@@ -1,6 +1,6 @@
   document.addEventListener("DOMContentLoaded", init);
 
-  const { Renderer, Stave, Formatter, StaveNote, Beam, Accidental} = Vex.Flow;
+  const { Renderer, Stave, Formatter, StaveNote, Beam, Accidental, MusicXMLParser} = Vex.Flow;
 
   //this is the array that will contain the music pattern inserted by the user
   let melody = [];
@@ -76,11 +76,43 @@
         const parentDiv = $('<div>').addClass('results-container');
         data.results.forEach(result => {
           const a = $('<a>').addClass('score-preview');
+
+          let url = '/result?score_name=' + result._fields[0];
+          for(let i = 1; i <= melody.length; i++) {
+            url = url + '&note_id'+ i + '=' + result._fields[i];
+          }
+          console.log(url);
+
+          a.attr('href', url);
           const resultDiv = $('<div>').addClass('music-score-box');
           const title = $('<h2>').addClass('title').text(result._fields[0]);
           resultDiv.append(title);
           a.append(resultDiv);
           parentDiv.append(a);
+
+          /*
+          let score_info = [];
+          const resultDiv = document.createElement('div');
+          resultDiv.className = 'music-score-box';
+          const title = document.createElement('h2');
+          title.className = 'title';
+          title.innerHTML = result._fields[0];
+          resultDiv.append(title);
+          resultDiv.addEventListener('click', function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/goToResult');
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xhr.onload = function() {
+              if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                window.location.href = response.redirectTo;
+              } else {
+                console.log('Error:', xhr.statusText);
+              }
+            };
+            xhr.send(JSON.stringify(score_info));
+          })
+          parentDiv.append(resultDiv);*/
         });
         resultsDiv.append(parentDiv);
       } else {

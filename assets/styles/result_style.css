@@ -1,0 +1,70 @@
+    #notation {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height:640px;
+    }
+
+    g.note.playing {
+        fill: rgb(12, 14, 142);
+    }
+
+    .score-container {
+        border: 2px solid #62aadd;
+        border-radius: 15px;
+        padding: 10px;
+        height: 700px;
+        width: 1000px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-bottom: 20px;
+    }
+    
+    .play-button,
+    .stop-button {
+        border-radius: 5px;
+        height: 30px;
+        width: 30px;
+        border: none;
+        cursor: pointer;
+        margin: 0 10px;
+        background-color: #bfdaed;
+        color: black;
+    }
+
+    .prevpage-button,
+    .nextpage-button {
+        border-radius: 5px;
+        height: 30px;
+        width: 100px;
+        border: none;
+        cursor: pointer;
+        margin: 0 10px;
+        background-color: #bfdaed;
+        color: black;
+        font-size: 12px;
+    }
+
+    .play-button:hover,
+    .stop-button:hover,
+    .prevpage-button:hover,
+    .nextpage-button:hover {
+        background-color: #62aadd;
+    }
+
+    .fa-play,
+    .fa-stop {
+        font-size: 10px;
+    }
+  
