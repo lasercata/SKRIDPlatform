@@ -1,6 +1,7 @@
 import express from 'express';
 import neo4j from 'neo4j-driver';
 import bodyParser from 'body-parser';
+import { promises as fs } from 'fs';
 
 const app = express();
 const port = 3000;
@@ -18,7 +19,10 @@ app.set("view engine", "ejs");
 
 app.use(express.static('assets'))
 app.use(bodyParser.json()) 
-app.use(bodyParser.urlencoded({ extended: true })) 
+app.use(bodyParser.urlencoded({ extended: true }))
+
+app.use(express.static('data'));
+app.use('/data', express.static('data'));
 
 //route for index page
 app.get("/", async function (req, res) {
@@ -39,6 +43,10 @@ app.get("/", async function (req, res) {
 //route for magic page
 app.get("/about", function (req, res) {
   res.render("about");
+});
+
+app.get('/result', (req, res) => {
+  res.render("result");
 });
 
 app.listen(port, () => {
@@ -63,8 +71,11 @@ app.post('/findPattern', async function(req, res) {
   } catch(err) {
     console.log(err);
   }
-  /*res.render("index", {
-    results: results,
-    isPatternResult: true,
-  });*/
 });
+
+app.post('/goToResult', function(req, res) {
+  const data = req.body;
+  res.render('result');
+})
+
+
