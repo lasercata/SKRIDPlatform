@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Skrid</title>
+    <link rel="stylesheet" href="./styles/semantic.min.css" />
+    <link rel="stylesheet" href="./styles/general_style.css" />
+    <link rel="stylesheet" href="./styles/result_style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <script src="https://unpkg.com/vexflow/releases/vexflow-debug.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+    
+    <script src="http://www.verovio.org/javascript/latest/verovio-toolkit-wasm.js" defer></script>
+    <script src='https://www.midijs.net/lib/midi.js'></script>
+</head>
+<%- include('./partials/header'); %>
+<body>
+  <div class="searchbar-box">
+    <br><br>
+    <h1 class="searchbar-title">Recherchez ton  partition musicale préférée !</h1>
+    <form>
+      <input type="text" placeholder="Search...">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+  <div class="container">
+    <div class="score-container">
+      <div class="button-container">
+        <button id="playMIDI" class="play-button"><i class="fas fa-play"></i></button>
+        <button id="stopMIDI" class="stop-button"><i class="fas fa-stop"></i></button>
+        <button id="prevPage" class="prevpage-button">Previous page</button>
+        <button id="nextPage" class="nextpage-button">Next page</button>
+      </div>
+      <div id="notation"></div>
+    </div>
+  </div>
+</body>
+<footer>
+  <%- include('./partials/footer'); %>
+</footer>
+
+</body>
+
+<script>
+  const datadir = "./data/JosephMahe/";
+  let score_name = "Air_n_1.mei";
+  let note;
+  let noteIds = [];
+
+  function readScoreName(score_name) {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    return urlParams.get(score_name);
+  }
+
+  function readNoteIds() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    for (const [key, value] of urlParams.entries()) {
+      if (key.startsWith('note_id')) {
+        noteIds.push(value);
+      }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", (event) => {
+      verovio.module.onRuntimeInitialized = () => {
+        let tk = new verovio.toolkit();
+
+        let zoom = 80;
+        //let pageHeight = document.body.clientHeight * 100 / zoom;
+        //let pageWidth = document.body.clientWidth * 100 / zoom;
+
+        const parent = document.querySelector('.score-container');
+
+        const parentWidth = parent.offsetWidth;
+        const parentHeight = parent.offsetHeight;
+
+        let pageHeight = parentHeight * 100 / zoom;
+        let pageWidth = parentWidth * 100 / zoom;
+
+        options = {
+          pageHeight: pageHeight,
+          pageWidth: pageWidth,
+          scale: zoom,
+        };
+        tk.setOptions(options);
+
+        // The current page, which will change when playing through the piece
+        let currentPage = 1;
+
+        /**
+          The handler to start playing the file
+        **/
+        const playMIDIHandler = function () {
+          // Get the MIDI file from the Verovio toolkit
+          let base64midi = tk.renderToMIDI();
+          // Add the data URL prefixes describing the content
+          let midiString = 'data:audio/midi;base64,' + base64midi;
+          // Pass it to play to MIDIjs
+          MIDIjs.play(midiString);
+        }
+
+        /**
+          The handler to stop playing the file
+        **/
+        const stopMIDIHandler = function () {
+          MIDIjs.stop();
+        }
+
+        const midiHightlightingHandler = function (event) {
+          // Remove the attribute 'playing' of all notes previously playing
+          let playingNotes = document.querySelectorAll('g.note.playing');
+          for (let playingNote of playingNotes) playingNote.classList.remove("playing");
+
+            // Get elements at a time in milliseconds (time from the player is in seconds)
+            let currentElements = tk.getElementsAtTime(event.time * 1000);
+
+            if (currentElements.page == 0) return;
+
+            if (currentElements.page != currentPage) {
+              currentPage = currentElements.page;
+              document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
+            }
+
+            // Get all notes playing and set the class
+            for (note of currentElements.notes) {
+              let noteElement = document.getElementById(note);
+              if (noteElement) noteElement.classList.add("playing");
+            }
+        }
+
+        const nextPageHandler = function () {
+          currentPage = Math.min(currentPage + 1, tk.getPageCount());
+          document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
+
+          for(let i = 0; i < noteIds.length; i++) {
+            note = document.getElementById(noteIds[i]);
+
+            if(note != null) {
+              note.setAttribute('fill', 'red');
+            }
+          }
+        }
+
+        const prevPageHandler = function () {
+          currentPage = Math.max(currentPage - 1, 1);
+          document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
+          for(let i = 0; i < noteIds.length; i++) {
+            note = document.getElementById(noteIds[i]);
+
+            if(note != null) {
+              note.setAttribute('fill', 'red');
+            }
+          }
+        }
+
+        /**
+          Wire up the buttons to actually work.
+        */
+        document.getElementById("playMIDI").addEventListener("click", playMIDIHandler);
+        document.getElementById("stopMIDI").addEventListener("click", stopMIDIHandler);
+        document.getElementById("nextPage").addEventListener("click", nextPageHandler);
+        document.getElementById("prevPage").addEventListener("click", prevPageHandler);
+        /**
+          Set the function as message callback
+        */
+        MIDIjs.player_callback = midiHightlightingHandler;
+
+        score_name = readScoreName('score_name');
+        readNoteIds();
+
+        let note_id1 = readScoreName('note_id1');
+    
+        score_name = score_name.slice(0, -4) + ".mei";
+
+        fetch(datadir+score_name)
+        .then( (response) => response.text() )
+        .then( (meiXML) => {
+          tk.loadData(meiXML);
+          // ... and generate the SVG for the first page ...
+          let svg = tk.renderToSVG(1);
+          // ... and finally gets the <div> element with the ID we specified, 
+          // and sets the content (innerHTML) to the SVG that we just generated.
+          document.getElementById("notation").innerHTML = svg;
+
+          for(let i = 0; i < noteIds.length; i++) {
+            note = document.getElementById(noteIds[i]);
+
+            if(note != null) {
+              note.setAttribute('fill', 'red');
+            }
+          }
+        });
+      }
+  });
+</script>
+</html>
