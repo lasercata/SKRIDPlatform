@@ -36,6 +36,10 @@
       </div>
       <div id="notation"></div>
     </div>
+    <div class="general_info">
+      <p id="author"><b>Author:</b> </p>
+      <p id="composition_date"><b>Composed in:</b> </p>
+    </div>
   </div>
 </body>
 <footer>
@@ -194,6 +198,27 @@
               note.setAttribute('fill', 'red');
             }
           }
+
+          const meiDoc = tk.getMEI();
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(meiDoc, 'text/xml');
+
+          const persNameElem = xmlDoc.getElementsByTagName('persName')[0];
+          const persNameContent = persNameElem.textContent;
+
+          let author = persNameContent.substring(13);
+          author = author.replace(/,\s\d+$/, '');
+
+          // Extract the date
+          const regExpDate = /\d{4}/;
+          const matchDate = persNameContent.match(regExpDate);
+          const date = matchDate ? matchDate[0] : null;
+
+          const author_p = document.getElementById('author');
+          author_p.append(author);
+          const composition_date = document.getElementById('composition_date');
+          composition_date.append(date);
+          console.log(persNameContent);
         });
       }
   });
