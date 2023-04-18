@@ -173,7 +173,7 @@
       }
     }
 
-    query += ') RETURN event1.inputfile';
+    query += ') RETURN event1.source';
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
@@ -188,6 +188,52 @@
    * This function creates a query ignoring the rhythm
    * */
   function constructIgnoringTheRhythm() {
+    let containsAlterations = false;
+    query = 'MATCH';
+
+    for(let i = 1; i < melody.length + 1; i++) {
+      query += '(event' + i + ':Event)-[:NEXT]->'; 
+    }
+    query += '(eventanonymous)';
+
+    for(let j = 1; j < melody.length + 1; j++) {
+      let music_note;
+      if(String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
+        music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
+      } else {
+        music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
+      }
+      query += ',(event' + j + ')-[:IS]->(fact' + j + '{pname:"'+ music_note +'"})';
+    }
+
+    //for loop to take care of the alterations (WHERE CLAUSE)
+    for(let k = 1; k < melody.length + 1; k++) {
+      if(String(melody[k-1].keys).slice(0,-2).endsWith("#")) {
+        if(!containsAlterations) {
+          query += ' WHERE (';
+          query += 'left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
+          containsAlterations = true;
+        } else {
+          query += ' and left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
+        }
+      } else if(String(melody[k-1].keys).slice(0,-2).endsWith("b")) {
+        if(!containsAlterations) {
+          query += ' WHERE (';
+          query += 'left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
+          containsAlterations = true;
+        } else {
+          query += ' and left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
+        }
+      }
+    }
+
+    query += ') RETURN event1.source';
+
+    for(let k = 1; k < melody.length + 1; k++) {
+      query += ', event'+ k +'.id as mei_id_event'+ k;
+    }
+
+    /*
     query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
@@ -250,25 +296,54 @@
    * This function creates a query ignoring the octave
    * */
   function constructIgnoringTheOctave() {
+    let containsAlterations = false;
     query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
-      query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+      //query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+      query += '(event' + i + ':Event)-[:NEXT{duration:0.125}]->';
     }
     query += '(eventanonymous)';
 
     for(let j = 1; j < melody.length + 1; j++) {
-      query += ',(event' + j + ')-[:IS]->({class:"'+ String(melody[j-1].keys).slice(0,-2).toLowerCase() +'"})';
+      let music_note;
+      if(String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
+        music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
+      } else {
+        music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
+      }
+      query += ',(event' + j + ')-[:IS]->(fact' + j + '{pname:"'+ music_note +'"})';
     }
 
-    query += ' RETURN event1.source';
+    //for loop to take care of the alterations (WHERE CLAUSE)
+    for(let k = 1; k < melody.length + 1; k++) {
+      if(String(melody[k-1].keys).slice(0,-2).endsWith("#")) {
+        if(!containsAlterations) {
+          query += ' WHERE (';
+          query += 'left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
+          containsAlterations = true;
+        } else {
+          query += ' and left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
+        }
+      } else if(String(melody[k-1].keys).slice(0,-2).endsWith("b")) {
+        if(!containsAlterations) {
+          query += ' WHERE (';
+          query += 'left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
+          containsAlterations = true;
+        } else {
+          query += ' and left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
+        }
+      }
+    }
+
+    query += ') RETURN event1.source';
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
     }
 
     console.log(query);
-
+    
     sendQuery(query);
   }
 
@@ -469,9 +544,13 @@
           let end = new Date();
           let elapsed = (end - start) / 1000;
 
-          //here calculate the duration of the note based of the time elapsed from mousedown to mouseup
+          console.log('The duration of the note is: ' + elapsed);
+
+          const sortedKeys = Object.keys(durationNote).sort((a, b) => durationNote[a] - durationNote[b]);
+
           let duration;
-          for (let durationCurrentNote in durationNote) {
+          for (let i = 0; i < sortedKeys.length; i++) {
+            const durationCurrentNote = sortedKeys[i];
             if (elapsed < durationNote[durationCurrentNote]) {
               duration = durationCurrentNote;
               break;
