@@ -56,6 +56,8 @@ app.listen(port, () => {
 app.post('/findPattern', async function(req, res) {
   const myQuery = req.body.string;
 
+  console.log('Here is the query I am going to send: ' + myQuery)
+
   let results = [];
   try {
     session.run(myQuery).then(result => {

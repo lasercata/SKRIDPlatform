@@ -191,11 +191,20 @@ header input {
   padding: 10px;
   margin: 5px;
   word-wrap: break-word;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .music-score-box:hover {
   cursor: pointer;
   box-shadow: 0 5px 10px rgba(0,0,0,0.3);
   background-color: #dceaf1;
+}
+.music-score-box svg {
+  max-width: 100%;
+  max-height: 100%;
 }
 .score-preview {
   text-decoration: none;

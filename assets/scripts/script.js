@@ -68,8 +68,11 @@
       return response.json();
     })
     .then(data => {
+      console.log(data);
+
       const resultsDiv = $('.container_2');
       resultsDiv.empty();
+      let tk = new verovio.toolkit();
       if(data.results.length != 0) {
         const results_title = $('<h2>').text('The following music scores contain your pattern: ');
         resultsDiv.append(results_title);
@@ -85,34 +88,35 @@
 
           a.attr('href', url);
           const resultDiv = $('<div>').addClass('music-score-box');
-          const title = $('<h2>').addClass('title').text(result._fields[0]);
-          resultDiv.append(title);
+          //const title = $('<h2>').addClass('title').text(result._fields[0]);
+          //resultDiv.append(title);
+
+          let zoom = 20;
+
+          const parentWidth = 180;
+          const parentHeight = 250;
+
+          let pageHeight = parentHeight * 100 / zoom;
+          let pageWidth = parentWidth * 100 / zoom;
+
+          options = {
+            pageHeight: pageHeight,
+            pageWidth: pageWidth,
+            scale: zoom,
+          };
+          tk.setOptions(options);
+
+          fetch('./data/JosephMahe/' + result._fields[0])
+            .then( (response) => response.text() )
+            .then( (meiXML) => {
+              tk.loadData(meiXML);
+              let svg = tk.renderToSVG(1);
+              resultDiv.html(svg);
+            });
+          
           a.append(resultDiv);
           parentDiv.append(a);
 
-          /*
-          let score_info = [];
-          const resultDiv = document.createElement('div');
-          resultDiv.className = 'music-score-box';
-          const title = document.createElement('h2');
-          title.className = 'title';
-          title.innerHTML = result._fields[0];
-          resultDiv.append(title);
-          resultDiv.addEventListener('click', function() {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/goToResult');
-            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-            xhr.onload = function() {
-              if (xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                window.location.href = response.redirectTo;
-              } else {
-                console.log('Error:', xhr.statusText);
-              }
-            };
-            xhr.send(JSON.stringify(score_info));
-          })
-          parentDiv.append(resultDiv);*/
         });
         resultsDiv.append(parentDiv);
       } else {
@@ -166,11 +170,27 @@
       query += ',(event' + j + ')-[:IS]->({class:"'+ String(melody[j-1].keys).slice(0,-2).toLowerCase() +'"})';
     }
 
+    //NEW CODE FROM HERE
+    query += ' WITH event1.source as source';
+    for(let k = 1; k < melody.length + 1; k++) {
+      query += ', event'+ k +'.id as mei_id_event'+ k;
+    }
+
+    query += ', COUNT(*) as number_of_occurrences RETURN source'
+    for(let k = 1; k < melody.length + 1; k++) {
+      query += ', mei_id_event'+ k;
+    }
+
+    query += ', number_of_occurrences';
+
+    //TO HERE
+
+    /*
     query += ' RETURN event1.source';
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
+    }*/
 
     console.log(query);
 
@@ -371,6 +391,14 @@
     }, 150);
   }
 
+  function getNextWhiteKey(blackKey) {
+    let nextElement = blackKey.nextElementSibling;
+    while (nextElement && !nextElement.classList.contains('white')) {
+      nextElement = nextElement.nextElementSibling;
+    }
+    return nextElement;
+  }
+
   /**
    * 
    * */
@@ -408,7 +436,7 @@
           start = new Date();
           playTune(key.dataset.key)
         });
-        key.addEventListener("mouseup", () => {
+        key.addEventListener("mouseup", (e) => {
           let end = new Date();
           let elapsed = (end - start) / 1000;
 
@@ -421,25 +449,47 @@
             }
           }
 
-          console.log(duration);
-
-          //here is the code to insert the pressed note in the music score above the piano
           let newkey;
-          if(key.dataset.key.length == 2) {
-            newkey = key.dataset.key.slice(0,1) + '/' + key.dataset.key.slice(1);
-            //add a new note to the melody
-            melody.push(new StaveNote({
-              keys: [newkey],
-              duration: duration,
-            }));
-          } else {
-            newkey = key.dataset.key.slice(0,2) + '/' + key.dataset.key.slice(2);
-            let note = new StaveNote({
-              keys: [newkey],
-              duration: duration,
-            });
-            note.addAccidental(0, new Accidental("#"));
-            melody.push(note);
+
+          //now check whether the key pressed is black
+          if(key.classList.contains('black')) {
+            //if it is, check if it is being pressed on the right
+            const button = e.target;
+            const rect = button.getBoundingClientRect();
+            const isRightHalf = e.clientX - rect.left > rect.width / 2;
+            if (isRightHalf) {
+              //if it is, then the note is the flat version of the next white key
+              //if it not, then it means that it has been pressed on the left, which is already the sharp version of the previous white key
+              const whiteKey = getNextWhiteKey(key);
+              if (whiteKey) {
+                newkey = whiteKey.dataset.key[0] + 'b/' + whiteKey.dataset.key[1];
+                console.log('The note is: '+ newkey + '. Duration: ' + duration);
+              }
+              //newkey = key.dataset.key.slice(0,2) + '/' + key.dataset.key.slice(2);
+              let note = new StaveNote({
+                keys: [newkey],
+                duration: duration,
+              });
+              note.addAccidental(0, new Accidental("b"));
+              melody.push(note);
+            } else {
+              newkey = key.dataset.key.slice(0,2) + '/' + key.dataset.key.slice(2);
+              let note = new StaveNote({
+                keys: [newkey],
+                duration: duration,
+              });
+              note.addAccidental(0, new Accidental("#"));
+              melody.push(note);
+            }
+          } else { 
+              //here is the code to insert the pressed note in the music score above the piano
+              newkey = key.dataset.key.slice(0,1) + '/' + key.dataset.key.slice(1);
+              console.log(newkey);
+              //add a new note to the melody
+              melody.push(new StaveNote({
+                keys: [newkey],
+                duration: duration,
+              }));
           }
 
           // format stave and all notes
@@ -546,12 +596,50 @@
         });
       });
   }
+
+  function manageFirstResults() {
+    var results = JSON.parse(document.getElementById('data').textContent);
+    for (var i = 0; i < results.length; i++) {
+
+      let score_name = results[i]._fields[0].properties.inputfile.slice(0, -4) + ".mei";
+
+      let tk = new verovio.toolkit();
+      let zoom = 20;
+
+      const parentWidth = 180;
+      const parentHeight = 250;
+
+      let pageHeight = parentHeight * 100 / zoom;
+      let pageWidth = parentWidth * 100 / zoom;
+
+      options = {
+        pageHeight: pageHeight,
+        pageWidth: pageWidth,
+        scale: zoom,
+      };
+      
+      tk.setOptions(options);
+
+      let score_div = document.getElementById(results[i]._fields[0].properties.inputfile);
+
+      fetch('./data/JosephMahe/' + score_name)
+        .then( (response) => response.text() )
+        .then( (meiXML) => {
+          tk.loadData(meiXML);
+          let svg = tk.renderToSVG(1);
+          score_div.innerHTML = svg;
+        });
+    }
+  }
   
   /**
    * This function adds an eventListener to all the buttons in the page.
    * */
   function init() {
-    manageOptions();
-    manageStaveAndMelody();
-    manageKeyboard();
+    verovio.module.onRuntimeInitialized = () => {
+      manageOptions();
+      manageStaveAndMelody();
+      manageKeyboard();
+      manageFirstResults();
+    }
   }
