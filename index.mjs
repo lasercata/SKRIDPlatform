@@ -28,7 +28,7 @@ app.use('/data', express.static('data'));
 app.get("/", async function (req, res) {
   let results = [];
   try {
-    const myQuery = "MATCH (s:Score) RETURN s ORDER BY s.name LIMIT 30";
+    const myQuery = "MATCH (s:Score) RETURN s ORDER BY s.source LIMIT 30";
     let temp = await session.run(myQuery);
     results = temp.records;
   } catch(err) {
@@ -79,5 +79,23 @@ app.post('/goToResult', function(req, res) {
   const data = req.body;
   res.render('result');
 })
+
+app.get('/search', async function(req, res) {
+  const query = req.query.query;
+  let results = [];
+
+  try {
+    const myQuery = "MATCH (s:Score) WHERE s.source CONTAINS $query RETURN s ORDER BY s.source DESC";
+    let temp = await session.run(myQuery, {query: query});
+    console.log(temp)
+    results = temp.records;
+  } catch(err) {
+    console.log(err);
+  }
+
+  res.render("index", {
+    results: results,
+  });
+});
 
 

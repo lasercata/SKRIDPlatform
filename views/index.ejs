@@ -22,8 +22,8 @@
   <div class="searchbar-box">
     <br><br>
     <h1 class="searchbar-title">Recherchez ton  partition musicale préférée !</h1>
-    <form>
-      <input type="text" placeholder="Search...">
+    <form action="/search" method="GET">
+      <input type="text" name="query" placeholder="Search a music score...">
       <button type="submit">Search</button>
     </form>
   </div>
@@ -98,6 +98,8 @@
             </a>
           <% } %>
         </div>
+      <% } else {%>
+        <p>No result found</p>
       <% } %>
     </div>
   </div>

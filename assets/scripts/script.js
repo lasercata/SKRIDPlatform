@@ -790,6 +790,19 @@
         });
     }
   }
+
+  function manageSearchBar() {
+    const form = document.getElementById('search-form');
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const query = document.getElementById('search-input').value;
+        fetch(`/search?query=${query}`)
+          .then(response => response.text())
+          .then(data => {
+            document.getElementById('search-results').innerHTML = data;
+          });
+      });
+  }
   
   /**
    * This function adds an eventListener to all the buttons in the page.
@@ -798,7 +811,8 @@
     verovio.module.onRuntimeInitialized = () => {
       manageOptions();
       manageStaveAndMelody();
-      manageKeyboard();
+      //manageKeyboard();
       manageFirstResults();
+      //manageSearchBar();
     }
   }
