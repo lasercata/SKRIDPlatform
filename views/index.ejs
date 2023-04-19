@@ -92,8 +92,9 @@
           <% for(var i = 0; i < results.length; i++) { %>
             <a class="score-preview" href="/result?score_name=<%= results[i]._fields[0].properties.inputfile %>">
               <div class="music-score-box" id="<%= results[i]._fields[0].properties.inputfile %>">
-                <h2 class="title"><%= results[i]._fields[0].properties.inputfile %></h2>
               </div>
+              <h3 class="score_title"><%= results[i]._fields[0].properties.inputfile.slice(0,-6) %></h3>
+              <p class="score_author">Author: Joseph Mahé</p>
             </a>
           <% } %>
         </div>

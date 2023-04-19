@@ -52,6 +52,34 @@
     'b': 'B5',
   };
 
+  function unifyResults(queryResults) {
+    let results = [];
+    const occurrences = {};
+    let notes_temp = [];
+
+    queryResults.results.forEach(result => {
+      const name = result._fields[0];
+      if (!occurrences[name]) {
+        occurrences[name] = 1;
+        notes_temp = [];
+        for(let i = 1; i <= melody.length; i++) {
+          notes_temp.push(result._fields[i]);
+        }
+        results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
+      } else {
+        occurrences[name]++;
+
+        const index = results.findIndex(item => item.name === name);
+        results[index].number_of_occurrences = occurrences[name];
+        for(let j = 1; j <= melody.length; j++) {
+          results[index].notes_id.push(result._fields[j]);
+        }
+      }
+    });
+    console.log(results);
+    return results;
+  }
+
   function sendQuery(query) {
     let data = {
       string: query,
@@ -70,21 +98,24 @@
     .then(data => {
       console.log(data);
 
+      //first call a function that cleans the data
+      let unifiedResults = unifyResults(data);
+
       const resultsDiv = $('.container_2');
       resultsDiv.empty();
       let tk = new verovio.toolkit();
-      if(data.results.length != 0) {
+      if(unifiedResults.length != 0) {
         const results_title = $('<h2>').text('The following music scores contain your pattern: ');
         resultsDiv.append(results_title);
         const parentDiv = $('<div>').addClass('results-container');
-        data.results.forEach(result => {
+        //then, for each element in the data create a div
+        unifiedResults.forEach(result => {
           const a = $('<a>').addClass('score-preview');
 
-          let url = '/result?score_name=' + result._fields[0];
-          for(let i = 1; i <= melody.length; i++) {
-            url = url + '&note_id'+ i + '=' + result._fields[i];
+          let url = '/result?score_name=' + result.name;
+          for(let i = 0; i <= result.notes_id.length; i++) {
+            url = url + '&note_id'+ i + '=' + result.notes_id[i];
           }
-          console.log(url);
 
           a.attr('href', url);
           const resultDiv = $('<div>').addClass('music-score-box');
@@ -106,7 +137,7 @@
           };
           tk.setOptions(options);
 
-          fetch('./data/JosephMahe/' + result._fields[0])
+          fetch('./data/JosephMahe/' + result.name)
             .then( (response) => response.text() )
             .then( (meiXML) => {
               tk.loadData(meiXML);
@@ -115,8 +146,17 @@
             });
           
           a.append(resultDiv);
-          parentDiv.append(a);
+          const h3 = document.createElement('h3');
+          h3.className = "score_title";
+          h3.textContent = result.name.slice(0,-6);
+          a.append(h3);
 
+          const occurrences = document.createElement('p');
+          occurrences.className = "score_author";
+          occurrences.textContent = 'Pattern occurrences: ' + result.number_of_occurrences;
+          a.append(occurrences);
+
+          parentDiv.append(a);
         });
         resultsDiv.append(parentDiv);
       } else {
@@ -172,8 +212,11 @@
         }
       }
     }
-
-    query += ') RETURN event1.source';
+    if(containsAlterations) {
+      query += ') RETURN event1.source';
+    } else {
+      query += ' RETURN event1.source';
+    }
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
@@ -227,7 +270,11 @@
       }
     }
 
-    query += ') RETURN event1.source';
+    if(containsAlterations) {
+      query += ') RETURN event1.source';
+    } else {
+      query += ' RETURN event1.source';
+    }
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
@@ -336,7 +383,11 @@
       }
     }
 
-    query += ') RETURN event1.source';
+    if(containsAlterations) {
+      query += ') RETURN event1.source';
+    } else {
+      query += ' RETURN event1.source';
+    }
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;

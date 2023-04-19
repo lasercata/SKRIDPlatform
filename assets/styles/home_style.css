@@ -187,7 +187,7 @@ header input {
   height: 250px;
   background-color: #E6F2F8;
   border-radius: 10px;
-  border: 2px solid #62aadd;
+  border: 2px solid #20AABD;
   padding: 10px;
   margin: 5px;
   word-wrap: break-word;
@@ -208,10 +208,16 @@ header input {
 }
 .score-preview {
   text-decoration: none;
+  color:#000;
+  padding: 15px;
 }
-.title {
-  font-size: 24px;
-  text-align: center;
+.score_title {
+  margin-left: 8px;
+  margin-top: 10px;
+}
+.score_author {
+  font-size: 16px;
+  margin-left: 8px;
 }
 @media screen and (max-width: 815px) {
   .wrapper {
