@@ -1,0 +1,1 @@
+CALL apoc.cypher.runFiles(["\Users\tomip\Desktop\LivreBleu\dump_luzel12.cypher", "\Users\tomip\Desktop\LivreBleu\dump_luzel7.cypher"], {statistics: false});
