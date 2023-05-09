@@ -45,6 +45,22 @@ app.get("/about", function (req, res) {
   res.render("about");
 });
 
+app.get("/collections", async function (req, res) {
+  let results = [];
+  try {
+    const name = "Francois-Marie Luzel";
+    const myQuery = "MATCH (s:Score) WHERE s.composer CONTAINS $name RETURN s ORDER BY s.source LIMIT 30";
+    let temp = await session.run(myQuery, {name: name});
+    results = temp.records;
+  } catch(err) {
+    console.log(err);
+  }
+
+  res.render("collections", {
+    results: results,
+  });
+})
+
 app.get('/result', (req, res) => {
   res.render("result");
 });

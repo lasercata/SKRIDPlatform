@@ -402,23 +402,68 @@
    * This function creates a query with the signature for the rhythm
    * */
   function constructSignatureForTheRhythm() {
+    let containsAlterations = false;
     query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
-      query += '(event' + i + ':Event)-[r'+ i +':NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+      //query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+      query += '(event' + i + ':Event)-[r' + i + ':NEXT{duration:0.125}]->';
     }
     query += '(eventanonymous)';
 
     for(let j = 1; j < melody.length + 1; j++) {
-      query += ',(event' + j + ')-[:IS]->({class:"'+ String(melody[j-1].keys).slice(0,-2).toLowerCase() +'",octave:'+ melody[j-1].duration +'})';
+      let music_note;
+      if(String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
+        music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
+      } else {
+        music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
+      }
+      query += ',(event' + j + ')-[:IS]->(fact' + j + '{pname:"'+ music_note +'",octave:'+ String(melody[j-1].keys).slice(String(melody[j-1].keys).length - 1) +'})';
     }
 
-    //here we add the WHERE clause
-    for(let w = 1; w < melody.length + 1; w++) {
-
+    //for loop to take care of the alterations (WHERE CLAUSE)
+    for(let k = 1; k < melody.length + 1; k++) {
+      if(String(melody[k-1].keys).slice(0,-2).endsWith("#")) {
+        if(!containsAlterations) {
+          query += ' WHERE (';
+          query += 'left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
+          containsAlterations = true;
+        } else {
+          query += ' and left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
+        }
+      } else if(String(melody[k-1].keys).slice(0,-2).endsWith("b")) {
+        if(!containsAlterations) {
+          query += ' WHERE (';
+          query += 'left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
+          containsAlterations = true;
+        } else {
+          query += ' and left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
+        }
+      }
     }
 
+    if(containsAlterations) {
+      query += ')';
+    }
+
+    //WHAT IF THERE IS ONLY ONE NOTE???
+
+    //from here the new part of the WHERE clause where we check the duration
+    if(melody.length >= 2) {
+      for(let w = 1; w < melody.length + 1; w++) {
+        let counter = 2;
+        if(!containsAlterations) {
+          query += ' WHERE r'+ counter + '.duration = r1.duration/2'
+          containsAlterations = true;
+        } else {
+          query += ' and r'+ counter + '.duration = r1.duration/2';
+        }
+        counter++;
+      }
+    } 
+      
     query += ' RETURN event1.source';
+    
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;

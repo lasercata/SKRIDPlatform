@@ -36,8 +36,16 @@
         cursor: pointer;
     }
     .footer {
-        background-color: #20AABD;
-          height: 100px;
-          width: 100%;
-          background: linear-gradient(to bottom, #18767E, #20AABD);
+        background: linear-gradient(to bottom, #18767E, #20AABD);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100px;
+        width: 100%;
+        font-size: 20px;
       }
+      
+    .footer .ui.container {
+        text-align: center;
+    }

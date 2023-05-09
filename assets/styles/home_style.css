@@ -35,8 +35,7 @@
   width: 500px;
 }
 #send-button {
-  width: 130px;
-  height: 40px;
+  padding: 10px;
   border-radius: 20px;
   background-color: #62aadd;
   color: #fff;
@@ -45,6 +44,11 @@
   border: none;
   outline: none;
   cursor: pointer;
+}
+.options-row label,
+.options-row input[type="radio"],
+.options-row button {
+  margin-right: 10px;
 }
 .score {
   display: flex;
