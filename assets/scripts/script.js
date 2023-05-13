@@ -110,55 +110,82 @@
         const parentDiv = $('<div>').addClass('results-container');
         //then, for each element in the data create a div
         unifiedResults.forEach(result => {
-          const a = $('<a>').addClass('score-preview');
 
-          let url = '/result?score_name=' + result.name;
-          for(let i = 0; i <= result.notes_id.length; i++) {
-            url = url + '&note_id'+ i + '=' + result.notes_id[i];
-          }
+          //here we ask the database to find the author of the score
+          author_query = "MATCH (s:Score {source: '"+ result.name+"'}) RETURN s.composer";
 
-          a.attr('href', url);
-          const resultDiv = $('<div>').addClass('music-score-box');
-          //const title = $('<h2>').addClass('title').text(result._fields[0]);
-          //resultDiv.append(title);
-
-          let zoom = 20;
-
-          const parentWidth = 180;
-          const parentHeight = 250;
-
-          let pageHeight = parentHeight * 100 / zoom;
-          let pageWidth = parentWidth * 100 / zoom;
-
-          options = {
-            pageHeight: pageHeight,
-            pageWidth: pageWidth,
-            scale: zoom,
+          let author_data = {
+            string: author_query,
           };
-          tk.setOptions(options);
 
-          fetch('./data/JosephMahe/' + result.name)
-            .then( (response) => response.text() )
-            .then( (meiXML) => {
-              tk.loadData(meiXML);
-              let svg = tk.renderToSVG(1);
-              resultDiv.html(svg);
-            });
-          
-          a.append(resultDiv);
-          const h3 = document.createElement('h3');
-          h3.className = "score_title";
-          h3.textContent = result.name.slice(0,-6);
-          a.append(h3);
+          fetch('/findAuthor', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(author_data)
+          })
+          .then(response => {
+            return response.json();
+          })
+          .then(data => {
 
-          const occurrences = document.createElement('p');
-          occurrences.className = "score_author";
-          occurrences.textContent = 'Pattern occurrences: ' + result.number_of_occurrences;
-          a.append(occurrences);
+            const a = $('<a>').addClass('score-preview');
 
-          parentDiv.append(a);
-        });
-        resultsDiv.append(parentDiv);
+            let url = '/result?author='+ data.results[0]._fields[0].substring(13).slice(0,-6) +'&score_name=' + result.name;
+            for(let i = 0; i <= result.notes_id.length; i++) {
+              url = url + '&note_id'+ i + '=' + result.notes_id[i];
+            }
+
+            a.attr('href', url);
+            const resultDiv = $('<div>').addClass('music-score-box');
+            //const title = $('<h2>').addClass('title').text(result._fields[0]);
+            //resultDiv.append(title);
+
+            let zoom = 20;
+
+            const parentWidth = 180;
+            const parentHeight = 250;
+
+            let pageHeight = parentHeight * 100 / zoom;
+            let pageWidth = parentWidth * 100 / zoom;
+
+            options = {
+              pageHeight: pageHeight,
+              pageWidth: pageWidth,
+              scale: zoom,
+            };
+            tk.setOptions(options);
+
+            console.log(data.results[0]._fields[0]);
+
+            let folder = data.results[0]._fields[0].substring(13).slice(0,-6);                                  //here we insert the name of the authorrrrr
+            folder = folder.replace(/\s+/g, "-") + '/';
+            console.log(folder);
+
+            fetch('./data/' + folder + result.name)
+              .then( (response) => response.text() )
+              .then( (meiXML) => {
+                tk.loadData(meiXML);
+                let svg = tk.renderToSVG(1);
+                resultDiv.html(svg);
+              });
+            
+            a.append(resultDiv);
+            const h3 = document.createElement('h3');
+            h3.className = "score_title";
+            h3.textContent = result.name.slice(0,-6);
+            a.append(h3);
+
+            const occurrences = document.createElement('p');
+            occurrences.className = "score_author";
+            occurrences.textContent = 'Pattern occurrences: ' + result.number_of_occurrences;
+            a.append(occurrences);
+
+            parentDiv.append(a);
+          });
+          resultsDiv.append(parentDiv);
+        })
       } else {
         const default_text = $('<h2>').text('No music score found');
         resultsDiv.append(default_text);
@@ -725,7 +752,7 @@
         });
     });
   }
-
+  /*
   function manageKeyboard() {
       let start_press = null;
       document.addEventListener("keydown", (e) => {
@@ -799,7 +826,7 @@
           note.setContext(context).draw();
         });
       });
-  }
+  }*/
 
   function manageFirstResults() {
     var results = JSON.parse(document.getElementById('data').textContent);
@@ -826,7 +853,7 @@
 
       let score_div = document.getElementById(results[i]._fields[0].properties.inputfile);
 
-      fetch('./data/JosephMahe/' + score_name)
+      fetch('./data/Joseph-Mahe/' + score_name)
         .then( (response) => response.text() )
         .then( (meiXML) => {
           tk.loadData(meiXML);
@@ -856,7 +883,6 @@
     verovio.module.onRuntimeInitialized = () => {
       manageOptions();
       manageStaveAndMelody();
-      //manageKeyboard();
       manageFirstResults();
       //manageSearchBar();
     }

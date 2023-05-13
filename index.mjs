@@ -47,17 +47,32 @@ app.get("/about", function (req, res) {
 
 app.get("/collections", async function (req, res) {
   let results = [];
+  let authors = [];
+  
+  const session = driver.session();
+
   try {
     const name = "Francois-Marie Luzel";
     const myQuery = "MATCH (s:Score) WHERE s.composer CONTAINS $name RETURN s ORDER BY s.source LIMIT 30";
     let temp = await session.run(myQuery, {name: name});
     results = temp.records;
+
+    const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.composer";
+    let temp2 = await session.run(authorQuery);
+    temp2 = temp2.records;
+    temp2.forEach((record) => {
+      console.log(record._fields[0]);
+      authors.push(record._fields[0].substring(13).slice(0,-6));
+    });
+
+    console.log(authors);
   } catch(err) {
     console.log(err);
   }
 
   res.render("collections", {
     results: results,
+    authors: authors,
   });
 })
 
@@ -68,13 +83,12 @@ app.get('/result', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
-
+/*
 app.post('/findPattern', async function(req, res) {
   const myQuery = req.body.string;
 
   console.log('Here is the query I am going to send: ' + myQuery)
 
-  let results = [];
   try {
     session.run(myQuery).then(result => {
       const results = result.records;
@@ -84,10 +98,59 @@ app.post('/findPattern', async function(req, res) {
     .catch(error => {
       console.error('Errore nella query:', error);
       res.sendStatus(500);
+    })
+    .finally(() => {
+      session.close();
     });
 
   } catch(err) {
     console.log(err);
+  }
+});*/
+
+app.post('/findPattern', async function(req, res) {
+  const myQuery = req.body.string;
+
+  console.log('Here is the query I am going to send: ' + myQuery)
+
+  const session = driver.session();
+
+  try {
+    await session.run(myQuery).then(result => {
+      const results = result.records;
+      console.log(results);
+      res.json({ results: results});
+    });
+
+  } catch(error) {
+    console.error('Errore nella query:', error);
+    res.sendStatus(500);
+
+  } finally {
+    await session.close();
+  }
+});
+
+app.post('/findAuthor', async function(req, res) {
+  const myQuery = req.body.string;
+
+  console.log('Here is the query I am going to send for the author: ' + myQuery)
+
+  const session = driver.session();
+
+  try {
+    await session.run(myQuery).then(result => {
+      const results = result.records;
+      console.log(results);
+      res.json({ results: results});
+    });
+
+  } catch(error) {
+    console.error('Errore nella query:', error);
+    res.sendStatus(500);
+
+  } finally {
+    await session.close();
   }
 });
 

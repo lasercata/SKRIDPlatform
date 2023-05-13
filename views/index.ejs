@@ -90,7 +90,7 @@
       <% if(results.length != 0) { %>
         <div class="results-container">
           <% for(var i = 0; i < results.length; i++) { %>
-            <a class="score-preview" href="/result?score_name=<%= results[i]._fields[0].properties.inputfile %>">
+            <a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %>&score_name=<%= results[i]._fields[0].properties.inputfile %>">
               <div class="music-score-box" id="<%= results[i]._fields[0].properties.inputfile %>">
               </div>
               <h3 class="score_title"><%= results[i]._fields[0].properties.inputfile.slice(0,-6) %></h3>
