@@ -204,8 +204,8 @@
     query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
-      //query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
-      query += '(event' + i + ':Event)-[:NEXT{duration:0.125}]->';
+      query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+      //query += '(event' + i + ':Event)-[:NEXT{duration:0.125}]->';
     }
     query += '(eventanonymous)';
 
