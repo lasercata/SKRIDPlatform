@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="./styles/semantic.min.css" />
     <link rel="stylesheet" href="./styles/home_style.css" />
     <link rel="stylesheet" href="./styles/general_style.css" />
+    <link rel="stylesheet" href="./styles/collections_style.css" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
@@ -21,72 +22,18 @@
 <body>
   <div class="searchbar-box">
     <br><br>
-    <h1 class="searchbar-title">Recherchez votre partition musicale préférée !</h1>
-    <form action="/search" method="GET">
-      <input type="text" name="query" placeholder="Rechercher une partition musicale...">
-      <button type="submit">Recherche</button>
-    </form>
+    <h1 class="searchbar-title">Recherchez dans les collections !</h1>
   </div>
-  <div class="container">
-    <div class="search-pattern">
-      <h1>Recherchez vos notes!</h1>
-      <div class="clear_buttons">
-        <button class="clear_all">Supprimer tout</button>
-        <button class="clear_last_note">Supprimer la dernière note</button>
-      </div>
-      <div id="music-score"></div>
-      <div class="options-row">
-        <input type="radio" id="check1" name="check1">
-        <label for="check1">Correspondance exacte</label>
-        <input type="radio" id="check2" name="check2">
-        <label for="check2">Correspondance approximative (sans tenir compte du rythme)</label>
-        <input type="radio" id="check3" name="check3">
-        <label for="check3">Correspondance approximative (sans tenir compte de la mélodie)</label>
-        <input type="radio" id="check4" name="check4">
-        <label for="check4">Correspondance approximative (sans tenir compte de l'octave)</label>
-        <input type="radio" id="check5" name="check5">
-        <label for="check5">Correspondance approximative (proportion rythmique)</label>
-        <button id="send-button">Recherche</button>
-      </div>
-      <div class="wrapper">
-        <header>
-          <h2>Votre piano</h2>
-          <div class="column volume-slider">
-            <span>Volume</span><input type="range" min="0" max="1" value="0.5" step="any">
-          </div>
-          <div class="column keys-checkbox">
-            <span>Montrer le nom des touches</span><input type="checkbox" checked>
-          </div>
-        </header>
-        <ul class="piano-keys">
-          <li class="key white" data-key="C4"><span>DO(Q)</span></li>
-          <li class="key black" data-key="C#4"><span>DO#(2)</span></li>
-          <li class="key white" data-key="D4"><span>RE(W)</span></li>
-          <li class="key black" data-key="D#4"><span>RE#(3)</span></li>
-          <li class="key white" data-key="E4"><span>MI(E)</span></li>
-          <li class="key white" data-key="F4"><span>FA(R)</span></li>
-          <li class="key black" data-key="F#4"><span>FA#(5)</span></li>
-          <li class="key white" data-key="G4"><span>SOL(T)</span></li>
-          <li class="key black" data-key="G#4"><span>SOL#(6)</span></li>
-          <li class="key white" data-key="A4"><span>LA(Y)</span></li>
-          <li class="key black" data-key="A#4"><span>LA#(7)</span></li>
-          <li class="key white" data-key="B4"><span>SI(U)</span></li>
-          <li class="key white" data-key="C5"><span>DO(I)</span></li>
-          <li class="key black" data-key="C#5"><span>DO#(9)</span></li>
-          <li class="key white" data-key="D5"><span>RE(O)</span></li>
-          <li class="key black" data-key="D#5"><span>RE#(0)</span></li>
-          <li class="key white" data-key="E5"><span>MI(Z)</span></li>
-          <li class="key white" data-key="F5"><span>FA(X)</span></li>
-          <li class="key black" data-key="F#5"><span>FA#(D)</span></li>
-          <li class="key white" data-key="G5"><span>SOL(C)</span></li>
-          <li class="key black" data-key="G#5"><span>SOL#(F)</span></li>
-          <li class="key white" data-key="A5"><span>LA(V)</span></li>
-          <li class="key black" data-key="A#5"><span>LA#(G)</span></li>
-          <li class="key white" data-key="B5"><span>SI(B)</span></li>
-        </ul>
-      </div>
+  <div class="father_container">
+    <div class="collections">
+      <% for(var i = 0; i < authors.length; i++) { %>
+        <a href="#" onClick="getCollectionByAuthor(this.innerText)"><%= authors[i] %></a><br>
+        <% if (i != authors.length - 1) { %>
+          <p class="separator"> _ </p>
+        <% } %>
+      <% } %>
     </div>
-    <div class="container_2">
+    <div class="items">
       <% if(results.length != 0) { %>
         <div class="results-container">
           <% for(var i = 0; i < results.length; i++) { %>
@@ -94,7 +41,6 @@
               <div class="music-score-box" id="<%= results[i]._fields[0].properties.inputfile %>">
               </div>
               <h3 class="score_title"><%= results[i]._fields[0].properties.inputfile.slice(0,-4) %></h3>
-              <p class="score_author">Auteur : <%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %></p>
             </a>
           <% } %>
         </div>

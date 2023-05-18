@@ -13,16 +13,26 @@
   let height = 0;
 
   let pianoKeys;
+  let selectedCollections;
 
   //all the possibile durations for a note
   const durationNote = {
-    '32': 0.125,
-    '16': 0.25,
-    '8': 0.5,
-    'q': 1,
-    'h': 2,
-    'w': 4,
+    '32': 0.125, //1/32
+    '16': 0.25, //1/16
+    '8': 0.5, //0.125
+    'q': 1, //0.25
+    'h': 2, //0.5
+    'w': 4, //1
   };
+  /*
+  const durationNote = {
+    '32': 0.03125, //1/32
+    '16': 0.0625, //1/16
+    '8': 0.125,
+    'q': 0.25,
+    'h': 0.5,
+    'w': 1
+  };*/
 
   //association between keyboard buttons and notes
   const keyboardButtons = {
@@ -205,7 +215,6 @@
 
     for(let i = 1; i < melody.length + 1; i++) {
       query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
-      //query += '(event' + i + ':Event)-[:NEXT{duration:0.125}]->';
     }
     query += '(eventanonymous)';
 
@@ -239,11 +248,35 @@
         }
       }
     }
+
     if(containsAlterations) {
-      query += ') RETURN event1.source';
-    } else {
-      query += ' RETURN event1.source';
+      query += ')';
+    } 
+
+    if(selectedCollections.length != 0) {
+      //from here on we add the part of the query to handle the collections
+      query += ' WITH event1 as event1'
+      for(let k = 2; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
+
+      query += ' WITH s as s';
+
+      for(let k = 1; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      //here it has to be changed from composer to collection
+      query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+      for(let k = 1; k < selectedCollections.length; k++) {
+        query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+      }
+
     }
+
+    query += ' RETURN event1.source';
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
@@ -298,48 +331,37 @@
     }
 
     if(containsAlterations) {
-      query += ') RETURN event1.source';
-    } else {
-      query += ' RETURN event1.source';
+      query += ')';
+    } 
+
+    if(selectedCollections.length != 0) {
+      //from here on we add the part of the query to handle the collections
+      query += ' WITH event1 as event1'
+      for(let k = 2; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
+
+      query += ' WITH s as s';
+
+      for(let k = 1; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      //here it has to be changed from composer to collection
+      query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+      for(let k = 1; k < selectedCollections.length; k++) {
+        query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+      }
+
     }
 
-    for(let k = 1; k < melody.length + 1; k++) {
-      query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
-
-    /*
-    query = 'MATCH';
-
-    for(let i = 1; i < melody.length + 1; i++) {
-      query += '(event' + i + ':Event)-[:NEXT]->'; 
-    }
-    query += '(eventanonymous)';
-
-    for(let j = 1; j < melody.length + 1; j++) {
-      query += ',(event' + j + ')-[:IS]->({class:"'+ String(melody[j-1].keys).slice(0,-2).toLowerCase() +'"})';
-    }
-
-    //NEW CODE FROM HERE
-    query += ' WITH event1.source as source';
-    for(let k = 1; k < melody.length + 1; k++) {
-      query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
-
-    query += ', COUNT(*) as number_of_occurrences RETURN source'
-    for(let k = 1; k < melody.length + 1; k++) {
-      query += ', mei_id_event'+ k;
-    }
-
-    query += ', number_of_occurrences';
-
-    //TO HERE
-
-    /*
     query += ' RETURN event1.source';
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
-    }*/
+    }
 
     console.log(query);
 
@@ -355,7 +377,32 @@
     for(let i = 1; i < melody.length + 1; i++) {
       query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
     }
-    query += '(eventanonymous) RETURN event1.source';
+    query += '(eventanonymous)' 
+
+    if(selectedCollections.length != 0) {
+      //from here on we add the part of the query to handle the collections
+      query += ' WITH event1 as event1'
+      for(let k = 2; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
+
+      query += ' WITH s as s';
+
+      for(let k = 1; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      //here it has to be changed from composer to collection
+      query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+      for(let k = 1; k < selectedCollections.length; k++) {
+        query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+      }
+
+    }
+
+    query += ' RETURN event1.source';
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
@@ -411,10 +458,33 @@
     }
 
     if(containsAlterations) {
-      query += ') RETURN event1.source';
-    } else {
-      query += ' RETURN event1.source';
+      query += ')';
+    } 
+
+    if(selectedCollections.length != 0) {
+      //from here on we add the part of the query to handle the collections
+      query += ' WITH event1 as event1'
+      for(let k = 2; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
+
+      query += ' WITH s as s';
+
+      for(let k = 1; k < melody.length + 1; k++) {
+        query += ', event' + k + ' as event' + k;
+      }
+
+      //here it has to be changed from composer to collection
+      query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+      for(let k = 1; k < selectedCollections.length; k++) {
+        query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+      }
+
     }
+
+    query += ' RETURN event1.source';
 
     for(let k = 1; k < melody.length + 1; k++) {
       query += ', event'+ k +'.id as mei_id_event'+ k;
@@ -533,6 +603,26 @@
         });
   }
 
+  function manageCollections() {
+    selectedCollections = [];
+
+    const select = document.getElementById("collections");
+    const list = document.getElementById("selected-collections");
+
+    select.addEventListener("change", function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (!selectedCollections.includes(selectedOption.value) && (selectedOption.value != '-')) {
+            selectedCollections.push(selectedOption.value);
+            const listItem = document.createElement("li");
+            listItem.textContent = selectedOption.textContent;
+            list.appendChild(listItem);
+        } else if(selectedOption.value == '-') {
+          selectedCollections = [];
+          list.textContent = "";
+        } 
+    });
+  }
+
   /**
    * This function increases/decreases the volume according to the user input
    * */
@@ -643,7 +733,8 @@
 
     // Finally create the stave with the treble symbol and draw it
     stave = new Stave(10, 40, width);
-    stave.addClef("treble").addTimeSignature("4/4");
+    //stave.addClef("treble").addTimeSignature("4/4");
+    stave.addClef("treble");
     stave.setContext(context).draw();
 
     // From here there will follow the code that manages what to do when the buttons of the piano are pressed
@@ -884,6 +975,6 @@
       manageOptions();
       manageStaveAndMelody();
       manageFirstResults();
-      //manageSearchBar();
+      manageCollections();
     }
   }

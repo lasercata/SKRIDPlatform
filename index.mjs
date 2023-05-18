@@ -27,16 +27,27 @@ app.use('/data', express.static('data'));
 //route for index page
 app.get("/", async function (req, res) {
   let results = [];
+  let authors = [];
   try {
     const myQuery = "MATCH (s:Score) RETURN s ORDER BY s.source LIMIT 30";
     let temp = await session.run(myQuery);
     results = temp.records;
+
+    const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.composer";
+    let temp2 = await session.run(authorQuery);
+    temp2 = temp2.records;
+    temp2.forEach((record) => {
+      authors.push(record._fields[0].substring(13).slice(0,-6));
+    });
   } catch(err) {
     console.log(err);
   }
 
+  console.log(authors);
+  
   res.render("index", {
     results: results,
+    authors: authors,
   });
 });
 
@@ -61,7 +72,6 @@ app.get("/collections", async function (req, res) {
     let temp2 = await session.run(authorQuery);
     temp2 = temp2.records;
     temp2.forEach((record) => {
-      console.log(record._fields[0]);
       authors.push(record._fields[0].substring(13).slice(0,-6));
     });
 
@@ -83,30 +93,25 @@ app.get('/result', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
-/*
-app.post('/findPattern', async function(req, res) {
-  const myQuery = req.body.string;
 
-  console.log('Here is the query I am going to send: ' + myQuery)
-
+app.get('/getCollectionByAuthor', async (req, res) => {
+  let results = [];
+  const name = req.query.author;
+  const session = driver.session();
+  
   try {
-    session.run(myQuery).then(result => {
-      const results = result.records;
-      console.log(results);
-      res.json({ results: results});
-    })
-    .catch(error => {
-      console.error('Errore nella query:', error);
-      res.sendStatus(500);
-    })
-    .finally(() => {
-      session.close();
-    });
-
+    const myQuery = "MATCH (s:Score) WHERE s.composer CONTAINS $name RETURN s ORDER BY s.source";
+    let temp = await session.run(myQuery, {name: name});
+    results = temp.records;
   } catch(err) {
     console.log(err);
   }
-});*/
+
+  res.json({
+    results: results,
+    author: name,
+  });
+})
 
 app.post('/findPattern', async function(req, res) {
   const myQuery = req.body.string;
