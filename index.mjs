@@ -56,6 +56,25 @@ app.get("/about", function (req, res) {
   res.render("about");
 });
 
+app.get("/queries", function (req, res) {
+  res.render("queries");
+});
+
+app.post('/query', (req, res) => {
+  const query = req.body.query;
+
+  // Execute the query
+  const session = driver.session();
+  session.run(query)
+    .then(result => {
+      const results = result.records.map(record => record.toObject());
+      res.json({ results });
+    })
+    .catch(error => {
+      res.json({ error: error.message });
+    });
+});
+
 app.get("/collections", async function (req, res) {
   let results = [];
   let authors = [];
@@ -75,7 +94,6 @@ app.get("/collections", async function (req, res) {
       authors.push(record._fields[0].substring(13).slice(0,-6));
     });
 
-    console.log(authors);
   } catch(err) {
     console.log(err);
   }
@@ -86,13 +104,10 @@ app.get("/collections", async function (req, res) {
   });
 })
 
+//is it used?
 app.get('/result', (req, res) => {
   res.render("result");
 });
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
 
 app.get('/getCollectionByAuthor', async (req, res) => {
   let results = [];
@@ -167,19 +182,30 @@ app.post('/goToResult', function(req, res) {
 app.get('/search', async function(req, res) {
   const query = req.query.query;
   let results = [];
+  let authors = [];
 
   try {
     const myQuery = "MATCH (s:Score) WHERE s.source CONTAINS $query RETURN s ORDER BY s.source DESC";
     let temp = await session.run(myQuery, {query: query});
     console.log(temp)
     results = temp.records;
+
+    const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.composer";
+    let temp2 = await session.run(authorQuery);
+    temp2 = temp2.records;
+    temp2.forEach((record) => {
+      authors.push(record._fields[0].substring(13).slice(0,-6));
+    });
   } catch(err) {
     console.log(err);
   }
 
   res.render("index", {
     results: results,
+    authors: authors,
   });
 });
 
-
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})

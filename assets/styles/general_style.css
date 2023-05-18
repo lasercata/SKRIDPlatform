@@ -1,17 +1,32 @@
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
     * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+    html, body {
+        height: 100%;
+    }
+    .body-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    .main-container {
+        flex: 1;
     }
     .searchbar-box {
         background-color: #20AABD;
-        height: 200px;
+        height: 25%;
         width: 100%;
         background: linear-gradient(to bottom, #18767E, #20AABD);
         color: #fff;
         text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
     }
     .searchbar-title {
         font-size: 30px;
@@ -41,9 +56,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100px;
+        height: 15%;
         width: 100%;
         font-size: 20px;
+        flex-shrink: 0;
       }
       
     .footer .ui.container {

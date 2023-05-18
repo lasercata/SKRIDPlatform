@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>The Skrid Platform</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./styles/semantic.min.css" />
+    <link rel="stylesheet" href="./styles/general_style.css" />
+
+    <!-- CSS Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    
+    <!-- JS Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</head>
+<style>
+    #query-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-top: 30px;
+      background-color: #b9d8df;
+    }
+    #submit-button {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    #query {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+    }
+    #submit {
+      padding: 8px 16px;
+        background-color: #20AABD;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        cursor: pointer;
+    }
+    #result {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+</style>
+<%- include('./partials/header'); %>
+<body class="body-wrapper">
+  <div class="searchbar-box">
+    <h1 class="searchbar-title">Écrivez vos propres requêtes !</h1>
+  </div>
+  <div class="container main-container">
+      <div id="query-box">
+        <textarea id="query" rows="10" cols="100" placeholder="Écrivez ici..."></textarea>
+        <div id="submit-button">
+          <button id="submit" onclick="submitQuery()">Recherche</button>
+        </div>
+      </div>
+      <div id="result"></div>
+  </div>
+</body>
+<%- include('./partials/footer'); %>
+<script>
+  document.addEventListener("DOMContentLoaded", init);
+
+  function init() {
+      let submit = document.getElementById('submit');
+      submit.addEventListener('click', submitQuery)
+  }
+
+  function submitQuery() {
+    console.log('Pressed!');
+    
+    const query = document.getElementById('query').value;
+    fetch('/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        document.getElementById('result').innerText = 'Error: ' + data.error;
+      } else {
+        document.getElementById('result').innerText = 'Results: ' + JSON.stringify(data.results);
+      }
+    })
+    .catch(error => {
+      document.getElementById('result').innerText = 'Connection error';
+    });
+  }
+</script>
+</html>
