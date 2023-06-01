@@ -26,7 +26,7 @@
     <!-- Jquery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<%- include('./partials/header'); %>
+<%- include('./partials/header', { currentPage: 'collections' }); %>
 <body>
   <div class="searchbar-box">
     <h1 class="searchbar-title">Recherchez dans les collections !</h1>
@@ -44,10 +44,11 @@
       <% if(results.length != 0) { %>
         <div class="results-container">
           <% for(var i = 0; i < results.length; i++) { %>
-            <a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %>&score_name=<%= results[i]._fields[0].properties.inputfile %>">
-              <div class="music-score-box" id="<%= results[i]._fields[0].properties.inputfile %>">
+            <!--<a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %>&score_name=<%= results[i]._fields[0].properties.source %>"></a>-->
+            <a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.collection %>&score_name=<%= results[i]._fields[0].properties.source %>">
+              <div class="music-score-box" id="<%= results[i]._fields[0].properties.source %>">
               </div>
-              <h3 class="score_title"><%= results[i]._fields[0].properties.inputfile.slice(0,-4) %></h3>
+              <h3 class="score_title"><%= results[i]._fields[0].properties.source.slice(0,-4) %></h3>
             </a>
           <% } %>
         </div>

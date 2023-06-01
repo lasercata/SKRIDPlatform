@@ -24,12 +24,12 @@
     <script src="http://www.verovio.org/javascript/latest/verovio-toolkit-wasm.js" defer></script>
 
     <!-- Javascript of the page -->
-    <script type="text/javascript" src="./scripts/script.js"></script>
+    <script type="text/javascript" src="./scripts/home_script.js"></script>
 
     <!-- Jquery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<%- include('./partials/header'); %>
+<%- include('./partials/header', { currentPage: 'home' }); %>
 <body>
   <div class="searchbar-box">
     <h1 class="searchbar-title">Recherchez votre partition musicale préférée !</h1>
@@ -65,8 +65,8 @@
         <label for="check3">Correspondance approximative (sans tenir compte de la mélodie)</label>
         <input type="radio" id="check4" name="check4">
         <label for="check4">Correspondance approximative (sans tenir compte de l'octave)</label>
-        <input type="radio" id="check5" name="check5">
-        <label for="check5">Correspondance approximative (proportion rythmique)</label>
+        <!--<input type="radio" id="check5" name="check5">
+        <label for="check5">Correspondance approximative (proportion rythmique)</label> -->
         <button id="send-button">Recherche</button>
       </div>
       <div class="wrapper">
@@ -111,11 +111,13 @@
       <% if(results.length != 0) { %>
         <div class="results-container">
           <% for(var i = 0; i < results.length; i++) { %>
-            <a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %>&score_name=<%= results[i]._fields[0].properties.inputfile %>">
-              <div class="music-score-box" id="<%= results[i]._fields[0].properties.inputfile %>">
+            <!--<a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %>&score_name=<%= results[i]._fields[0].properties.source %>">-->
+            <a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.collection %>&score_name=<%= results[i]._fields[0].properties.source %>">
+              <div class="music-score-box" id="<%= results[i]._fields[0].properties.source %>">
               </div>
-              <h3 class="score_title"><%= results[i]._fields[0].properties.inputfile.slice(0,-6) %></h3>
-              <p class="score_author">Auteur : Joseph Mahé</p>
+              <h3 class="score_title"><%= results[i]._fields[0].properties.source.slice(0,-4) %></h3>
+              <!--<p class="score_author">Auteur : <%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %></p>-->
+              <p class="score_author">Collection : <%= results[i]._fields[0].properties.collection %></p>
             </a>
           <% } %>
         </div>

@@ -6,7 +6,7 @@
     title =  "3. Autre Version du Tregor."
     composer =  "Collecté par Francois-Marie Luzel, 1913"
     encodingsoftware =  "MuseScore 3.6.2"
-    encodingdate =  "2023-04-21"
+    encodingdate =  "2023-05-15"
     encoder =  "Virginie Thion, IRISA, France"
     source =  "Musiques bretonnes, Maurice Duhamel, Dastum"
     }

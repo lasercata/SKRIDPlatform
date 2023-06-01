@@ -3,9 +3,9 @@ echo Adding metadata to $1!
 # adding the composer "Collecté par Francois-Marie Luzel, 1913" (or erase the previous one if exists)
 if grep -q '<creator type=\"composer\">' $1 ;
 then
-sed -r -i -e 's|<creator type="composer">.*<\/creator>|<creator type="composer">Collecté par Francois-Marie Luzel, 1913<\/creator>|g' $1
+sed -r -i -e 's|<creator type="composer">.*<\/creator>|<creator type="composer">Collecté par Francois-Marie Luzel, 1913<\/creator><creator type="collection">Francois-Marie Luzel<\/creator>|g' $1
 else 
-sed -r -i -e 's|<\/identification>|<creator type="composer">collecté par Francois-Marie Luzel, 1913<\/creator><\/identification>|g' $1
+sed -r -i -e 's|<\/identification>|<creator type="composer">collecté par Francois-Marie Luzel, 1913<\/creator><creator type="collection">Francois-Marie Luzel<\/creator><\/identification>|g' $1
 fi
 # adding the source "Musiques bretonnes, Maurice Duhamel, Dastum" (or erase the previous one if exists)
 if grep -q '<source>' $1 ;

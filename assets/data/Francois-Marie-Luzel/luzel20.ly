@@ -6,7 +6,7 @@
     title =  "Garan ar Briz (Garan le Bris) - Autre Version du Trégor."
     composer =  "Collecté par Francois-Marie Luzel, 1913"
     encodingsoftware =  "MuseScore 3.6.2"
-    encodingdate =  "2022-12-12"
+    encodingdate =  "2023-05-15"
     encoder =  "Virginie Thion, IRISA, France"
     source =  "Musiques bretonnes, Maurice Duhamel, Dastum"
     }

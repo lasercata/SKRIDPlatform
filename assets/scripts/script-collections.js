@@ -7,7 +7,7 @@
         const resultsDiv = $('.items');
         resultsDiv.empty();
 
-        console.log(data.results);
+        // console.log(data.results);
 
         let tk = new verovio.toolkit();
         if(data.results.length != 0) {
@@ -72,7 +72,7 @@
     var results = JSON.parse(document.getElementById('data').textContent);
     for (var i = 0; i < results.length; i++) {
 
-      let score_name = results[i]._fields[0].properties.inputfile.slice(0, -4) + ".mei";
+      let score_name = results[i]._fields[0].properties.source;
 
       let tk = new verovio.toolkit();
       let zoom = 20;
@@ -91,7 +91,7 @@
       
       tk.setOptions(options);
 
-      let score_div = document.getElementById(results[i]._fields[0].properties.inputfile);
+      let score_div = document.getElementById(results[i]._fields[0].properties.source);
 
       fetch('./data/Francois-Marie-Luzel/' + score_name)
         .then( (response) => response.text() )
@@ -104,7 +104,7 @@
   }
   
   /**
-   * This function adds an eventListener to all the buttons in the page.
+   * This function adds an eventListener to all the buttons in the page
    * */
   function init() {
     verovio.module.onRuntimeInitialized = () => {

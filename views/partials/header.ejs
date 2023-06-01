@@ -6,16 +6,16 @@
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
       <ul class="navbar-nav">
-        <li class="nav-item active">
+        <li class="nav-item <%= currentPage === 'home' ? 'active' : '' %>">
           <a class="nav-link" href="/">Home</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item <%= currentPage === 'collections' ? 'active' : '' %>">
           <a class="nav-link" href="/collections">Collections</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item <%= currentPage === 'queries' ? 'active' : '' %>">
           <a class="nav-link" href="/queries">Queries</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item <%= currentPage === 'about' ? 'active' : '' %>">
           <a class="nav-link" href="/about">About</a>
         </li>
       </ul>

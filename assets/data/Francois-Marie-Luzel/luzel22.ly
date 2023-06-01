@@ -6,7 +6,7 @@
     title =  "Ar Vinorezig"
     composer =  "Collecté par Francois-Marie Luzel, 1913"
     encodingsoftware =  "MuseScore 4.0.2"
-    encodingdate =  "2023-04-21"
+    encodingdate =  "2023-05-15"
     encoder =  "Virginie Thion, IRISA, France"
     source =  "Musiques bretonnes, Maurice Duhamel, Dastum"
     }
