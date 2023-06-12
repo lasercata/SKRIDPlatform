@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>The Skrid Platform</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./styles/general_style.css" />
+
+    <!-- CSS Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    
+    <!-- JS Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</head>
+<%- include('./partials/header', { currentPage: 'home' }); %>
+<body>
+  <div class="searchbar-box">
+    <h1 class="searchbar-title">Comment ça marche ?</h1>
+  </div>
+
+  <h2 class="searchbar-title">L'architecture logicielle</h2>
+  L'outil de recherche de motif musical de la plateforme SKRID s'appuie sur la modélisation intermédiaire d'une partition musicale sous la forme d'un graphe. 
+  Les représentations intermédiaires des partitions des collections mises à disposition sur la plateforme sont stockées dans une base de données graphe, gérée par un système de gestion dédié à ce type de base de données.
+  L'interface "clavier de piano" permet à un utilisateur de définir une motif musical à rechercher. 
+  Un module spécifique de la couche fonctionnelle de la plateforme capture le motif musical, et le traduit en une requête 
+  (dite "à base de motif de graphe"). 
+  Cette requête est envoyée au système de gestion de base de données, qui l'exécute sur la base de données contenant les représentations intermédiaires des partitions,
+  et fournit en résultat les occurrences du motif trouvées au sein de la base de données.
+  Ces résultats sont récupérés par la couche fonctionnelle de la plateforme SKRID, 
+  dont un module de visualiation restitue les résultats sous forme graphique.
+    <br/> <br/>
+  Pour en savoir plus concernant le modèle de données intermédiaire utilisé et le mécanisme d'interrogation des données 
+  sous-jacents à la plateforme, vous pouvez consulter les articles de recherche mentionnés dans la section <a class="body" href="https://shaman.enssat.fr/skrid/references">Références et liens</a> du site.
+</div>
+
+<br/>
+<br/>
+
+<div class="jumbotron" style="padding:40px;">
+<h2 class="searchbar-title">Les contributeurs</h2>
+Ont contribué à la mise en oeuvre de la plateforme (par ordre alphabétique) :
+<ul>
+  <li>Pierre Alain (mise en oeuvre de l'architecture)</li>
+  <li>Vincent Barreaud (dev. couche fonctionnelle, mise en oeuvre de l'architecture)</li>
+  <li>Anne-Marie Nicol (amorce projet, références collections et contacts musique traditionnelle)</li>
+  <li>Tommaso Padovano (dev. couche fonctionnelle, en particulier l'interface piano et l'accès aux collections)</li>
+  <li>Gwenaël Piel (encodage des collections J. Mahé)</li>
+  <li>Virginie Thion (encodage de la collection F.-M. Luzel (en cours), génération des formats de données, dev. base de données)</li>
+</ul>
+Merci à l'IRISA et à L'Univeristé de Rennes pour le financement de la plateforme (défi scitifique SKRID). 
+
+<br/>
+<br/>
+
+<h2 class="searchbar-title">Contact</h2>
+Pour nous contacter, vous pouvez envoyer un message à Virginie Thion (prenom.nom@irisa.fr)
+</div>
+  </body>
+<%- include('./partials/footer'); %>
+</html>
