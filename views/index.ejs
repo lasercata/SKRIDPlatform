@@ -21,7 +21,7 @@
     <script src="https://unpkg.com/vexflow/releases/vexflow-debug.js"></script>
 
     <!-- Verovio for the svg representation of the scores previews -->
-    <script src="http://www.verovio.org/javascript/latest/verovio-toolkit-wasm.js" defer></script>
+    <script src="https://www.verovio.org/javascript/latest/verovio-toolkit-wasm.js" defer></script>
 
     <!-- Javascript of the page -->
     <script type="text/javascript" src="./scripts/home_script.js"></script>
@@ -58,13 +58,13 @@
       <ol id="selected-collections"></ol>
       <div class="options-row">
         <input type="radio" id="check1" name="check1">
-        <label for="check1">Correspondance exacte</label>
-        <input type="radio" id="check2" name="check2">
-        <label for="check2">Correspondance approximative (sans tenir compte du rythme)</label>
+        <label for="check1">Correspondance exacte (rythme et hauteurs des notes)</label>
+        <input type="radio" id="check2" name="check2" checked>
+        <label for="check2">Correspondance des hauteurs de notes seulement (sans tenir compte du rythme)</label>
         <input type="radio" id="check3" name="check3">
-        <label for="check3">Correspondance approximative (sans tenir compte de la mélodie)</label>
+        <label for="check3">Correspondance du rythme seulement (sans tenir compte de la mélodie)</label>
         <input type="radio" id="check4" name="check4">
-        <label for="check4">Correspondance approximative (sans tenir compte de l'octave)</label>
+        <label for="check4">Correspondance exacte sans tenir compte de l'octave</label>
         <!--<input type="radio" id="check5" name="check5">
         <label for="check5">Correspondance approximative (proportion rythmique)</label> -->
         <button id="send-button">Recherche</button>
