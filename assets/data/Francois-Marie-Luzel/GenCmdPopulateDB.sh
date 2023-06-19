@@ -12,4 +12,6 @@ rm list_of_files_temp3.txt;
 rm list_of_files_temp4.txt;
 # 3-write the script in cmdPopulate.cql
 mv list_of_files.txt cmdPopulate.cql;
-sed "s/\/Users\/thion\/SVNSourceSup\/skrid\/DSL\/Data/\/home\/shaman\/Public\/DSL\/Data/g" cmdPopulate.cql > cmdPopulate_Elaine.cql
+sed "s/\/Users\/thion\/Git\/SKRIDPlatform\/assets\/data/\/home\/shaman\/Public\/DSL\/SKRIDPlatform\/assets\/data/g" cmdPopulate.cql > cmdPopulate_Elaine.cql
+
+
