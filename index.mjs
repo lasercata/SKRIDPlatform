@@ -3,7 +3,7 @@ import neo4j, { auth } from 'neo4j-driver';
 import bodyParser from 'body-parser';
 
 const app = express();
-const port = 3001;
+const port = 3000;
 
 const uri = 'bolt://localhost:7687';
 const user = 'neo4j'
@@ -24,13 +24,24 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('data'));
 app.use('/data', express.static('data'));
 
+app.get("/", function(req,res){
+    res.render("home");});
+
+app.get("/plus", function (req, res) {
+      res.render("plus");
+    });
+    
+app.get("/references", function (req, res) {
+      res.render("references");
+    });
+    
 // Route for index page
-app.get("/", async function (req, res) {
+app.get("/interface", async function (req, res) {
   let results = [];
   let authors = [];
   try {
     const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS 'Joseph Mahe Original' RETURN s ORDER BY s.source LIMIT 30";
-    let temp = await session.run(myQuery);
+    let temp = await session.run(myQuery); //
     results = temp.records;
 
     // The query to get the authors is necessary to display the list of possibile collections
@@ -48,24 +59,23 @@ app.get("/", async function (req, res) {
   }
   res.render("index", {
     results: results,
-    authors: authors,
+      authors: authors
   });
 });
 
+
+/*
 // Route for about page
 app.get("/about", function (req, res) {
   res.render("about");
 });
-
-// Route for about page
-app.get("/home", function (req, res) {
-  res.render("home");
-});
-
+*/
+/*
 // Route for queries page
 app.get("/queries", function (req, res) {
   res.render("queries");
 });
+*/
 
 // This endpoint is called when the user wants to send a specific (self-written) query to the database
 app.post('/query', (req, res) => {

@@ -20,12 +20,14 @@
     <script src='https://www.midijs.net/lib/midi.js'></script>
 
     <!-- Javascript of the page -->
-    <script type="text/javascript" src="./scripts/result_script.js"></script>
+<script type="text/javascript" src="./scripts/result_script.js"></script>
+
+
 </head>
 <%- include('./partials/header', {currentPage: ''}); %>
 <body>
   <div class="searchbar-box">
-    <h1 class="searchbar-title">R&eacute;sultat :</h1>
+    <h1 class="searchbar-title" id="searchbar_title">Fichier </h1>
   </div>
   <div class="container">
     <div class="score-container">
@@ -38,14 +40,16 @@
       <div id="notation"></div>
     </div>
     <div class="general_info">
-      <p id="author"><b>Author:</b> </p>
-      <p id="composition_date"><b>Composed in:</b> </p>
+      <p id="author"><b>Auteur :</b> </p>
+      <p id="composition_date"><b>Compos&eacute; en :</b> </p>
+      <p id="fichier_mei"><b>Fichier MEI :</b> </p>
     </div>
   </div>
 </body>
 <footer>
   <%- include('./partials/footer'); %>
-</footer>
+  </footer>
+
 
 </body>
 </html>

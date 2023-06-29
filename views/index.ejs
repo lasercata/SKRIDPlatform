@@ -32,21 +32,28 @@
 <%- include('./partials/header', { currentPage: 'home' }); %>
 <body>
   <div class="searchbar-box">
-    <h1 class="searchbar-title">Rechercher l'occurrence d'une chaîne de caract&egrave;res</h1>
+    <h1 class="searchbar-title">Rechercher dans le contenu des partitions</h1>
+  </div>
+  <!--
+  <div class="container">
+    <div class="search-pattern">
+      <h1>Rechercher l'occurrence d'une chaîne de caract&egrave;res</h1>
     <form action="/search" method="GET">
-      <input type="text" name="query" placeholder="Rechercher une partition musicale...">
+      <input type="text" name="query" placeholder="Indiquez ici une syllabe, un bout de titre, ...">
       <button type="submit">Recherche</button>
     </form>
   </div>
+  </div>
+  -->
   <div class="container">
     <div class="search-pattern">
-      <h1>Rechercher motif musical</h1>
+      <h1>Rechercher un motif musical</h1>
+      <div id="music-score"></div>
       <div class="clear_buttons">
         <button class="clear_all">Supprimer tout</button>
         <button class="clear_last_note">Supprimer la dernière note</button>
       </div>
-      <div id="music-score"></div>
-      <label for="collections">(Facultatif) Sélectionnez des collections pour le motif : </label>
+      <label for="collections">(Facultatif) Collections dans lesquelles rechercher : </label>
       <select id="collections" name="collections">
         <option value='-'>All</option>
         <% for(var j = 0; j < authors.length; j++) { %>
@@ -54,7 +61,7 @@
         <% } %>
       </select>
       <br>
-      <label>Collections sélectionnées :</label>
+      <label>Collections sélectionnées (par d&eacute;faut, toutes les collections) :</label>
       <ol id="selected-collections"></ol>
       <div class="options-row">
         <input type="radio" id="check1" name="check1">
@@ -71,12 +78,12 @@
       </div>
       <div class="wrapper">
         <header>
-          <h2>Votre piano</h2>
+          <h2>Utilisez le piano pour d&eacute;finir le motif musical</h2>
           <div class="column volume-slider">
             <span>Volume</span><input type="range" min="0" max="1" value="0.5" step="any">
           </div>
           <div class="column keys-checkbox">
-            <span>Montrer le nom des touches</span><input type="checkbox" checked>
+            <span>Touches</span><input type="checkbox" checked>
           </div>
         </header>
         <ul class="piano-keys">
@@ -105,7 +112,7 @@
           <li class="key black" data-key="A#5"><span>LA#(A#)</span></li>
           <li class="key white" data-key="B5"><span>SI(B)</span></li>
         </ul>
-      </div>
+      </div> 
     </div>
     <div class="container_2">
       <% if(results.length != 0) { %>

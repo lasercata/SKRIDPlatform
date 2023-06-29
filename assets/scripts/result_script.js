@@ -94,6 +94,15 @@
 
           const composition_date = document.getElementById('composition_date');
           composition_date.append(date);
+
+	    const fichier_mei = document.getElementById('fichier_mei');
+	    var link_mei = document.createElement('a');
+	    link_mei.setAttribute('href',datadir+folder+score_name);
+	    link_mei.innerHTML = score_name;
+	    document.getElementById('fichier_mei').appendChild(link_mei);
+	    
+	    document.getElementById('searchbar_title').append(score_name);
+	    
         });
       }
   }
