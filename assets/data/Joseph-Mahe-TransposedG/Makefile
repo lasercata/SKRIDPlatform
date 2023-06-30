@@ -79,13 +79,13 @@ svg: $(SVGOBJECTS)
 	verovio $^ -t svg -o $@
 
 archives:
-	zip -9 -y -r -q MaheFilesAll.zip *.mscz *.musicxml *.ly *.svg *.mid *.mei
-	zip -9 -y -r -q MaheFilesLy.zip *.ly
-	zip -9 -y -r -q MaheFilesSvg.zip *.svg
-	zip -9 -y -r -q MaheFilesMei.zip *.mei
-	zip -9 -y -r -q MaheFilesMusicxml.zip *.musicxml
-	zip -9 -y -r -q MaheFilesMid.zip *.mid
-	zip -9 -y -r -q MaheFilesPdf.zip *.pdf
+	zip -9 -y -r -q Joseph-Mahe-TransposedG_FilesAll.zip *.mscz *.musicxml *.ly *.svg *.mid *.mei
+	zip -9 -y -r -q Joseph-Mahe-TransposedG_FilesLy.zip *.ly
+	zip -9 -y -r -q Joseph-Mahe-TransposedG_FilesSvg.zip *.svg
+	zip -9 -y -r -q Joseph-Mahe-TransposedG_FilesMei.zip *.mei
+	zip -9 -y -r -q Joseph-Mahe-TransposedG_FilesMusicxml.zip *.musicxml
+	zip -9 -y -r -q Joseph-Mahe-TransposedG_FilesMid.zip *.mid
+	zip -9 -y -r -q Joseph-Mahe-TransposedG_FilesPdf.zip *.pdf
 
 listfiles:
 	sh create_list_of_files.sh

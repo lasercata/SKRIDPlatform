@@ -33,7 +33,7 @@
   </div>
   <div class="father_container">
   <div class="collections">
-    Les collections :<br/><br/>
+    S&eacute;lectionner la collection &agrave; afficher :<br/><br/>
     <p class="separator"> <hr/> </p>
       <% for(var i = 0; i < authors.length; i++) { %>
         <a href="#" onClick="getCollectionByAuthor(this.innerText)"><%= authors[i] %></a><br>
@@ -43,9 +43,10 @@
     <% } %>
         <p class="separator"> <hr/> </p>
     </div>
-    <div class="items">
-      T&eacute;l&eacute;charger les fichiers sous la forme d'une archive : <br/>
-      <br/><br/><br/><br/>
+    <div class="archives">
+      <p id="archives"> </p>
+      <br/>
+      <br/>
 	        Explorer le contenu des fichiers : <br/>
       <% if(results.length != 0) { %>
         <div class="results-container">

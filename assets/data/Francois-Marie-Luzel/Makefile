@@ -43,12 +43,11 @@ svg: $(SVGOBJECTS)
 	verovio $^ -t svg -o $@
 
 archives:
-	zip -9 -y -r -q LuzelFilesAll.zip *.mscz *.musicxml *.ly *.svg *.mid *.mei
-	zip -9 -y -r -q LuzelFilesLy.zip *.ly
-	zip -9 -y -r -q LuzelFilesSvg.zip *.svg
-	zip -9 -y -r -q LuzelFilesMei.zip *.mei
-	zip -9 -y -r -q LuzelFilesMusicxml.zip *.musicxml
-	zip -9 -y -r -q LuzelFilesMid.zip *.mid
+	zip -9 -y -r -q Francois-Marie-Luzel_FilesAll.zip *.mscz *.musicxml *.ly *.svg *.mid *.mei
+	zip -9 -y -r -q Francois-Marie-Luzel_FilesLy.zip *.ly
+	zip -9 -y -r -q Francois-Marie-Luzel_FilesSvg.zip *.svg
+	zip -9 -y -r -q Francois-Marie-Luzel_FilesMei.zip *.mei
+	zip -9 -y -r -q Francois-Marie-Luzel_FilesMusicxml.zip *.musicxml
 
 clean:
 	\rm -f *.musicxml-e *~
