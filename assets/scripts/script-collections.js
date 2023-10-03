@@ -3,7 +3,7 @@
   function getCollectionByAuthor(author) {
       document.getElementById('archives').innerHTML = "T&eacute;l&eacute;charger la collection sous la forme d'une archive : ";
 
-      fetch(`/getCollectionByAuthor?author=${encodeURIComponent(author)}`)
+      fetch(`/skrid/getCollectionByAuthor?author=${encodeURIComponent(author)}`)
       .then(response => response.json()) 
       .then(data => {
         const resultsDiv = $('.items');
