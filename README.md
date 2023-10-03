@@ -16,6 +16,9 @@ screen -r 3897991
 -manip-
 ctr-a d (pour redétacher)
 
+
+
+
 Rappel utilisation de screen 
 Pour créer
 screen -S nom 
