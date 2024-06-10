@@ -43,7 +43,7 @@ app.get("/interface", async function (req, res) {
     let temp = await session.run(myQuery); //
     results = temp.records;
 
-    // The query to get the authors is necessary to display the list of possibile collections
+    // The query to get the authors is necessary to display the list of possible collections
     //const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.composer";
     const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.collection";
     let temp2 = await session.run(authorQuery);
