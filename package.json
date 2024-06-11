@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "nodemon": "nodemon -i index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-docs": "node_modules/.bin/jsdoc -c jsdoc.json"
   },
   "author": "Tommaso PADOVANO",
   "license": "ISC",
   "dependencies": {
+    "docdash": "^2.0.2",
     "ejs": "^3.1.6",
     "express": "^4.18.2",
     "jquery": "^3.6.4",
