@@ -1,8 +1,17 @@
+/**
+ * @file Backend for collection page
+ * @module script-collections
+ */
   document.addEventListener("DOMContentLoaded", init);
 
+  //TODO: document this
+  /**
+   * @param {string} author - the author
+   */
   function getCollectionByAuthor(author) {
       document.getElementById('archives').innerHTML = "T&eacute;l&eacute;charger la collection sous la forme d'une archive : ";
 
+      //TODO: remove /skrid ?
       fetch(`/skrid/getCollectionByAuthor?author=${encodeURIComponent(author)}`)
       .then(response => response.json()) 
       .then(data => {
@@ -72,6 +81,11 @@
       });
   }
 
+/**
+ * Create links for archives.
+ * @param {*} data - the data
+ * @param {*} data.author - the corresponding author
+ */
 function createArchivesLinks(data){
 	  var folder_name = data.author;
           folder_name = folder_name.replace(/\s+/g, "-");
@@ -119,6 +133,7 @@ function createArchivesLinks(data){
 	  document.getElementById('archives').append(link_archives_Svg);
 }
 
+//TODO: document this
   function manageFirstResults() {
     var results = JSON.parse(document.getElementById('data').textContent);
     for (var i = 0; i < results.length; i++) {

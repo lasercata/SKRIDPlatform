@@ -1,3 +1,10 @@
+/**
+ * @file Backend for the piano interface.
+ * Manages buttons presses, generate queries, and send them.
+ *
+ * @module home_script
+ */
+
   document.addEventListener("DOMContentLoaded", init);
 
   const { Renderer, Stave, Formatter, StaveNote, Beam, Accidental, MusicXMLParser} = Vex.Flow;
@@ -101,6 +108,7 @@
 
   /**
    * This function sends the query for the pattern and displays the results (including the preview)
+   * @param {string} query - the query to send
    */
   function sendQuery(query) {
     let data = {
@@ -225,7 +233,7 @@
   }
   
   /**
-   * This function creates a query for the exact match
+   * This function creates a query for the exact match and send it.
    * */
   function constructExactMatch() {
     let containsAlterations = false;
@@ -306,7 +314,7 @@
   }
 
   /**
-   * This function creates a query ignoring the rhythm
+   * This function creates a query ignoring the rhythm and send it.
    * */
   function constructIgnoringTheRhythm() {
     let containsAlterations = false;
@@ -387,7 +395,7 @@
   }
 
   /**
-   * This function creates a query ignoring the melody
+   * This function creates a query ignoring the melody and send it.
    * */
   function constructIgnoringTheMelody() {
     query = 'MATCH';
@@ -432,7 +440,7 @@
   }
 
   /**
-   * This function creates a query ignoring the octave
+   * This function creates a query ignoring the octave and send it.
    * */
   function constructIgnoringTheOctave() {
     let containsAlterations = false;
@@ -513,7 +521,7 @@
   }
 
   /**
-   * This function creates a query with the signature for the rhythm
+   * This function creates a query with the signature for the rhythm and send it.
    * */
   function constructSignatureForTheRhythm() {
     let containsAlterations = false;

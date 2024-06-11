@@ -1,3 +1,7 @@
+/**
+ * @file Main file: create the express app.
+ */
+
 const express = require('express');
 const neo4j = require('neo4j-driver');
 const bodyParser = require('body-parser');

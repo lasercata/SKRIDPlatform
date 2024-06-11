@@ -1,3 +1,8 @@
+/**
+ * @file Backend for result page
+ * @module result_script
+ */
+
 document.addEventListener("DOMContentLoaded", init);
 
   let datadir;
@@ -9,6 +14,9 @@ document.addEventListener("DOMContentLoaded", init);
   // Verovio toolkit variable
   let tk;
 
+  /**
+   * Wire up buttons, set parameters, and retrieve song informations in order to display it.
+   */
   function init() {
       datadir = "./data/";
       noteIds = [];
@@ -135,6 +143,8 @@ document.addEventListener("DOMContentLoaded", init);
 
   /**
    * Retrieve from the url the parameter
+   * @param {string} parameter - search parameter
+   * @returns the value of the given parameter from the url
    */
   function readFromUrl(parameter) {
     const queryString = window.location.search;
