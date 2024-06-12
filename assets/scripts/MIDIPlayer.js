@@ -15,14 +15,14 @@ function tick() {
     //such as (for 3 pages) [svg, svg#definition-scale, svg, svg#definition-scale, svg, svg#definition-scale, definition-scale: svg#definition-scale]
     var svgpage = group.getElementsByTagName('svg');
     if (elementsattime.page > 0){
-      // console.log(elementsattime);
-      notesbeingplayed.forEach(function(noteid) {
-          d3.select(svgpage[(elementsattime.page-1)*2]).select("#" + noteid).style("filter", null)
-      });
-      elementsattime.notes.forEach(function(noteid) {
-          d3.select(svgpage[(elementsattime.page-1)*2]).select("#" + noteid).style("filter", "url(#highlighting)")
-          notesbeingplayed.push(noteid);
-      });
+        // console.log(elementsattime);
+        notesbeingplayed.forEach(function(noteid) {
+            d3.select(svgpage[(elementsattime.page-1)*2]).select("#" + noteid).style("filter", null)
+        });
+        elementsattime.notes.forEach(function(noteid) {
+            d3.select(svgpage[(elementsattime.page-1)*2]).select("#" + noteid).style("filter", "url(#highlighting)")
+            notesbeingplayed.push(noteid);
+        });
     }
 }
 
@@ -122,15 +122,15 @@ function renderSVGandMIDI() {
                 $("#playpause").show();
                 //allow click of note to jump to the time in the MIDI the note is played
                 $("g.note").click(function() {
-                  window.clearInterval(highlighttick);
-                  MIDI.Player.pause(true);
-                  var timeofElement = vrvToolkit.getTimeForElement(this.id);
-                  //convert time of element to miliseconds
-                  MIDI.Player.currentTime = timeofElement/120.0*1000.0;
-                  time = MIDI.Player.currentTime;
-                  highlighttick = window.setInterval(tick, 100);
-                  $("#playpause").html("Pause");
-                  MIDI.Player.resume();
+                    window.clearInterval(highlighttick);
+                    MIDI.Player.pause(true);
+                    var timeofElement = vrvToolkit.getTimeForElement(this.id);
+                    //convert time of element to miliseconds
+                    MIDI.Player.currentTime = timeofElement/120.0*1000.0;
+                    time = MIDI.Player.currentTime;
+                    highlighttick = window.setInterval(tick, 100);
+                    $("#playpause").html("Pause");
+                    MIDI.Player.resume();
                 });
             }
         });
