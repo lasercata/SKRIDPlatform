@@ -12,7 +12,8 @@ const port = 3000;
 const uri = 'neo4j://localhost:7687'; // default dor cypher-shell neo4j://localhost:7687
 // cypher-shell -u neo4j -p root -a neo4j://localhost:7687
 const user = 'neo4j'
-const password = 'root';
+const password = '12345678';
+// const password = 'root';
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password)); 
 const session = driver.session();
