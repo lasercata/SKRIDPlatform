@@ -21,6 +21,8 @@ You can finally paste the content of the modified file into the prompt and run i
 
 Repeat the same steps with the other databases.
 
+To correct the database, paste the queries from `data_corrections.cypher` (one by one) in the prompt of neo4j-desktop.
+
 
 ## Testing (run in local)
 <!-- Download the project -->
