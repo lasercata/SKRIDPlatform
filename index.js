@@ -100,7 +100,7 @@ app.post('/query', (req, res) => {
 });
 
 // This endpoint will redirect the user to the 'collections' page 
-// Before redirecting, it queries the database in order to get the first collection to display
+// Before redirecting, it queries the database in order to get the first collection to display.
 app.get("/collections", async function (req, res) {
     let results = [];
     let authors = [];
@@ -108,13 +108,7 @@ app.get("/collections", async function (req, res) {
     const session = driver.session();
 
     try {
-        const name = "Francois-Marie Luzel";
-        //const myQuery = "MATCH (s:Score) WHERE s.composer CONTAINS $name RETURN s ORDER BY s.source";
-        const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS $name RETURN s ORDER BY s.source";
-        let temp = await session.run(myQuery, {name: name});
-        results = temp.records;
-
-        // The query for the authors is necessary in order to display the different collections
+        //---Get authors (to display the different collections)
         //const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.composer";
         const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.collection";
         let temp2 = await session.run(authorQuery);
@@ -124,6 +118,13 @@ app.get("/collections", async function (req, res) {
             authors.push(record._fields[0]);
         });
         console.log(authors);
+
+        //---Get collection of the first author
+        const name = authors[0];
+        const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS $name RETURN s ORDER BY s.source";
+        let temp = await session.run(myQuery, {name: name});
+        results = temp.records;
+
     } catch(err) {
         console.log(err);
     }

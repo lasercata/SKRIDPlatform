@@ -53,3 +53,5 @@ npm run generate-docs
 
 Then open `docs/index.html` with your browser.
 
+## Notes for local tests
+If `index.js` has been modified, it is needed to restart `node index.js`. Otherwise it is just needed to refresh the web page.
