@@ -1,5 +1,6 @@
 /**
- * @file Main file: create the express app.
+ * @file Main file. Creates the express app.
+ * @module index.js
  */
 
 const express = require('express');
@@ -31,15 +32,27 @@ app.use('/data', express.static('data'));
 app.get("/", function(req,res){
     res.render("home");});
 
+/**
+ * Route for the plus page
+ * @constant /plus
+ */
 app.get("/plus", function (req, res) {
     res.render("plus");
 });
 
+/**
+ * Route for the references page
+ * @constant /references
+ */
 app.get("/references", function (req, res) {
     res.render("references");
 });
 
-// Route for index page
+/**
+ * Route for the research page
+ * @constant /interface
+ * @todo doc this better
+ */
 app.get("/interface", async function (req, res) {
     let results = [];
     let authors = [];
@@ -81,7 +94,11 @@ app.get("/queries", function (req, res) {
 });
 */
 
-// This endpoint is called when the user wants to send a specific (self-written) query to the database
+/**
+ * This endpoint is called when the user wants to send a specific (self-written) query to the database
+ *
+ * @constant /query
+ */
 app.post('/query', (req, res) => {
     // Retrieve the melody from the body
     const query = req.body.query;
@@ -99,8 +116,12 @@ app.post('/query', (req, res) => {
         });
 });
 
-// This endpoint will redirect the user to the 'collections' page 
-// Before redirecting, it queries the database in order to get the first collection to display.
+/**
+ * This endpoint will redirect the user to the 'collections' page .
+ * Before redirecting, it queries the database in order to get the first collection to display.
+ *
+ * @constant /collections
+ */
 app.get("/collections", async function (req, res) {
     let results = [];
     let authors = [];
@@ -135,12 +156,18 @@ app.get("/collections", async function (req, res) {
     });
 })
 
-// Route for the result page
+/**
+ * Route for the result page
+ * @constant /result
+ */
 app.get('/result', (req, res) => {
     res.render("result");
 });
 
-// This endpoint is called to get the score of a specific composer/author
+/**
+ * This endpoint is called to get the score of a specific composer/author
+ * @constant /getCollectionByAuthor
+ */
 app.get('/getCollectionByAuthor', async (req, res) => {
     let results = [];
     const name = req.query.author;
@@ -161,7 +188,10 @@ app.get('/getCollectionByAuthor', async (req, res) => {
     });
 })
 
-// This endpoint is called when the user wants to retrieve the results containing the inserted pattern
+/**
+ * This endpoint is called when the user wants to retrieve the results containing the inserted pattern
+ * @constant /findPattern
+ */
 app.post('/findPattern', async function(req, res) {
     const myQuery = req.body.string;
     const session = driver.session();
@@ -182,7 +212,10 @@ app.post('/findPattern', async function(req, res) {
     }
 });
 
-// This endpoint will retrieve the author of a specific music score
+/**
+ * This endpoint will retrieve the author of a specific music score
+ * @constant /findAuthor
+ */
 app.post('/findAuthor', async function(req, res) {
     const score_name = req.body.string;
     const session = driver.session();
@@ -210,7 +243,10 @@ app.post('/goToResult', function(req, res) {
   res.render('result');
 })*/
 
-// This endpoint will search for all the scores containing in the title the string inserted by the user in the search bar
+/**
+ * This endpoint will search for all the scores containing in the title the string inserted by the user in the search bar
+ * @constant /search
+ */
 app.get('/search', async function(req, res) {
     const query = req.query.query;
     let results = [];
