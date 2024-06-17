@@ -66,38 +66,50 @@ function createScorePreviews(data) {
  * @param {*} results - data.results from the query to get the collection.
  */
 function fillScorePreviews(results) {
-    for (var i = 0; i < results.length; i++) {
-        let score_name = results[i]._fields[0].properties.source;
+    try {
+        for (var i = 0; i < results.length; i++) {
+            let score_name = results[i]._fields[0].properties.source;
 
-        let tk = new verovio.toolkit();
-        let zoom = 20;
+            let tk = new verovio.toolkit();
+            let zoom = 20;
 
-        const parentWidth = 180;
-        const parentHeight = 250;
+            const parentWidth = 180;
+            const parentHeight = 250;
 
-        let pageHeight = parentHeight * 100 / zoom;
-        let pageWidth = parentWidth * 100 / zoom;
+            let pageHeight = parentHeight * 100 / zoom;
+            let pageWidth = parentWidth * 100 / zoom;
 
-        options = {
-            pageHeight: pageHeight,
-            pageWidth: pageWidth,
-            scale: zoom,
-        };
+            options = {
+                pageHeight: pageHeight,
+                pageWidth: pageWidth,
+                scale: zoom,
+            };
 
-        tk.setOptions(options);
+            tk.setOptions(options);
 
-        let score_div = document.getElementById(results[i]._fields[0].properties.source);
+            let score_div = document.getElementById(results[i]._fields[0].properties.source);
 
-        let author = results[i]._fields[0].properties.collection;
-        let folder = author.replace(/\s+/g, "-") + '/';
+            let author = results[i]._fields[0].properties.collection;
+            let folder = author.replace(/\s+/g, "-") + '/';
 
-        fetch('./data/' + folder + score_name)
-        .then( (response) => response.text() )
-        .then( (meiXML) => {
-            tk.loadData(meiXML);
-            let svg = tk.renderToSVG(1);
-            score_div.innerHTML = svg;
-        });
+            fetch('./data/' + folder + score_name)
+            .then( (response) => response.text() )
+            .then( (meiXML) => {
+                try {
+                    tk.loadData(meiXML);
+                    let svg = tk.renderToSVG(1);
+                    score_div.innerHTML = svg;
+                }
+                catch (err) {
+                    console.log('fillScorePreviews: fetch(): error: ' + err);
+                    tk.destroy();
+                    tk = undefined;
+                }
+            });
+        }
+    }
+    catch (err) {
+        console.log('fillScorePreviews: error: ' + err);
     }
 }
 
