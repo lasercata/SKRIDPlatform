@@ -3,6 +3,10 @@
  * @module script-collections
  */
 
+ /** The number of items per page */
+const NB_PER_PAGE = 20;
+// const NB_PER_PAGE = 25;
+
 document.addEventListener("DOMContentLoaded", init);
 
 /**
@@ -19,6 +23,7 @@ function getCollectionByAuthor(author) {
     .then(data => {
         createArchivesLinks(data);
         createScorePreviews(data);
+        refreshPageNbInfos(data.results.length, 1);
         fillScorePreviews(data.results);
     })
     .catch(error => {
@@ -95,21 +100,19 @@ function fillScorePreviews(results) {
             fetch('./data/' + folder + score_name)
             .then( (response) => response.text() )
             .then( (meiXML) => {
-                try {
-                    tk.loadData(meiXML);
-                    let svg = tk.renderToSVG(1);
-                    score_div.innerHTML = svg;
-                }
-                catch (err) {
-                    console.log('fillScorePreviews: fetch(): error: ' + err);
-                    tk.destroy();
-                    tk = undefined;
-                }
-            });
+                tk.loadData(meiXML);
+                let svg = tk.renderToSVG(1);
+                score_div.innerHTML = svg;
+            })
+            .catch (err => {
+                console.error('fillScorePreviews: fetch(): error: ' + err);
+                tk.destroy();
+                tk = undefined;
+            })
         }
     }
     catch (err) {
-        console.log('fillScorePreviews: error: ' + err);
+        console.error('fillScorePreviews: error: ' + err);
     }
 }
 
@@ -175,15 +178,141 @@ function createArchivesLinks(data) {
 }
 
 /**
- * Fill the preview with the data that was queried from index.js
+ * Make a cypher query to get the number of scores associated with the given author.
+ *
+ * @param {string} author - the name of the collection
+ * @returns {promise} the number of scores in the collection associated with the author.
+ *
+ * @example
+ * getCollectionSize('Joseph Mahe Original').then(nb => console.log(nb));
+ */
+function getCollectionSize(author) {
+    const query = `MATCH (s:Score) WHERE s.collection CONTAINS "${author}" RETURN COUNT(s)`;
+    let data = {
+        "query": query,
+    };
+
+    return fetch('/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        // console.log(data.results[0]["COUNT(s)"].low);
+        return data.results[0]["COUNT(s)"].low;
+    })
+    .catch(err => {
+        console.error('Error:', err);
+    })
+}
+
+/**
+ * Make a cypher query to get the data only on a given page.
+ *
+ * @param {string} author - the author of the collection
+ * @param {int} pageNb - the number of the page to get
+ * @param {int} numberPerPage - the number of items per page
+ *
+ * @return {promise} the page items in a json format.
+ *
+ * @example
+ * fetchPagefetchPageN('Joseph Mahe Original', 1, 20).then(data => console.log(data));
+ */
+function fetchPageN(author, pageNb, numberPerPage) {
+    const query = `MATCH (s:Score) WHERE s.collection CONTAINS "${author}" RETURN s ORDER BY s.source SKIP ${(pageNb - 1) * numberPerPage} LIMIT ${numberPerPage}`
+    let data = {
+        "query": query,
+    };
+
+    return fetch('/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        return data.results;
+    })
+    .catch(err => {
+        console.error('Error:', err);
+    })
+}
+
+/**
+ * Refreshes the spin box max number and the total number of pages.
+ *
+ * @param {int} nb - the number of items (all pages included)
+ * @param {null} [current_page=null] - current page value to display in the spin box (if null, it is unchanged)
+ */
+function refreshPageNbInfos(nb, current_page=null) {
+    let spin_box = document.getElementById('page_nb_input');
+    let label = document.getElementById('page_max_nb_lb');
+
+    spin_box.max = Math.ceil(nb / NB_PER_PAGE);
+    label.innerHTML = " / " + Math.ceil(nb / NB_PER_PAGE);
+
+    if (current_page != null)
+        spin_box.value = current_page;
+}
+
+/**
+ * Handler of the next page button
+ * */
+const nextCollectionPageHandler = function () {
+    let spin_box = document.getElementById('page_nb_input');
+
+    //---Check that we are not at the last page
+    if (Number(spin_box.value) < Number(spin_box.max)) {
+        //---Change the value of the spin box
+        spin_box.value++;
+
+        //---Load the new content
+        //TODO: this
+    }
+}
+
+/**
+ * Handler of the next page button
+ * */
+const prevCollectionPageHandler = function () {
+    let spin_box = document.getElementById('page_nb_input');
+
+    //---Check that we are not at the first page
+    if (Number(spin_box.value) > 1) {
+        //---Change the value of the spin box
+        spin_box.value--;
+
+        //---Load the new content
+        //TODO: this
+    }
+}
+
+/**
+ * Connects buttons and fills the preview with the data that was queried from index.js
  */
 function init() {
     verovio.module.onRuntimeInitialized = () => {
+        document.getElementById("nextPage").addEventListener("click", nextCollectionPageHandler);
+        document.getElementById("prevPage").addEventListener("click", prevCollectionPageHandler);
+
         // var authors = JSON.parse(document.getElementById('authors').textContent);
         // console.log(authors[0]);
         // getCollectionByAuthor(authors[0]);
 
         let results = JSON.parse(document.getElementById('data').textContent);
         fillScorePreviews(results);
+
+        refreshPageNbInfos(results.length);
+
+        //TODO: connect changes from spin box to the right functions
     }
 }
