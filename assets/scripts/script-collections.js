@@ -4,8 +4,10 @@
  */
 
  /** The number of items per page */
-const NB_PER_PAGE = 20;
-// const NB_PER_PAGE = 25;
+var nb_per_page = 10;
+
+/** The current collection */
+var current_author;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -18,10 +20,12 @@ document.addEventListener("DOMContentLoaded", init);
 function getCollectionByAuthor(author) {
     document.getElementById('archives').innerHTML = "T&eacute;l&eacute;charger la collection sous la forme d'une archive : ";
 
+    current_author = author;
+
     fetch(`/getCollectionByAuthor?author=${encodeURIComponent(author)}`)
     .then(response => response.json()) 
     .then(data => {
-        createArchivesLinks(data);
+        createArchivesLinks(author);
         createScorePreviews(data);
         refreshPageNbInfos(data.results.length, 1);
         fillScorePreviews(data.results);
@@ -43,17 +47,25 @@ function createScorePreviews(data) {
 
     if(data.results.length != 0) {
         data.results.forEach(result => {
+            let prop;
+            try {
+                prop = result._fields[0].properties;
+            }
+            catch {
+                prop = result.s.properties;
+            }
+
             const a = $('<a>').addClass('score-preview');
-            let url = '/result?author='+ data.author +'&score_name=' + result._fields[0].properties.source;
+            let url = '/result?author='+ data.author +'&score_name=' + prop.source;
             a.attr('href', url);
 
             const score_box = $('<div>').addClass('music-score-box');
-            score_box.attr('id', result._fields[0].properties.source);
+            score_box.attr('id', prop.source);
             a.append(score_box);
 
             const h3 = document.createElement('h3');
             h3.className = "score_title";
-            h3.textContent = result._fields[0].properties.source.slice(0, -4);
+            h3.textContent = prop.source.slice(0, -4);
 
             a.append(h3);
             results_container.append(a);
@@ -73,7 +85,15 @@ function createScorePreviews(data) {
 function fillScorePreviews(results) {
     try {
         for (var i = 0; i < results.length; i++) {
-            let score_name = results[i]._fields[0].properties.source;
+            let prop;
+            try {
+                prop = results[i]._fields[0].properties;
+            }
+            catch {
+                prop = results[i].s.properties;
+            }
+
+            let score_name = prop.source;
 
             let tk = new verovio.toolkit();
             let zoom = 20;
@@ -92,9 +112,9 @@ function fillScorePreviews(results) {
 
             tk.setOptions(options);
 
-            let score_div = document.getElementById(results[i]._fields[0].properties.source);
+            let score_div = document.getElementById(prop.source);
 
-            let author = results[i]._fields[0].properties.collection;
+            let author = prop.collection;
             let folder = author.replace(/\s+/g, "-") + '/';
 
             fetch('./data/' + folder + score_name)
@@ -119,12 +139,11 @@ function fillScorePreviews(results) {
 /**
  * Create links for archives, and add them in the html.
  *
- * @param {*} data - the data
- * @param {string} data.author - the corresponding author
+ * @param {string} author - the corresponding author
  */
-function createArchivesLinks(data) {
+function createArchivesLinks(author) {
     //---Init
-    var folder_name = data.author;
+    var folder_name = author;
     folder_name = folder_name.replace(/\s+/g, "-");
 
     //---MEI
@@ -240,7 +259,7 @@ function fetchPageN(author, pageNb, numberPerPage) {
         return response.json();
     })
     .then(data => {
-        return data.results;
+        return data;
     })
     .catch(err => {
         console.error('Error:', err);
@@ -250,18 +269,72 @@ function fetchPageN(author, pageNb, numberPerPage) {
 /**
  * Refreshes the spin box max number and the total number of pages.
  *
- * @param {int} nb - the number of items (all pages included)
+ * @param {int} nb - the number of items in the collection for the current author (all pages included)
  * @param {null} [current_page=null] - current page value to display in the spin box (if null, it is unchanged)
+ * @param {null} [numberPerPage=null] - if not null, change the value of the displayed value of the nb per page select.
  */
-function refreshPageNbInfos(nb, current_page=null) {
+function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
     let spin_box = document.getElementById('page_nb_input');
     let label = document.getElementById('page_max_nb_lb');
+    let select = document.getElementById('nb_per_page_select');
 
-    spin_box.max = Math.ceil(nb / NB_PER_PAGE);
-    label.innerHTML = " / " + Math.ceil(nb / NB_PER_PAGE);
+    spin_box.max = Math.ceil(nb / nb_per_page);
+    label.innerHTML = " / " + Math.ceil(nb / nb_per_page);
 
     if (current_page != null)
         spin_box.value = current_page;
+
+    if (numberPerPage != null)
+        select.value = numberPerPage;
+}
+
+/**
+ * Make cypher queries to get the scores of the author for the page pageNb, and display it in the html.
+ * Uses {@linkcode getCollectionSize} and {@linkcode fetchPageN} to make the queries, and
+ * {@linkcode createScorePreviews} and {@linkcode fillScorePreviews} to display the results.
+ *
+ * @param {string} author - the author name
+ * @param {int} pageNb - the number of the page to load
+ * @param {int} numberPerPage - the number of items per page
+ * @param {boolean} [refresh=false] - if true, refresh the spin box values.
+ * @param {boolean} [range_change=false] - if true, and if pageNb > lastPage, set pageNb to lastPage.
+ */
+function loadPageN(author, pageNb, numberPerPage, refresh=false, range_change=false) {
+    //---Get the number of scores of this author
+    getCollectionSize(author).then(nb => {
+        const nbPages = Math.ceil(nb / numberPerPage);
+
+        if (range_change && pageNb > nbPages)
+            pageNb = nbPages;
+
+        if (refresh)
+            refreshPageNbInfos(nb, pageNb, numberPerPage);
+
+        if (1 <= pageNb && pageNb <= nbPages) { // Ensure that the page exists
+            //---Get the data of this page
+            fetchPageN(author, pageNb, numberPerPage).then(data => {
+                createScorePreviews(data);
+                fillScorePreviews(data.results);
+            });
+        }
+    });
+}
+
+/**
+ * Handler of the author / collection selection.
+ *
+ * @param {string} author - the author name
+ */
+const authorButtonHandler = function(author) {
+    //---Set the current author
+    current_author = author;
+
+    //---Create archive links
+    document.getElementById('archives').innerHTML = "T&eacute;l&eacute;charger la collection sous la forme d'une archive : ";
+    createArchivesLinks(author);
+
+    //---Load the first page
+    loadPageN(author, 1, nb_per_page, true);
 }
 
 /**
@@ -276,12 +349,12 @@ const nextCollectionPageHandler = function () {
         spin_box.value++;
 
         //---Load the new content
-        //TODO: this
+        loadPageN(current_author, spin_box.value, nb_per_page, false);
     }
 }
 
 /**
- * Handler of the next page button
+ * Handler of the previous page button
  * */
 const prevCollectionPageHandler = function () {
     let spin_box = document.getElementById('page_nb_input');
@@ -292,8 +365,28 @@ const prevCollectionPageHandler = function () {
         spin_box.value--;
 
         //---Load the new content
-        //TODO: this
+        loadPageN(current_author, spin_box.value, nb_per_page, false);
     }
+}
+
+/**
+ * Handler of the spin box page selection
+ */
+const spinBoxChangedHandler = function(change) {
+    let pageNb = Math.floor(change.srcElement.value);
+    loadPageN(current_author, pageNb, nb_per_page, false);
+}
+
+/**
+ * Handler of the combo box to select the number of items per page.
+ */
+const nbPerPageHandler = function(change) {
+    let spin_box = document.getElementById('page_nb_input');
+
+    //---Change the global variable
+    nb_per_page = change.srcElement.value;
+
+    loadPageN(current_author, Math.floor(spin_box.value), nb_per_page, true, true);
 }
 
 /**
@@ -301,18 +394,22 @@ const prevCollectionPageHandler = function () {
  */
 function init() {
     verovio.module.onRuntimeInitialized = () => {
+        //---Connect pagination buttons
         document.getElementById("nextPage").addEventListener("click", nextCollectionPageHandler);
         document.getElementById("prevPage").addEventListener("click", prevCollectionPageHandler);
+        document.getElementById("page_nb_input").addEventListener("change", spinBoxChangedHandler);
+        document.getElementById("nb_per_page_select").addEventListener("change", nbPerPageHandler);
 
-        // var authors = JSON.parse(document.getElementById('authors').textContent);
-        // console.log(authors[0]);
-        // getCollectionByAuthor(authors[0]);
+        //---Set the current author
+        let authors = JSON.parse(document.getElementById('authors').textContent);
+        current_author = authors[0];
 
-        let results = JSON.parse(document.getElementById('data').textContent);
-        fillScorePreviews(results);
+        //---Fill the first page
+        authorButtonHandler(authors[0]);
 
-        refreshPageNbInfos(results.length);
-
-        //TODO: connect changes from spin box to the right functions
+        // let results = JSON.parse(document.getElementById('data').textContent);
+        // fillScorePreviews(results);
+        //
+        // refreshPageNbInfos(results.length);
     }
 }
