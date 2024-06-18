@@ -55,6 +55,17 @@ app.get("/references", function (req, res) {
 });
 
 /**
+ * Route for the manual query page.
+ *
+ * GET
+ *
+ * @constant /manualQuery
+ */
+app.get("/manualQuery", function (req, res) {
+    res.render("manual_query");
+});
+
+/**
  * Route for the research page.
  *
  * GET

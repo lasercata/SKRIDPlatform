@@ -212,7 +212,7 @@ function getCollectionSize(author) {
  * @return {promise} the page items in a json format.
  *
  * @example
- * fetchPagefetchPageN('Joseph Mahe Original', 1, 20).then(data => console.log(data));
+ * fetchPageN('Joseph Mahe Original', 1, 20).then(data => console.log(data));
  */
 function fetchPageN(author, pageNb, numberPerPage) {
     const query = `MATCH (s:Score) WHERE s.collection CONTAINS "${author}" RETURN s ORDER BY s.source SKIP ${(pageNb - 1) * numberPerPage} LIMIT ${numberPerPage}`

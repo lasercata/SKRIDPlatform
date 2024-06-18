@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>The Skrid Platform</title>
+        <!-- CSS -->
+        <link rel="stylesheet" href="./styles/semantic.min.css" />
+        <link rel="stylesheet" href="./styles/home_style.css" />
+        <link rel="stylesheet" href="./styles/general_style.css" />
+        <link rel="stylesheet" href="./styles/manual_query.css" />
+
+        <!-- CSS Bootstrap -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+        <!-- JS Bootstrap -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+        <!-- Verovio -->
+        <script src="https://www.verovio.org/javascript/latest/verovio-toolkit-wasm.js" defer></script>
+
+        <!-- Javascript of the page -->
+        <script type="text/javascript" src="./scripts/manual_query_script.js"></script>
+
+        <!-- Jquery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    <%- include('./partials/header', { currentPage: 'manual_query' }); %>
+    <body>
+        <div class="searchbar-box">
+            <h1 class="searchbar-title">Ecrire des requêtes</h1>
+        </div>
+        <div class="father_container">
+            <div class='text_area'>
+                <textarea id='text_field' rows=5 cols=60></textarea>
+            </div>
+            <button id="submit_bt">Submit</button>
+        </div>
+        <!-- <div id="data" style="display: none;"> -->
+        <!--   < %= JSON.stringify(results) %> -->
+        <!-- </div> -->
+        <!-- <div id="authors" style="display: none;"> -->
+        <!--     < %= JSON.stringify(authors) %> -->
+        <!-- </div> -->
+    </body> 
+    <%- include('./partials/footer'); %>
+</html>
+

@@ -1,0 +1,38 @@
+textarea {
+    padding: 10px;
+    max-width: 100%;
+    line-height: 1.5;
+    border-radius: 5px;
+    border: 1px solid #62aadd;
+    box-shadow: 1px 1px 1px #999;
+}
+
+textarea:focus {
+    border: 2px solid #62aadd;
+}
+
+.text_area {
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+#submit_bt {
+    padding: 10px;
+    border-radius: 20px;
+    background-color: #62aadd;
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+    border: none;
+    outline: none;
+    cursor: pointer;
+
+    float:right;
+    margin: 10px;
+}
+
+#submit_bt:hover {
+    background-color: #62aadd;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
