@@ -9,6 +9,8 @@ var nb_per_page = 10;
 /** The current collection */
 var current_author;
 
+var tk_lst = [];
+
 document.addEventListener("DOMContentLoaded", init);
 
 /**
@@ -20,6 +22,8 @@ document.addEventListener("DOMContentLoaded", init);
 function createScorePreviews(data) {
     let results_container = $('#results-container');
     results_container.empty();
+
+    tk_lst.forEach(tk => tk.destroy());
 
     if(data.results.length != 0) {
         data.results.forEach(result => {
@@ -56,9 +60,12 @@ function createScorePreviews(data) {
 /**
  * Fills the score previews with svg previews.
  *
- * @param {*} results - data.results from the query to get the collection.
+ * @param {*} results - results from the query to get the collection.
+ *
+ * @returns an array of verovio toolkits that will need to be freed.
  */
 function fillScorePreviews(results) {
+    tk_lst = [];
     try {
         for (var i = 0; i < results.length; i++) {
             let prop;
@@ -72,6 +79,7 @@ function fillScorePreviews(results) {
             let score_name = prop.source;
 
             let tk = new verovio.toolkit();
+            tk_lst.push(tk);
             let zoom = 20;
 
             const parentWidth = 180;
@@ -110,6 +118,8 @@ function fillScorePreviews(results) {
     catch (err) {
         console.error('fillScorePreviews: error: ' + err);
     }
+
+    return tk_lst;
 }
 
 /**
@@ -290,7 +300,7 @@ function loadPageN(author, pageNb, numberPerPage, refresh=false, range_change=fa
             //---Get the data of this page
             fetchPageN(author, pageNb, numberPerPage).then(data => {
                 createScorePreviews(data);
-                fillScorePreviews(data.results);
+                tk_lst = fillScorePreviews(data.results);
             });
 
             //---Disable button if we are on the first or last page
