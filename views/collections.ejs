@@ -53,6 +53,7 @@
           <option value=10>10</option>
           <option value=15>15</option>
           <option value=20>20</option>
+          <option value=100>100</option>
         </select>
         <label id="nb_per_page_lb"> per page</label>
       </div>
@@ -63,26 +64,13 @@
       <br/>
       <br/>
 	        Explorer le contenu des fichiers : <br/>
-      <% if(results.length != 0) { %>
         <div class="results-container" id="results-container">
-          <% for(var i = 0; i < results.length; i++) { %>
-            <!--<a class="score-preview" href="/skrid/result?author=<%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %>&score_name=<%= results[i]._fields[0].properties.source %>"></a>-->
-            <!-- <a class="score-preview" href="/skrid/result?author=<%= results[i]._fields[0].properties.collection %>&score_name=<%= results[i]._fields[0].properties.source %>"> -->
-            <a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.collection %>&score_name=<%= results[i]._fields[0].properties.source %>">
-              <div class="music-score-box" id="<%= results[i]._fields[0].properties.source %>">
-              </div>
-              <h3 class="score_title"><%= results[i]._fields[0].properties.source.slice(0,-4) %></h3>
-            </a>
-          <% } %>
         </div>
-      <% } else {%>
-        <p>No result found</p>
-      <% } %>
     </div>
   </div>
-  <div id="data" style="display: none;">
-    <%= JSON.stringify(results) %>
-  </div>
+  <!-- <div id="data" style="display: none;"> -->
+  <!--   < %= JSON.stringify(results) %> -->
+  <!-- </div> -->
   <div id="authors" style="display: none;">
     <%= JSON.stringify(authors) %>
   </div>

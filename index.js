@@ -33,7 +33,10 @@ app.get("/", function(req,res){
     res.render("home");});
 
 /**
- * Route for the plus page
+ * Route for the plus page.
+ *
+ * GET
+ *
  * @constant /plus
  */
 app.get("/plus", function (req, res) {
@@ -41,7 +44,10 @@ app.get("/plus", function (req, res) {
 });
 
 /**
- * Route for the references page
+ * Route for the references page.
+ *
+ * GET
+ *
  * @constant /references
  */
 app.get("/references", function (req, res) {
@@ -49,7 +55,10 @@ app.get("/references", function (req, res) {
 });
 
 /**
- * Route for the research page
+ * Route for the research page.
+ *
+ * GET
+ *
  * @constant /interface
  * @todo doc this better
  */
@@ -95,7 +104,9 @@ app.get("/queries", function (req, res) {
 */
 
 /**
- * This endpoint is called when the user wants to send a specific (self-written) query to the database
+ * This endpoint is called when the user wants to send a specific (self-written) query to the database.
+ *
+ * POST
  *
  * @constant /query
  */
@@ -118,12 +129,14 @@ app.post('/query', (req, res) => {
 
 /**
  * This endpoint will redirect the user to the 'collections' page .
- * Before redirecting, it queries the database in order to get the first collection to display.
+ * Before redirecting, it queries the database in order to get the list of collections.
+ *
+ * GET
  *
  * @constant /collections
  */
 app.get("/collections", async function (req, res) {
-    let results = [];
+    // let results = [];
     let authors = [];
 
     const session = driver.session();
@@ -141,23 +154,26 @@ app.get("/collections", async function (req, res) {
         console.log(authors);
 
         //---Get collection of the first author
-        const name = authors[0];
-        const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS $name RETURN s ORDER BY s.source";
-        let temp = await session.run(myQuery, {name: name});
-        results = temp.records;
+        // const name = authors[0];
+        // const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS $name RETURN s ORDER BY s.source LIMIT 1";
+        // let temp = await session.run(myQuery, {name: name});
+        // results = temp.records;
 
     } catch(err) {
         console.log(err);
     }
 
     res.render("collections", {
-        results: results,
+        // results: results,
         authors: authors,
     });
 })
 
 /**
- * Route for the result page
+ * Route for the result page.
+ *
+ * GET
+ *
  * @constant /result
  */
 app.get('/result', (req, res) => {
@@ -165,7 +181,10 @@ app.get('/result', (req, res) => {
 });
 
 /**
- * This endpoint is called to get the score of a specific composer/author
+ * This endpoint is called to get the score of a specific composer/author.
+ *
+ * GET
+ *
  * @constant /getCollectionByAuthor
  */
 app.get('/getCollectionByAuthor', async (req, res) => {
@@ -189,7 +208,10 @@ app.get('/getCollectionByAuthor', async (req, res) => {
 })
 
 /**
- * This endpoint is called when the user wants to retrieve the results containing the inserted pattern
+ * This endpoint is called when the user wants to retrieve the results containing the inserted pattern.
+ *
+ * POST
+ *
  * @constant /findPattern
  */
 app.post('/findPattern', async function(req, res) {
@@ -213,7 +235,10 @@ app.post('/findPattern', async function(req, res) {
 });
 
 /**
- * This endpoint will retrieve the author of a specific music score
+ * This endpoint will retrieve the author of a specific music score.
+ *
+ * POST
+ *
  * @constant /findAuthor
  */
 app.post('/findAuthor', async function(req, res) {
@@ -244,7 +269,10 @@ app.post('/goToResult', function(req, res) {
 })*/
 
 /**
- * This endpoint will search for all the scores containing in the title the string inserted by the user in the search bar
+ * This endpoint will search for all the scores containing in the title the string inserted by the user in the search bar.
+ *
+ * GET
+ *
  * @constant /search
  */
 app.get('/search', async function(req, res) {

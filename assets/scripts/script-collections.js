@@ -9,7 +9,8 @@ var nb_per_page = 10;
 /** The current collection */
 var current_author;
 
-var tk_lst = [];
+/** The verovio toolkit */
+var tk;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -23,8 +24,6 @@ function createScorePreviews(data) {
     let results_container = $('#results-container');
     results_container.empty();
 
-    tk_lst.forEach(tk => tk.destroy());
-
     if(data.results.length != 0) {
         data.results.forEach(result => {
             let prop;
@@ -35,12 +34,14 @@ function createScorePreviews(data) {
                 prop = result.s.properties;
             }
 
-            const a = $('<a>').addClass('score-preview');
+            const a = document.createElement('a');
+            a.className = 'score-preview';
             let url = '/result?author='+ prop.collection +'&score_name=' + prop.source;
-            a.attr('href', url);
+            a.href = url;
 
-            const score_box = $('<div>').addClass('music-score-box');
-            score_box.attr('id', prop.source);
+            const score_box = document.createElement('div');
+            score_box.className = 'music-score-box';
+            score_box.id = prop.source;
             a.append(score_box);
 
             const h3 = document.createElement('h3');
@@ -61,65 +62,50 @@ function createScorePreviews(data) {
  * Fills the score previews with svg previews.
  *
  * @param {*} results - results from the query to get the collection.
- *
- * @returns an array of verovio toolkits that will need to be freed.
  */
 function fillScorePreviews(results) {
-    tk_lst = [];
-    try {
-        for (var i = 0; i < results.length; i++) {
-            let prop;
-            try {
-                prop = results[i]._fields[0].properties;
-            }
-            catch {
-                prop = results[i].s.properties;
-            }
-
-            let score_name = prop.source;
-
-            let tk = new verovio.toolkit();
-            tk_lst.push(tk);
-            let zoom = 20;
-
-            const parentWidth = 180;
-            const parentHeight = 250;
-
-            let pageHeight = parentHeight * 100 / zoom;
-            let pageWidth = parentWidth * 100 / zoom;
-
-            options = {
-                pageHeight: pageHeight,
-                pageWidth: pageWidth,
-                scale: zoom,
-            };
-
-            tk.setOptions(options);
-
-            let score_div = document.getElementById(prop.source);
-
-            let author = prop.collection;
-            let folder = author.replace(/\s+/g, "-") + '/';
-
-            fetch('./data/' + folder + score_name)
-            .then( (response) => response.text() )
-            .then( (meiXML) => {
-                tk.loadData(meiXML);
-                let svg = tk.renderToSVG(1);
-                score_div.innerHTML = svg;
-            })
-            .catch (err => {
-                console.error('fillScorePreviews: fetch(): error: ' + err);
-                tk.destroy();
-                tk = undefined;
-            })
+    for (var i = 0; i < results.length; i++) {
+        let prop;
+        try {
+            prop = results[i]._fields[0].properties;
         }
-    }
-    catch (err) {
-        console.error('fillScorePreviews: error: ' + err);
-    }
+        catch {
+            prop = results[i].s.properties;
+        }
 
-    return tk_lst;
+        let score_name = prop.source;
+
+        let zoom = 20;
+        const parentWidth = 180;
+        const parentHeight = 250;
+
+        let pageHeight = parentHeight * 100 / zoom;
+        let pageWidth = parentWidth * 100 / zoom;
+
+        options = {
+            pageHeight: pageHeight,
+            pageWidth: pageWidth,
+            scale: zoom,
+        };
+
+        tk.setOptions(options);
+
+        let score_div = document.getElementById(prop.source);
+
+        let author = prop.collection;
+        let folder = author.replace(/\s+/g, "-") + '/';
+
+        fetch('./data/' + folder + score_name)
+        .then( (response) => response.text() )
+        .then( (meiXML) => {
+            tk.loadData(meiXML);
+            let svg = tk.renderToSVG(1);
+            score_div.innerHTML = svg;
+        })
+        .catch (err => {
+            console.error('fillScorePreviews: fetch(): error: ' + err);
+        })
+    }
 }
 
 /**
@@ -300,7 +286,7 @@ function loadPageN(author, pageNb, numberPerPage, refresh=false, range_change=fa
             //---Get the data of this page
             fetchPageN(author, pageNb, numberPerPage).then(data => {
                 createScorePreviews(data);
-                tk_lst = fillScorePreviews(data.results);
+                fillScorePreviews(data.results);
             });
 
             //---Disable button if we are on the first or last page
@@ -408,5 +394,8 @@ function init() {
         // fillScorePreviews(results);
         //
         // refreshPageNbInfos(results.length);
+
+        //---Create verovio toolkit (tk)
+        tk = new verovio.toolkit();
     }
 }
