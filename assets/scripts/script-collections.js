@@ -12,30 +12,6 @@ var current_author;
 document.addEventListener("DOMContentLoaded", init);
 
 /**
- * Queries the database to get the collection associated with the author and show it in the html.
- * Uses {@linkcode createScorePreviews} and {@linkcode fillScorePreviews} to do so.
- *
- * @param {string} author - the author name (from the html page 'collection')
- */
-function getCollectionByAuthor(author) {
-    document.getElementById('archives').innerHTML = "T&eacute;l&eacute;charger la collection sous la forme d'une archive : ";
-
-    current_author = author;
-
-    fetch(`/getCollectionByAuthor?author=${encodeURIComponent(author)}`)
-    .then(response => response.json()) 
-    .then(data => {
-        createArchivesLinks(author);
-        createScorePreviews(data);
-        refreshPageNbInfos(data.results.length, 1);
-        fillScorePreviews(data.results);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-/**
  * Clears the current results-container and create new score previews in it
  * that fits the current data.
  *
@@ -56,7 +32,7 @@ function createScorePreviews(data) {
             }
 
             const a = $('<a>').addClass('score-preview');
-            let url = '/result?author='+ data.author +'&score_name=' + prop.source;
+            let url = '/result?author='+ prop.collection +'&score_name=' + prop.source;
             a.attr('href', url);
 
             const score_box = $('<div>').addClass('music-score-box');
@@ -316,6 +292,17 @@ function loadPageN(author, pageNb, numberPerPage, refresh=false, range_change=fa
                 createScorePreviews(data);
                 fillScorePreviews(data.results);
             });
+
+            //---Disable button if we are on the first or last page
+            if (pageNb == 1)
+                document.getElementById('prevPage').disabled = true;
+            else
+                document.getElementById('prevPage').disabled = false;
+
+            if (pageNb == nbPages)
+                document.getElementById('nextPage').disabled = true;
+            else
+                document.getElementById('nextPage').disabled = false;
         }
     });
 }
@@ -340,7 +327,7 @@ const authorButtonHandler = function(author) {
 /**
  * Handler of the next page button
  * */
-const nextCollectionPageHandler = function () {
+const nextCollectionPageHandler = function() {
     let spin_box = document.getElementById('page_nb_input');
 
     //---Check that we are not at the last page
@@ -356,7 +343,7 @@ const nextCollectionPageHandler = function () {
 /**
  * Handler of the previous page button
  * */
-const prevCollectionPageHandler = function () {
+const prevCollectionPageHandler = function() {
     let spin_box = document.getElementById('page_nb_input');
 
     //---Check that we are not at the first page
