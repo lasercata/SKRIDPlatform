@@ -65,6 +65,13 @@
         background-color: #62aadd;
     }
 
+    .prevpage-button:disabled,
+    .nextpage-button:disabled {
+        background-color: #ccc;
+        color: #666;
+        cursor: not-allowed;
+    }
+
     .fa-play,
     .fa-stop {
         font-size: 10px;

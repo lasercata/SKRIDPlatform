@@ -137,6 +137,7 @@ function init() {
             link_svg.innerHTML = filename+'.svg';
             document.getElementById('fichier_svg').appendChild(link_svg);
 
+            refreshPagination(1, tk.getPageCount());
         });
     }
 }
@@ -206,14 +207,23 @@ const midiHightlightingHandler = function (event) {
     for (note of currentElements.notes) {
         let noteElement = document.getElementById(note);
         if (noteElement) noteElement.classList.add("playing");
+
     }
+
+    refreshPagination(currentPage, tk.getPageCount());
 }
 
 /**
  * Handler of the next page button
  * */
-const nextPageHandler = function () {
-    currentPage = Math.min(currentPage + 1, tk.getPageCount());
+const nextPageHandler = function() {
+    //---Get next page
+    let lastPage = tk.getPageCount();
+    currentPage = Math.min(currentPage + 1, lastPage);
+
+    refreshPagination(currentPage, lastPage);
+
+    //---Render next page
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
 
     for(let i = 0; i < noteIds.length; i++) {
@@ -228,8 +238,13 @@ const nextPageHandler = function () {
 /**
  * Handler of the previous page button
  * */
-const prevPageHandler = function () {
+const prevPageHandler = function() {
+    //---Get previous page
     currentPage = Math.max(currentPage - 1, 1);
+
+    refreshPagination(currentPage, tk.getPageCount());
+
+    //---Render previous page
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
     for(let i = 0; i < noteIds.length; i++) {
         note = document.getElementById(noteIds[i]);
@@ -238,4 +253,33 @@ const prevPageHandler = function () {
             note.setAttribute('fill', 'red');
         }
     }
+}
+
+/**
+ * Disable next / previous buttons if necessary.
+ * Also refresh page info label.
+ *
+ * @param {int} currentPage - the current page
+ * @param {int} lastPage - the last page
+ */
+function refreshPagination(currentPage, lastPage) {
+    //---Init
+    next_bt = document.getElementById('nextPage');
+    prev_bt = document.getElementById('prevPage');
+    page_info_lb = document.getElementById('page_info');
+
+    //---Page info
+    page_info_lb.innerHTML = String(currentPage) + ' / ' + String(lastPage);
+
+    //---Next
+    if (currentPage == lastPage)
+        next_bt.disabled = true;
+    else
+        next_bt.disabled = false;
+
+    //---Previous
+    if (currentPage == 1)
+        prev_bt.disabled = true;
+    else
+        prev_bt.disabled = false;
 }

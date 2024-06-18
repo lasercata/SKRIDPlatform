@@ -40,6 +40,13 @@
     background-color: #62aadd;
 }
 
+.prevpage-button:disabled,
+.nextpage-button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
 .page-nb-input {
     width: 40px;
 }
