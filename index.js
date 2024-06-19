@@ -115,6 +115,31 @@ app.get("/queries", function (req, res) {
 */
 
 /**
+ * This endpoint calls the python test script.
+ *
+ * Data to post : {'query': some_fuzzy_query}
+ *
+ * POST
+ *
+ * @constant /pythonTest
+ * @todo check that it works well
+ */
+app.post('/pythonTest', (req, res) => {
+    const query = req.body.query;
+
+    const { spawn } = require('child_process');
+    const pyTest = spawn('python3', ['python/test.py', query]);
+
+    pyTest.stdout.on('data', data => {
+        // console.log(data.toString());
+        // console.log(JSON.stringify(data));
+        // res.write(data.toString());
+        // res.json(data);
+        res.json(data.toString());
+    });
+});
+
+/**
  * This endpoint is called when the user wants to send a specific (self-written) query to the database.
  *
  * POST

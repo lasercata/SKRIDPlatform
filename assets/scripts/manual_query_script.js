@@ -28,20 +28,47 @@ function init() {
 }
 
 /**
- * Submit the query from the input textarea, and show the result in the output.
+ * Submit the query from the input textarea, and show the result in the output using {@linkcode postAndDisplayQuery}.
  */
 const submitHandler = function() {
+    //---Init
+    let query = input.value;
+
+    //---Fuzzy request (use python script to convert it)
     if (is_fuzzy_cb.checked) {
-        console.log('Not implemented yet.');
-        output.value = 'Fuzzy queries are not implemented yet.'
+        console.log('This is just testing with a python script, it does not convert the query for the moment.');
 
-        return;
+        fetch('/pythonTest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'query': query})
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(crisp_query => {
+            postAndDisplayQuery(crisp_query);
+        })
     }
+    else {
+        postAndDisplayQuery(query);
+    }
+}
 
+/**
+ * Post a query to /query and display the result in the result field.
+ *
+ * @param {string} query - the cypher query to send.
+ */
+function postAndDisplayQuery(query) {
+    //---Init
     let data = {
-        "query": input.value,
+        "query": query
     };
 
+    //---Post the request and display the result
     fetch('/query', {
         method: 'POST',
         headers: {
