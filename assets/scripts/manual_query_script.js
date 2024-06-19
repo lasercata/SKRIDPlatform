@@ -17,8 +17,8 @@ function init() {
     input = document.getElementById('text_field');
     output = document.getElementById('result_field');
 
+    //---Submit when ctrl+enter pressed
     input.addEventListener('keydown', (event) => {
-        // if ((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey)
         console.log(event.key);
         if (event.key == "Enter" && event.ctrlKey)
             submitHandler();
@@ -46,12 +46,15 @@ const submitHandler = function() {
     .then(data => {
         let formatted_out;
 
-        try {
+        if ('results' in data) {
             formatted_out = JSON.stringify(data.results, null, '  ');
 
             formatted_out = `Number of results : ${data.results.length}\n\n` + formatted_out;
         }
-        catch {
+        else if ('error' in data) {
+            formatted_out = data.error;
+        }
+        else {
             formatted_out = JSON.stringify(data, null, '  ');
         }
 
