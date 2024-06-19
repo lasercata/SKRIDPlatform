@@ -5,6 +5,7 @@ textarea {
     border-radius: 5px;
     border: 1px solid #62aadd;
     box-shadow: 1px 1px 1px #999;
+    font-family: monospace !important;
 }
 
 textarea:focus {
@@ -17,6 +18,10 @@ textarea:focus {
     justify-content: center;
 }
 
+.label {
+    margin: 10px;
+}
+
 #submit_bt {
     padding: 10px;
     border-radius: 20px;
@@ -27,8 +32,9 @@ textarea:focus {
     border: none;
     outline: none;
     cursor: pointer;
+    max-height: 50px;
 
-    float:right;
+    /* float: right; */
     margin: 10px;
 }
 

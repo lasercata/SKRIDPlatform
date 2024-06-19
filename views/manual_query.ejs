@@ -33,9 +33,14 @@
         </div>
         <div class="father_container">
             <div class='text_area'>
-                <textarea id='text_field' rows=5 cols=60></textarea>
+                <label class='label'>Input query :</label>
+                <textarea id='text_field' rows=5 cols=100></textarea>
+                <button id="submit_bt">Submit</button>
             </div>
-            <button id="submit_bt">Submit</button>
+            <div class='text_area'>
+                <label class='label'>Result :</label>
+                <textarea id='result_field' rows=20 cols=140 readonly></textarea>
+            </div>
         </div>
         <!-- <div id="data" style="display: none;"> -->
         <!--   < %= JSON.stringify(results) %> -->
