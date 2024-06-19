@@ -3,7 +3,32 @@
 SKRID Platform is an interface to a graph database designed to explore musical patterns in music scores.
 
 
-## Setup database
+## Code structure
+```
+.
+├── assets/
+│   ├── data/                   Data for the app
+│   ├── scripts/                Client-side javascript
+│   └── tunes/                  Sounds for the piano keys
+├── docs/                       Contain the documentation (when made)
+├── config/                     Neo4j configurations
+├── views/                      HTML pages
+│
+├── compilation_requete_fuzzy/  git submodule from https://github.com/aa196883/compilation_requete_fuzzy
+│
+├── index.js                    Server-side main file
+│
+├── jsdoc.json                  Configuration for the documentation tool (jsdoc)
+├── package.json                npm configuration
+│
+├── loadAllDB.sh                Load data to neo4j database
+├── post_a_query.sh             Send a query from a .cypher file using curl
+│
+└── README.md
+```
+
+## Setup
+### Setup database
 Download [neo4j-desktop](https://neo4j.com/download/) (keep the activation code and paste it when launching the application).
 
 In the application, create a new project, and add a database (`add` button, then `local DBMS`).
@@ -11,7 +36,7 @@ Choose a name corresponding to the database, use the password `12345678` (or cha
 
 When this is done, click on the name, then on the right click on `Plugins`. Install `APOC`.
 
-Then click on `...`, then `Settings`, and replace the configuration with the content of `neo4j.conf`.
+Then click on `...`, then `Settings`, and replace the configuration with the content of `config/neo4j.conf`.
 
 Click on `Start`, and when started, on `Open`.
 
@@ -21,10 +46,10 @@ You can finally paste the content of the modified file into the prompt and run i
 
 Repeat the same steps with the other databases.
 
-To correct the database, paste the queries from `data_corrections.cypher` (one by one) in the prompt of neo4j-desktop.
+To correct the database, paste the queries from `config/data_corrections.cypher` (one by one) in the prompt of neo4j-desktop.
 
 
-## Testing (run in local)
+### Testing (run in local)
 <!-- Download the project -->
 <!-- ``` -->
 <!-- git clone https://github.com/vBarreaud/SKRIDPlatform.git -->
@@ -47,7 +72,7 @@ And then open the following url in your browser : `localhost:3000` (change the p
 Make sure to have the neo4j database running when testing.
 
 
-## Make documentation
+### Make documentation
 To generate the documentation, run :
 ```
 npm run generate-docs
