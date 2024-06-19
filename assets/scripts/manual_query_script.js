@@ -5,6 +5,7 @@
 
 var input;
 var output;
+var is_fuzzy_cb;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -16,6 +17,7 @@ function init() {
 
     input = document.getElementById('text_field');
     output = document.getElementById('result_field');
+    is_fuzzy_cb = document.getElementById('fuzzy_cb');
 
     //---Submit when ctrl+enter pressed
     input.addEventListener('keydown', (event) => {
@@ -29,6 +31,13 @@ function init() {
  * Submit the query from the input textarea, and show the result in the output.
  */
 const submitHandler = function() {
+    if (is_fuzzy_cb.checked) {
+        console.log('Not implemented yet.');
+        output.value = 'Fuzzy queries are not implemented yet.'
+
+        return;
+    }
+
     let data = {
         "query": input.value,
     };
