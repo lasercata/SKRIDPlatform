@@ -115,20 +115,19 @@ app.get("/queries", function (req, res) {
 */
 
 /**
- * This endpoint calls the python test script.
+ * This endpoint calls the python parser to convert a fuzzy query to a cypher one.
  *
  * Data to post : {'query': some_fuzzy_query}
  *
  * POST
  *
- * @constant /pythonTest
- * @todo check that it works well
+ * @constant /compileFuzzy
  */
-app.post('/pythonTest', (req, res) => {
+app.post('/compileFuzzy', (req, res) => {
     const query = req.body.query;
 
     const { spawn } = require('child_process');
-    const pyTest = spawn('python3', ['python/test.py', query]);
+    const pyTest = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'compile', query]);
 
     pyTest.stdout.on('data', data => {
         // console.log(data.toString());

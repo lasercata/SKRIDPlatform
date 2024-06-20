@@ -36,9 +36,7 @@ const submitHandler = function() {
 
     //---Fuzzy request (use python script to convert it)
     if (is_fuzzy_cb.checked) {
-        console.log('This is just testing with a python script, it does not convert the query for the moment.');
-
-        fetch('/pythonTest', {
+        fetch('/compileFuzzy', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
