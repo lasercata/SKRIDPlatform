@@ -6,6 +6,8 @@
 var input;
 var output;
 var is_fuzzy_cb;
+var crisp_field;
+var crisp_div;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -14,10 +16,17 @@ document.addEventListener("DOMContentLoaded", init);
  */
 function init() {
     document.getElementById('submit_bt').addEventListener("click", submitHandler);
+    // document.getElementById('submit_crisp_bt').addEventListener("click", submitCrispHandler);
 
     input = document.getElementById('text_field');
     output = document.getElementById('result_field');
     is_fuzzy_cb = document.getElementById('fuzzy_cb');
+
+    crisp_field = document.getElementById('crisp_field');
+    crisp_div = document.getElementById('crisp_div');
+
+    is_fuzzy_cb.addEventListener('change', fuzzyCbHandler);
+    fuzzyCbHandler();
 
     //---Submit when ctrl+enter pressed
     input.addEventListener('keydown', (event) => {
@@ -47,11 +56,30 @@ const submitHandler = function() {
             return response.json();
         })
         .then(crisp_query => {
+            console.log('Crisp query :');
+            console.log(crisp_query);
+
+            crisp_field.value = crisp_query;
             postAndDisplayQuery(crisp_query);
+        })
+        .catch(err => {
+            console.error(err)
         })
     }
     else {
         postAndDisplayQuery(query);
+    }
+}
+
+/**
+ * Hides or show the crisp query text field according to the fuzzy checkbox
+ */
+const fuzzyCbHandler = function() {
+    if (is_fuzzy_cb.checked) {
+        $('#crisp_div').show();
+    }
+    else {
+        $('#crisp_div').hide();
     }
 }
 
