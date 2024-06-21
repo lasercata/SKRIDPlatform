@@ -9,6 +9,9 @@ var is_fuzzy_cb;
 var crisp_field;
 var crisp_div;
 
+/** This is the query returned when a malformatted one is compiled */
+const malformatted_compiled_query = "MATCH \n,\nWHERE\n\nRETURN, \ne0.source AS source, e0.start AS start, e-1.end AS end\n"
+
 document.addEventListener("DOMContentLoaded", init);
 
 /**
@@ -56,6 +59,11 @@ const submitHandler = function() {
             return response.json();
         })
         .then(crisp_query => {
+            if (crisp_query == malformatted_compiled_query) {
+                crisp_field.value = 'Fuzzy query is not correctly formatted.';
+                return;
+            }
+
             console.log('Crisp query :');
             console.log(crisp_query);
 
