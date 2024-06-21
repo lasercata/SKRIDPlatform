@@ -1,5 +1,5 @@
 /**
- * @file Backend for collection page
+ * @file Script for collection page
  * @module script-collections
  */
 

@@ -1,5 +1,5 @@
 /**
- * @file Backend for manualQuery page
+ * @file script for manualQuery page
  * @module manual_query_script
  */
 

@@ -1,5 +1,5 @@
 /**
- * @file Backend for the piano interface.
+ * @file Script for the piano interface.
  * Manages buttons presses, generate queries, and send them.
  *
  * @module home_script

@@ -1,5 +1,5 @@
 /**
- * @file Backend for result page
+ * @file Script for result page
  * @module result_script
  */
 
