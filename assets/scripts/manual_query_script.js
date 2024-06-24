@@ -64,9 +64,6 @@ const submitHandler = function() {
                 return;
             }
 
-            console.log('Crisp query :');
-            console.log(crisp_query);
-
             crisp_field.value = crisp_query;
             postAndDisplayQuery(crisp_query);
         })

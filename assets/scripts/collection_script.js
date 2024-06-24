@@ -1,6 +1,6 @@
 /**
  * @file Script for collection page
- * @module script-collections
+ * @module collection_script
  */
 
  /** The number of items per page */
