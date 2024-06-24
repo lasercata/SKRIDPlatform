@@ -171,6 +171,8 @@ function sendQuery(query) {
                         url = url + '&note_id'+ i + '=' + result.notes_id[i];
                     }
                     a.attr('href', url);
+                    a.attr('target', '_blank'); // open link in a new tab ;
+                    a.attr('rel', 'noopener noreferrer'); // recommended security measure (see https://stackoverflow.com/a/15551842)
 
                     const resultDiv = $('<div>').addClass('music-score-box');
 

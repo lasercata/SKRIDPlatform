@@ -38,6 +38,8 @@ function createScorePreviews(data) {
             a.className = 'score-preview';
             let url = '/result?author='+ prop.collection +'&score_name=' + prop.source;
             a.href = url;
+            a.target = '_blank'; // open link in a new tab ;
+            a.rel = 'noopener noreferrer'; // recommended security measure (see https://stackoverflow.com/a/15551842)
 
             const score_box = document.createElement('div');
             score_box.className = 'music-score-box';
