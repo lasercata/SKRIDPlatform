@@ -5,6 +5,8 @@
  * @module home_script
  */
 
+// import { createPreviews, fillPreviews } from "./preview_scores.mjs";
+
 document.addEventListener("DOMContentLoaded", init);
 
 const { Renderer, Stave, Formatter, StaveNote, Beam, Accidental, MusicXMLParser} = Vex.Flow;
@@ -224,10 +226,60 @@ function sendQuery(query) {
                 resultsDiv.append(parentDiv);
             })
         } else {
-            // If there are no results containing that patter, display a different text
+            // If there are no results containing that pattern, display a different text
             const default_text = $('<h2>').text('No music score found');
             resultsDiv.append(default_text);
         }
+    })
+    .catch(error => {
+        console.error('An error occurred:', error);
+    });
+}
+
+/**
+ * This function sends the query for the pattern and displays the results (including the preview)
+ * @param {string} query - the query to send
+ */
+function sendQuery_new_todo(query) {
+    let data = {
+        string: query,
+    };
+
+    fetch('/findPattern', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        // First, call a function that converts the data
+        let unifiedResults = unifyResults(data);
+
+        // Take the container already containing previous results and empty it
+        const resultsDiv = $('.container_2');
+        resultsDiv.empty();
+
+        let tk = new verovio.toolkit();
+
+        createPreviews(resultsDiv, unifiedResults);
+        fillPreviews(tk, unifiedResults);
+
+        // // If there are results for the query, display each of them
+        // if(unifiedResults.length != 0) {
+        //     const results_title = $('<h2>').text('The following music scores contain your pattern: ');
+        //     resultsDiv.append(results_title);
+        //     const parentDiv = $('<div>').addClass('results-container');
+        //
+        //     createPreviews()
+        // } else {
+        //     // If there are no results containing that pattern, display a different text
+        //     const default_text = $('<h2>').text('No music score found');
+        //     resultsDiv.append(default_text);
+        // }
     })
     .catch(error => {
         console.error('An error occurred:', error);

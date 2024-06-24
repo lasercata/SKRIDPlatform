@@ -138,7 +138,7 @@ function init() {
             link_svg.innerHTML = filename+'.svg';
             document.getElementById('fichier_svg').appendChild(link_svg);
 
-            refreshPagination(1, tk.getPageCount());
+            refreshPagination(currentPage, tk.getPageCount());
         });
     }
 }

@@ -3,6 +3,8 @@
  * @module collection_script
  */
 
+import { createPreviews, fillPreviews } from "./preview_scores.mjs";
+
  /** The number of items per page */
 var nb_per_page = 10;
 
@@ -13,102 +15,6 @@ var current_author;
 var tk;
 
 document.addEventListener("DOMContentLoaded", init);
-
-/**
- * Clears the current results-container and create new score previews in it
- * that fits the current data.
- *
- * @param {*} data - the data containing all the scores of the collection.
- */
-function createScorePreviews(data) {
-    let results_container = $('#results-container');
-    results_container.empty();
-
-    if(data.results.length != 0) {
-        data.results.forEach(result => {
-            let prop;
-            try {
-                prop = result._fields[0].properties;
-            }
-            catch {
-                prop = result.s.properties;
-            }
-
-            const a = document.createElement('a');
-            a.className = 'score-preview';
-            let url = '/result?author='+ prop.collection +'&score_name=' + prop.source;
-            a.href = url;
-            a.target = '_blank'; // open link in a new tab ;
-            a.rel = 'noopener noreferrer'; // recommended security measure (see https://stackoverflow.com/a/15551842)
-
-            const score_box = document.createElement('div');
-            score_box.className = 'music-score-box';
-            score_box.id = prop.source;
-            a.append(score_box);
-
-            const h3 = document.createElement('h3');
-            h3.className = "score_title";
-            h3.textContent = prop.source.slice(0, -4);
-
-            a.append(h3);
-            results_container.append(a);
-        });
-    }
-    else {
-        const default_text = $('<h2>').text('No music score found');
-        results_container.append(default_text);
-    }
-}
-
-/**
- * Fills the score previews with svg previews.
- *
- * @param {*} results - results from the query to get the collection.
- */
-function fillScorePreviews(results) {
-    for (var i = 0; i < results.length; i++) {
-        let prop;
-        try {
-            prop = results[i]._fields[0].properties;
-        }
-        catch {
-            prop = results[i].s.properties;
-        }
-
-        let score_name = prop.source;
-
-        let zoom = 20;
-        const parentWidth = 180;
-        const parentHeight = 250;
-
-        let pageHeight = parentHeight * 100 / zoom;
-        let pageWidth = parentWidth * 100 / zoom;
-
-        options = {
-            pageHeight: pageHeight,
-            pageWidth: pageWidth,
-            scale: zoom,
-        };
-
-        tk.setOptions(options);
-
-        let score_div = document.getElementById(prop.source);
-
-        let author = prop.collection;
-        let folder = author.replace(/\s+/g, "-") + '/';
-
-        fetch('./data/' + folder + score_name)
-        .then( (response) => response.text() )
-        .then( (meiXML) => {
-            tk.loadData(meiXML);
-            let svg = tk.renderToSVG(1);
-            score_div.innerHTML = svg;
-        })
-        .catch (err => {
-            console.error('fillScorePreviews: fetch(): error: ' + err);
-        })
-    }
-}
 
 /**
  * Create links for archives, and add them in the html.
@@ -265,7 +171,7 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
 /**
  * Make cypher queries to get the scores of the author for the page pageNb, and display it in the html.
  * Uses {@linkcode getCollectionSize} and {@linkcode fetchPageN} to make the queries, and
- * {@linkcode createScorePreviews} and {@linkcode fillScorePreviews} to display the results.
+ * {@linkcode createPreviews} and {@linkcode fillPreviews} from `preview_scores.js` to display the results.
  *
  * @param {string} author - the author name
  * @param {int} pageNb - the number of the page to load
@@ -287,8 +193,9 @@ function loadPageN(author, pageNb, numberPerPage, refresh=false, range_change=fa
         if (1 <= pageNb && pageNb <= nbPages) { // Ensure that the page exists
             //---Get the data of this page
             fetchPageN(author, pageNb, numberPerPage).then(data => {
-                createScorePreviews(data);
-                fillScorePreviews(data.results);
+                let results_container = $('#results-container');
+                createPreviews(results_container, data);
+                fillPreviews(tk, data.results);
             });
 
             //---Disable button if we are on the first or last page
@@ -399,5 +306,7 @@ function init() {
 
         //---Create verovio toolkit (tk)
         tk = new verovio.toolkit();
+
+        window.authorButtonHandler = authorButtonHandler;
     }
 }
