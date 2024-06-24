@@ -24,10 +24,11 @@ function init() {
 
     verovio.module.onRuntimeInitialized = () => {
         tk = new verovio.toolkit();
-        const parent = document.querySelector('.score-container');
+        // const parent = document.querySelector('.score-container');
+        const parent = document.getElementById('notation');
 
         // Set the parameters for the correct visualization of the score
-        let zoom = 80;
+        let zoom = 75;
         const parentWidth = parent.offsetWidth;
         const parentHeight = parent.offsetHeight;
         let pageHeight = parentHeight * 100 / zoom;
@@ -67,7 +68,7 @@ function init() {
         .then( (meiXML) => {
             tk.loadData(meiXML);
             // And generate the SVG for the first page ...
-            let svg = tk.renderToSVG(1);
+            let svg = tk.renderToSVG(currentPage);
             // Finally, get the <div> element with the specified ID, 
             // and set the content (innerHTML) to the SVG that we just generated.
             document.getElementById("notation").innerHTML = svg;
