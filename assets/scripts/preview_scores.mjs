@@ -43,7 +43,7 @@ function makeUrl(collection, source, red_notes=null) {
     let url = '/result?author='+ collection +'&score_name=' + source;
 
     if (red_notes != null) {
-        for(let i = 0; i <= red_notes.length; i++) {
+        for(let i = 0; i < red_notes.length; i++) {
             url += '&note_id'+ i + '=' + red_notes[i];
         }
     }
@@ -136,28 +136,93 @@ function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, p
 }
 
 /**
- * Clears the current results container and create new score previews in it
- * that fits the current data.
+ * Create and fill the previews.
  *
- * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g $('#results_container')) ;
- * @param {*} results - the query result containing all the scores ;
+ * Clears the current results container and redirect toward the right function,
+ * that will create new score previews in it that fits the current data.
+ *
+ * there are multiple function because the query results are different in format.
+ *
+ * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
+ * @param {*} tk - the verovio toolkit ;
+ * @param {*} results - the query result containing all the scores.
  */
-function createPreviews(results_container, results) {
+function loadPreviews(results_container, tk, results) {
     results_container.empty();
 
     if(results.length != 0) {
-        results.forEach(result => {
-            let prop = getSourceAndCollection(result);
-            let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('notes_id') ? result.notes_id : null);
-
-            const a = createPreview(url, prop.source);
-            results_container.append(a);
-        });
+        if (results[0].hasOwnProperty('s') || (results[0].hasOwnProperty('_fields') && results[0]._fields[0].hasOwnProperty('properties'))) {
+            createPreviews_1(results_container, results);
+            fillPreviews(tk, results);
+        }
+        else
+            createPreviews_2(results_container, tk, results);
     }
     else {
         const default_text = $('<h2>').text('No music score found');
         results_container.append(default_text);
     }
+}
+
+/**
+ * Create new score previews in the results container that fits the current data.
+ * Used by collection page.
+ *
+ * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
+ * @param {*} results - the query result containing all the scores ;
+ */
+function createPreviews_1(results_container, results) {
+    results.forEach(result => {
+        let prop = getSourceAndCollection(result);
+        let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('notes_id') ? result.notes_id : null);
+
+        const a = createPreview(url, prop.source);
+        results_container.append(a);
+    });
+}
+
+/**
+ * Create new score previews in the results container that fits the current data.
+ * Used by piano interface page.
+ *
+ * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
+ * @param {*} tk - the verovio toolkit ;
+ * @param {*} results - the query result containing all the scores ;
+ */
+function createPreviews_2(results_container, tk, results) {
+    // // Take the container already containing previous results and empty it
+    // const results_container = $('.container_2');
+    // results_container.empty();
+    //
+    // const results_title = $('<h2>').text('The following music scores contain your pattern: ');
+    // results_container.append(results_title);
+    // const parentDiv = $('<div>').addClass('results-container');
+    // results_container.append(parentDiv);
+
+    // Get the collections associated with each result
+    results.forEach(result => {
+        let author_data = { string: result.name, };
+        fetch('/findAuthor', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(author_data)
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(data_auth => {
+            let collection = data_auth.results[0]._fields[0]
+
+            let url = makeUrl(collection, result.name, result.notes_id);
+            results_container.append(createPreview(url, result.name, result.number_of_occurrences));
+
+            let score_div = document.getElementById(result.name);
+            let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + result.name;
+            fillPreview(score_div, score_path, tk, result.notes_id);
+        });
+    });
 }
 
 /**
@@ -178,4 +243,4 @@ function fillPreviews(tk, results) {
     }
 }
 
-export { createPreview, fillPreview, createPreviews, fillPreviews, makeUrl };
+export { loadPreviews };

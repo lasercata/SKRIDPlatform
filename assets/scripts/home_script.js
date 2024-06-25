@@ -5,7 +5,7 @@
  * @module home_script
  */
 
-import { createPreview, fillPreview, makeUrl } from "./preview_scores.mjs";
+import { setTk, loadPageN } from './paginated_results.js';
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -52,33 +52,6 @@ const durationNote = {
 };
 
 /**
- * Initialize all the variables and the Vexflow pentagram
- * */
-function init() {
-    melody = [];
-    selectedCollections = [];
-
-    stave = null;
-    context = null;
-    renderer = null;
-
-    pentagram_width = 450;
-    pentagram_height = 150;
-    pentagram = document.getElementById("music-score");
-
-    pianoKeys = document.querySelectorAll(".piano-keys .key"),
-        volumeSlider = document.querySelector(".volume-slider input"),
-        keysCheckbox = document.querySelector(".keys-checkbox input");
-
-    verovio.module.onRuntimeInitialized = () => {
-        manageOptions();
-        manageStaveAndMelody();
-        setPreviewForFirstResults();
-        manageCollections();
-    }
-}
-
-/**
  * Take the results sent by the server and count the number of occurrences of the pattern here
  * @param {*} queryResults 
  * @returns an array of results correctly filtered
@@ -113,135 +86,6 @@ function unifyResults(queryResults) {
 /**
  * This function sends the query for the pattern and displays the results (including the preview)
  * @param {string} query - the query to send
- * @todo delete this old function
- */
-function sendQuery_old(query) {
-    let data = {
-        string: query,
-    };
-
-    fetch('/findPattern', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        return response.json();
-    })
-    .then(data => {
-        // First, call a function that converts the data
-        let unifiedResults = unifyResults(data);
-
-        // Take the container already containing previous results and empty it
-        const resultsDiv = $('.container_2');
-        resultsDiv.empty();
-
-        let tk = new verovio.toolkit();
-
-        // If there are results for the query, display each of them
-        if(unifiedResults.length != 0) {
-            const results_title = $('<h2>').text('The following music scores contain your pattern: ');
-            resultsDiv.append(results_title);
-            const parentDiv = $('<div>').addClass('results-container');
-            // For each result in the data create a div
-            unifiedResults.forEach(result => {
-
-                // Here we ask the database to find the author of the current score so that we can pass it to the result page
-                let author_data = {
-                    string: result.name,
-                };
-
-                fetch('/findAuthor', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(author_data)
-                })
-                .then(response => {
-                    return response.json();
-                })
-                .then(data => {
-                    // console.log(data);
-
-                    // Now, proceed to create the div of the score, including the preview with verovio
-                    const a = $('<a>').addClass('score-preview');
-
-                    // First, construct the url and add each note_id in the url as well
-                    //let url = '/result?author='+ data.results[0]._fields[0].substring(13).slice(0,-6) +'&score_name=' + result.name;
-                    let url = '/result?author='+ data.results[0]._fields[0] +'&score_name=' + result.name;
-                    for(let i = 0; i <= result.notes_id.length; i++) {
-                        url = url + '&note_id'+ i + '=' + result.notes_id[i];
-                    }
-                    a.attr('href', url);
-                    a.attr('target', '_blank'); // open link in a new tab ;
-                    a.attr('rel', 'noopener noreferrer'); // recommended security measure (see https://stackoverflow.com/a/15551842)
-
-                    const resultDiv = $('<div>').addClass('music-score-box');
-
-                    // Set all the parameters for the correct representation of the verovio preview
-                    let zoom = 20;
-                    const parentWidth = 180;
-                    const parentHeight = 250;
-                    let pageHeight = parentHeight * 100 / zoom;
-                    let pageWidth = parentWidth * 100 / zoom;
-
-                    // Use the parameters here to set the options
-                    options = {
-                        pageHeight: pageHeight,
-                        pageWidth: pageWidth,
-                        scale: zoom,
-                    };
-                    tk.setOptions(options);
-
-                    // Find the folder names exactly as the author contained in the database
-                    //let folder = data.results[0]._fields[0].substring(13).slice(0,-6);         
-                    let folder = data.results[0]._fields[0];                          
-                    folder = folder.replace(/\s+/g, "-") + '/';
-
-                    // Look into the folder for the .mei file and use it to display the verovio preview
-                    fetch('./data/' + folder + result.name)
-                    .then( (response) => response.text() )
-                    .then( (meiXML) => {
-                        tk.loadData(meiXML);
-                        let svg = tk.renderToSVG(1);
-                        resultDiv.html(svg);
-                    });
-
-                    a.append(resultDiv);
-
-                    // Display the score title under the preview
-                    const h3 = document.createElement('h3');
-                    h3.className = "score_title";
-                    h3.textContent = result.name.slice(0,-4);
-                    a.append(h3);
-
-                    // Display the number of occurrences under the preview
-                    const occurrences = document.createElement('p');
-                    occurrences.className = "score_author";
-                    occurrences.textContent = 'Pattern occurrences: ' + result.number_of_occurrences;
-                    a.append(occurrences);
-
-                    parentDiv.append(a);
-                });
-                resultsDiv.append(parentDiv);
-            })
-        } else {
-            // If there are no results containing that pattern, display a different text
-            const default_text = $('<h2>').text('No music score found');
-            resultsDiv.append(default_text);
-        }
-    })
-    .catch(error => {
-        console.error('An error occurred:', error);
-    });
-}
-
-/**
- * This function sends the query for the pattern and displays the results (including the preview)
- * @param {string} query - the query to send
  */
 function sendQuery(query) {
     let data = {
@@ -262,53 +106,22 @@ function sendQuery(query) {
         // First, call a function that converts the data
         let unifiedResults = unifyResults(data);
 
-        // Take the container already containing previous results and empty it
-        const resultsDiv = $('.container_2');
-        resultsDiv.empty();
+        let results_container = $('#results-container');
+        results_container.empty();
 
-        // If there are results for the query, display each of them
-        if(unifiedResults.length != 0) {
-            const results_title = $('<h2>').text('The following music scores contain your pattern: ');
-            resultsDiv.append(results_title);
-            const parentDiv = $('<div>').addClass('results-container');
-            resultsDiv.append(parentDiv);
-
-            // Create the verovio toolkit
-            let tk = new verovio.toolkit();
-
-            // Get the collections associated with each result
-            unifiedResults.forEach(result => {
-                let author_data = { string: result.name, };
-                fetch('/findAuthor', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(author_data)
-                })
-                .then(response => {
-                    return response.json();
-                })
-                .then(data_auth => {
-                    let collection = data_auth.results[0]._fields[0]
-
-                    let url = makeUrl(collection, result.name, result.notes_id);
-                    parentDiv.append(createPreview(url, result.name, result.number_of_occurrences));
-
-                    let score_div = document.getElementById(result.name);
-                    let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + result.name;
-                    fillPreview(score_div, score_path, tk, result.notes_id);
-                });
-            });
-        }
-        else {
-            // If there are no results containing that pattern, display a different text
+        if (unifiedResults.length == 0) {
             const default_text = $('<h2>').text('No music score found');
-            resultsDiv.append(default_text);
+            results_container.append(default_text);
         }
-    })
-    .catch(error => {
-        console.error('An error occurred:', error);
+        // else {
+        //     const results_title = $('<h2>').text('The following music scores contain your pattern: ');
+        //     results_container.append(results_title);
+        // }
+
+        //---Load the first page
+        let dataDiv = document.getElementById('data');
+        dataDiv.textContent = JSON.stringify(unifiedResults);
+        loadPageN(1, null, true, true);
     });
 }
 
@@ -967,45 +780,32 @@ function manageStaveAndMelody() {
 }
 
 /**
- * This function creates for each element of the results the previw "image".
- * Using verovio we look for the mei file and we create an svg that will act as 'cover' for our result
- */
-function setPreviewForFirstResults() {
-    // Retrieve the data hidden in the html code
-    var results = JSON.parse(document.getElementById('data').textContent);
-    // For each result, set the preview
-    for (var i = 0; i < results.length; i++) {
-        let score_name = results[i]._fields[0].properties.source;
+ * Initialize all the variables and the Vexflow pentagram
+ * */
+function init() {
+    melody = [];
+    selectedCollections = [];
+
+    stave = null;
+    context = null;
+    renderer = null;
+
+    pentagram_width = 450;
+    pentagram_height = 150;
+    pentagram = document.getElementById("music-score");
+
+    pianoKeys = document.querySelectorAll(".piano-keys .key"),
+        volumeSlider = document.querySelector(".volume-slider input"),
+        keysCheckbox = document.querySelector(".keys-checkbox input");
+
+    verovio.module.onRuntimeInitialized = () => {
+        manageOptions();
+        manageStaveAndMelody();
+        manageCollections();
 
         let tk = new verovio.toolkit();
-
-        // Set the values for zoom, height and width of the preview
-        let zoom = 20;
-        const parentWidth = 180;
-        const parentHeight = 250;
-        let pageHeight = parentHeight * 100 / zoom;
-        let pageWidth = parentWidth * 100 / zoom;
-
-        // Insert them into the 'options' element
-        let options = {
-            pageHeight: pageHeight,
-            pageWidth: pageWidth,
-            scale: zoom,
-        };
-
-        // Use the 'options' element to set the verovio toolkit options
-        tk.setOptions(options);
-
-        // Retrieve the div of the element using the id
-        let score_div = document.getElementById(results[i]._fields[0].properties.source);
-
-        // Search the mei file in the collection and set the preview for the div
-        fetch('./data/Joseph-Mahe-Original/' + score_name)
-        .then( (response) => response.text() )
-        .then( (meiXML) => {
-            tk.loadData(meiXML);
-            let svg = tk.renderToSVG(1);
-            score_div.innerHTML = svg;
-        });
+        setTk(tk);
     }
+
+    loadPageN(0); // hide the navigation buttons
 }

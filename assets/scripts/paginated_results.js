@@ -5,7 +5,8 @@
  * @module paginated_results
  */
 
-import { createPreviews, fillPreviews } from "./preview_scores.mjs";
+// import { createPreviews, fillPreviews } from "./preview_scores.mjs";
+import { loadPreviews } from "./preview_scores.mjs";
 
  /** The number of items per page */
 var nb_per_page = 10;
@@ -85,6 +86,16 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
     let nb = pageData.length;
     const nbPages = Math.ceil(nb / numberPerPage);
 
+    //---If not data
+    if (nb == 0) {
+        hideNav();
+        return;
+    }
+    else {
+        showNav();
+    }
+
+    //---If the user changed the numberPerPage, check that the selected page is still in the range.
     if (range_change && pageNb > nbPages)
         pageNb = nbPages;
 
@@ -97,8 +108,8 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
 
         //---Display results
         let results_container = $('#results-container');
-        createPreviews(results_container, data);
-        fillPreviews(tk, data);
+        loadPreviews(results_container, tk, data);
+        // fillPreviews(tk, data);
 
         //---Disable button if we are on the first or last page
         document.getElementById('prevPage').disabled = (pageNb == 1);
@@ -107,6 +118,20 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
         document.getElementById('prevPage-bot').disabled = (pageNb == 1);
         document.getElementById('nextPage-bot').disabled = (pageNb == nbPages);
     }
+}
+
+/**
+ * Hides the navigation menus
+ */
+function hideNav() {
+    $('.navigation').hide();
+}
+
+/**
+ * Shows the navigation menus
+ */
+function showNav() {
+    $('.navigation').show();
 }
 
 /**

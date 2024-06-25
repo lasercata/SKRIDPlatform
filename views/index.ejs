@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./styles/semantic.min.css" />
     <link rel="stylesheet" href="./styles/home_style.css" />
     <link rel="stylesheet" href="./styles/general_style.css" />
+    <link rel="stylesheet" href="./styles/paginated_results.css" />
     
     <!-- CSS Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -116,27 +117,8 @@
       </div> 
     </div>
     <div class="container_2">
-      <% if(results.length != 0) { %>
-        <div class="results-container">
-          <% for(var i = 0; i < results.length; i++) { %>
-            <!--<a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %>&score_name=<%= results[i]._fields[0].properties.source %>">-->
-            <!-- <a class="score-preview" href="/skrid/result?author=<%= results[i]._fields[0].properties.collection %>&score_name=<%= results[i]._fields[0].properties.source %>"> -->
-            <a class="score-preview" href="/result?author=<%= results[i]._fields[0].properties.collection %>&score_name=<%= results[i]._fields[0].properties.source %>">
-              <div class="music-score-box" id="<%= results[i]._fields[0].properties.source %>">
-              </div>
-              <h3 class="score_title"><%= results[i]._fields[0].properties.source.slice(0,-4) %></h3>
-              <!--<p class="score_author">Auteur : <%= results[i]._fields[0].properties.composer.substring(13).slice(0, -6) %></p>-->
-              <p class="score_author">Collection : <%= results[i]._fields[0].properties.collection %></p>
-            </a>
-          <% } %>
-        </div>
-      <% } else {%>
-        <p>No result found</p>
-      <% } %>
+        <%- include('./partials/paginated_results.ejs'); %>
     </div>
-  </div>
-  <div id="data" style="display: none;">
-    <%= JSON.stringify(results) %>
   </div>
 </body> 
 <%- include('./partials/footer'); %>

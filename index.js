@@ -94,12 +94,12 @@ app.get("/manualQuery", function (req, res) {
  * @todo doc this better, and remove the first request !
  */
 app.get('/interface', async function (req, res) {
-    let results = [];
+    // let results = [];
     let authors = [];
     try {
-        const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS 'Joseph Mahe Original' RETURN s ORDER BY s.source LIMIT 30";
-        let temp = await session.run(myQuery); //
-        results = temp.records;
+        // const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS 'Joseph Mahe Original' RETURN s ORDER BY s.source LIMIT 30";
+        // let temp = await session.run(myQuery); //
+        // results = temp.records;
 
         // The query to get the authors is necessary to display the list of possible collections
         //const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.composer";
@@ -115,7 +115,7 @@ app.get('/interface', async function (req, res) {
         console.log(err);
     }
     res.render("index", {
-        results: results,
+        // results: results,
         authors: authors
     });
 });
