@@ -5,7 +5,7 @@
  * @module home_script
  */
 
-// import { createPreviews, fillPreviews } from "./preview_scores.mjs";
+import { createPreview, fillPreview, makeUrl } from "./preview_scores.mjs";
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -28,6 +28,8 @@ let selectedCollections;
 
 let pentagram;
 let pentagram_svg;
+
+let audio;
 
 /*
   const durationNote = {
@@ -111,8 +113,9 @@ function unifyResults(queryResults) {
 /**
  * This function sends the query for the pattern and displays the results (including the preview)
  * @param {string} query - the query to send
+ * @todo delete this old function
  */
-function sendQuery(query) {
+function sendQuery_old(query) {
     let data = {
         string: query,
     };
@@ -240,7 +243,7 @@ function sendQuery(query) {
  * This function sends the query for the pattern and displays the results (including the preview)
  * @param {string} query - the query to send
  */
-function sendQuery_new_todo(query) {
+function sendQuery(query) {
     let data = {
         string: query,
     };
@@ -263,23 +266,46 @@ function sendQuery_new_todo(query) {
         const resultsDiv = $('.container_2');
         resultsDiv.empty();
 
-        let tk = new verovio.toolkit();
+        // If there are results for the query, display each of them
+        if(unifiedResults.length != 0) {
+            const results_title = $('<h2>').text('The following music scores contain your pattern: ');
+            resultsDiv.append(results_title);
+            const parentDiv = $('<div>').addClass('results-container');
+            resultsDiv.append(parentDiv);
 
-        createPreviews(resultsDiv, unifiedResults);
-        fillPreviews(tk, unifiedResults);
+            // Create the verovio toolkit
+            let tk = new verovio.toolkit();
 
-        // // If there are results for the query, display each of them
-        // if(unifiedResults.length != 0) {
-        //     const results_title = $('<h2>').text('The following music scores contain your pattern: ');
-        //     resultsDiv.append(results_title);
-        //     const parentDiv = $('<div>').addClass('results-container');
-        //
-        //     createPreviews()
-        // } else {
-        //     // If there are no results containing that pattern, display a different text
-        //     const default_text = $('<h2>').text('No music score found');
-        //     resultsDiv.append(default_text);
-        // }
+            // Get the collections associated with each result
+            unifiedResults.forEach(result => {
+                let author_data = { string: result.name, };
+                fetch('/findAuthor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(author_data)
+                })
+                .then(response => {
+                    return response.json();
+                })
+                .then(data_auth => {
+                    let collection = data_auth.results[0]._fields[0]
+
+                    let url = makeUrl(collection, result.name, result.notes_id);
+                    parentDiv.append(createPreview(url, result.name, result.number_of_occurrences));
+
+                    let score_div = document.getElementById(result.name);
+                    let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + result.name;
+                    fillPreview(score_div, score_path, tk, result.notes_id);
+                });
+            });
+        }
+        else {
+            // If there are no results containing that pattern, display a different text
+            const default_text = $('<h2>').text('No music score found');
+            resultsDiv.append(default_text);
+        }
     })
     .catch(error => {
         console.error('An error occurred:', error);
@@ -291,7 +317,7 @@ function sendQuery_new_todo(query) {
  * */
 function constructExactMatch() {
     let containsAlterations = false;
-    query = 'MATCH';
+    let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
         query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
@@ -372,7 +398,7 @@ function constructExactMatch() {
  * */
 function constructIgnoringTheRhythm() {
     let containsAlterations = false;
-    query = 'MATCH';
+    let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
         query += '(event' + i + ':Event)-[:NEXT]->'; 
@@ -452,7 +478,7 @@ function constructIgnoringTheRhythm() {
  * This function creates a query ignoring the melody and send it.
  * */
 function constructIgnoringTheMelody() {
-    query = 'MATCH';
+    let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
         query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
@@ -498,7 +524,7 @@ function constructIgnoringTheMelody() {
  * */
 function constructIgnoringTheOctave() {
     let containsAlterations = false;
-    query = 'MATCH';
+    let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
         query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
@@ -579,7 +605,7 @@ function constructIgnoringTheOctave() {
  * */
 function constructSignatureForTheRhythm() {
     let containsAlterations = false;
-    query = 'MATCH';
+    let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
         //query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
@@ -961,7 +987,7 @@ function setPreviewForFirstResults() {
         let pageWidth = parentWidth * 100 / zoom;
 
         // Insert them into the 'options' element
-        options = {
+        let options = {
             pageHeight: pageHeight,
             pageWidth: pageWidth,
             scale: zoom,

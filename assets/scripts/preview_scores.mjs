@@ -4,6 +4,54 @@
  */
 
 /**
+ * Try to retreive `source` and `collection` from `result`
+ *
+ * @param {*} result - the json object.
+ *
+ * @returns {source: `source`, collection: `collection`}
+ */
+function getSourceAndCollection(result) {
+    let res = {};
+    try {
+        let prop = result._fields[0].properties;
+        res.source = prop.source;
+        res.collection = prop.collection;
+    }
+    catch {
+        try {
+            let prop = result.s.properties;
+            res.source = prop.source;
+            res.collection = prop.collection;
+        }
+        catch {
+            res.source = result.name;
+            res.collection = null;
+        }
+    }
+
+    return res;
+}
+
+/**
+ * Make the url for the previews.
+ *
+ * @param {string} collection - the name of the collection to which the score belongs ;
+ * @param {string} source - the filename of the score ;
+ * @param {int[]} [red_notes=null] - an array of notes IDs to highlight in red.
+ */
+function makeUrl(collection, source, red_notes=null) {
+    let url = '/result?author='+ collection +'&score_name=' + source;
+
+    if (red_notes != null) {
+        for(let i = 0; i <= red_notes.length; i++) {
+            url += '&note_id'+ i + '=' + red_notes[i];
+        }
+    }
+
+    return url;
+}
+
+/**
  * Create html <a> for the given score.
  *
  * @param {string} url        - the link that will be used when the user clicks on the preview ;
@@ -49,12 +97,12 @@ function createPreview(url, source, nb_occ=null) {
  * @param {HTMLElement} score_div  - the html element that will contain the svg preview ;
  * @param {string} score_path      - the (relative) path to the score (`./data/[collection name]/[score name]`) ;
  * @param {verovio.toolkit} tk     - the verovio toolkit ;
+ * @param {int[]} [red_notes=[]]   - an array of mei IDs for notes to highlight in red.
  * @param {int} [parentWidth=180]  - the width of the parent (used to calculate the width of the svg) ;
  * @param {int} [parentHeight=250] - the height of the parent (used to calculate the height of the svg) ;
  * @param {int} [zoom=20]          - the zoom for the svg ;
- * @param {int[]} [red_notes=[]]   - an array of mei IDs for notes to highlight in red.
  */
-function fillPreview(score_div, score_path, tk, parentWidth=180, parentHeight=250, zoom=20, red_notes=[]) {
+function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, parentHeight=250, zoom=20) {
     let pageHeight = parentHeight * 100 / zoom;
     let pageWidth = parentWidth * 100 / zoom;
 
@@ -72,6 +120,15 @@ function fillPreview(score_div, score_path, tk, parentWidth=180, parentHeight=25
         tk.loadData(meiXML);
         let svg = tk.renderToSVG(1); // render the first page
         score_div.innerHTML = svg;
+
+        // Then, for each id in the noteIds array, find the note and set the color to red
+        for(let i = 0; i < red_notes.length; i++) {
+            let note = document.getElementById(red_notes[i]);
+
+            if(note != null) {
+                note.setAttribute('fill', 'red');
+            }
+        }
     })
     .catch (err => {
         console.error('fill_preview: fetch(): error: ' + err);
@@ -83,28 +140,15 @@ function fillPreview(score_div, score_path, tk, parentWidth=180, parentHeight=25
  * that fits the current data.
  *
  * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g $('#results_container')) ;
- * @param {*} data - the data containing all the scores of the collection.
+ * @param {*} results - the query result containing all the scores ;
  */
-function createPreviews(results_container, data) {
+function createPreviews(results_container, results) {
     results_container.empty();
 
-    if(data.results.length != 0) {
-        data.results.forEach(result => {
-            let prop;
-            try {
-                prop = result._fields[0].properties;
-            }
-            catch {
-                prop = result.s.properties;
-            }
-
-            let url = '/result?author='+ prop.collection +'&score_name=' + prop.source;
-
-            if (result.hasOwnProperty('notes_id')) {
-                for(let i = 0; i <= result.notes_id.length; i++) {
-                    url += '&note_id'+ i + '=' + result.notes_id[i];
-                }
-            }
+    if(results.length != 0) {
+        results.forEach(result => {
+            let prop = getSourceAndCollection(result);
+            let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('notes_id') ? result.notes_id : null);
 
             const a = createPreview(url, prop.source);
             results_container.append(a);
@@ -120,17 +164,11 @@ function createPreviews(results_container, data) {
  * Fills the score previews with svg previews.
  *
  * @param {verovio.toolkit} tk - the verovio toolkit ;
- * @param {*} results - results from the query to get the collection.
+ * @param {*} results - results from the query to get the collection ;
  */
 function fillPreviews(tk, results) {
     for (var i = 0; i < results.length; i++) {
-        let prop;
-        try {
-            prop = results[i]._fields[0].properties;
-        }
-        catch {
-            prop = results[i].s.properties;
-        }
+        let prop = getSourceAndCollection(results[i]);
 
         let score_name = prop.source;
 
@@ -140,4 +178,4 @@ function fillPreviews(tk, results) {
     }
 }
 
-export { createPreview, fillPreview, createPreviews, fillPreviews };
+export { createPreview, fillPreview, createPreviews, fillPreviews, makeUrl };

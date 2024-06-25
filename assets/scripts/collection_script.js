@@ -194,7 +194,7 @@ function loadPageN(author, pageNb, numberPerPage, refresh=false, range_change=fa
             //---Get the data of this page
             fetchPageN(author, pageNb, numberPerPage).then(data => {
                 let results_container = $('#results-container');
-                createPreviews(results_container, data);
+                createPreviews(results_container, data.results);
                 fillPreviews(tk, data.results);
             });
 
