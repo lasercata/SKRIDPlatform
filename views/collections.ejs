@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./styles/home_style.css" />
     <link rel="stylesheet" href="./styles/general_style.css" />
     <link rel="stylesheet" href="./styles/collections_style.css" />
+    <link rel="stylesheet" href="./styles/paginated_results.css" />
 
     <!-- CSS Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -47,33 +48,30 @@
         <p class="separator"> <hr/> </p>
     </div>
     <div class="archives">
-      <div class="navigation">
-        <button id="prevPage" class="prevpage-button">Previous page</button>
-        <input type=number min=1 value=1 id="page_nb_input" class="page-nb-input">
-        <label id="page_max_nb_lb">/ 0</label>
-        <button id="nextPage" class="nextpage-button">Next page</button>
-        <select id="nb_per_page_select">
-          <option value=10>10</option>
-          <option value=15>15</option>
-          <option value=20>20</option>
-          <option value=100>100</option>
-        </select>
-        <label id="nb_per_page_lb"> per page</label>
-      </div>
+      <!-- <div class="navigation"> -->
+      <!--   <button id="prevPage" class="prevpage-button">Previous page</button> -->
+      <!--   <input type=number min=1 value=1 id="page_nb_input" class="page-nb-input"> -->
+      <!--   <label id="page_max_nb_lb">/ 0</label> -->
+      <!--   <button id="nextPage" class="nextpage-button">Next page</button> -->
+      <!--   <select id="nb_per_page_select"> -->
+      <!--     <option value=10>10</option> -->
+      <!--     <option value=15>15</option> -->
+      <!--     <option value=20>20</option> -->
+      <!--     <option value=100>100</option> -->
+      <!--   </select> -->
+      <!--   <label id="nb_per_page_lb"> per page</label> -->
+      <!-- </div> -->
 
       <br/>
 
       <p id="archives"> </p>
       <br/>
-      <br/>
-	        Explorer le contenu des fichiers : <br/>
-        <div class="results-container" id="results-container">
-        </div>
+      Explorer le contenu des fichiers : <br/>
+        <!-- <div class="results-container" id="results-container"> -->
+        <!-- </div> -->
+        <%- include('./partials/paginated_results.ejs'); %>
     </div>
   </div>
-  <!-- <div id="data" style="display: none;"> -->
-  <!--   < %= JSON.stringify(results) %> -->
-  <!-- </div> -->
   <div id="authors" style="display: none;">
     <%= JSON.stringify(authors) %>
   </div>

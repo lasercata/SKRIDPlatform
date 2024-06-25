@@ -21,32 +21,3 @@
 .separator {
     color: white;
 }
-
-.prevpage-button,
-.nextpage-button {
-    border-radius: 5px;
-    height: 30px;
-    width: 100px;
-    border: none;
-    cursor: pointer;
-    margin: 0 10px;
-    background-color: #bfdaed;
-    color: black;
-    font-size: 12px;
-}
-
-.prevpage-button:hover,
-.nextpage-button:hover {
-    background-color: #62aadd;
-}
-
-.prevpage-button:disabled,
-.nextpage-button:disabled {
-    background-color: #ccc;
-    color: #666;
-    cursor: not-allowed;
-}
-
-.page-nb-input {
-    width: 40px;
-}

@@ -3,7 +3,7 @@
  * @module collection_script
  */
 
-import { createPreviews, fillPreviews } from "./preview_scores.mjs";
+import { setTk, loadPageN } from './paginated_results.js';
 
  /** The number of items per page */
 var nb_per_page = 10;
@@ -77,53 +77,17 @@ function createArchivesLinks(author) {
 }
 
 /**
- * Make a cypher query to get the number of scores associated with the given author.
- *
- * @param {string} author - the name of the collection
- * @returns {promise} the number of scores in the collection associated with the author.
- *
- * @example
- * getCollectionSize('Joseph Mahe Original').then(nb => console.log(nb));
- */
-function getCollectionSize(author) {
-    const query = `MATCH (s:Score) WHERE s.collection CONTAINS "${author}" RETURN COUNT(s)`;
-    let data = {
-        "query": query,
-    };
-
-    return fetch('/query', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        return response.json();
-    })
-    .then(data => {
-        // console.log(data.results[0]["COUNT(s)"].low);
-        return data.results[0]["COUNT(s)"].low;
-    })
-    .catch(err => {
-        console.error('Error:', err);
-    })
-}
-
-/**
- * Make a cypher query to get the data only on a given page.
+ * Make a cypher query to get the data for a given author.
  *
  * @param {string} author - the author of the collection
- * @param {int} pageNb - the number of the page to get
- * @param {int} numberPerPage - the number of items per page
  *
  * @return {promise} the page items in a json format.
  *
  * @example
- * fetchPageN('Joseph Mahe Original', 1, 20).then(data => console.log(data));
+ * fetchPageN('Joseph Mahe Original').then(data => console.log(data));
  */
-function fetchPageN(author, pageNb, numberPerPage) {
-    const query = `MATCH (s:Score) WHERE s.collection CONTAINS "${author}" RETURN s ORDER BY s.source SKIP ${(pageNb - 1) * numberPerPage} LIMIT ${numberPerPage}`
+function fetchPageData(author) {
+    const query = `MATCH (s:Score) WHERE s.collection CONTAINS "${author}" RETURN s ORDER BY s.source`;
     let data = {
         "query": query,
     };
@@ -147,72 +111,6 @@ function fetchPageN(author, pageNb, numberPerPage) {
 }
 
 /**
- * Refreshes the spin box max number and the total number of pages.
- *
- * @param {int} nb - the number of items in the collection for the current author (all pages included)
- * @param {null} [current_page=null] - current page value to display in the spin box (if null, it is unchanged)
- * @param {null} [numberPerPage=null] - if not null, change the value of the displayed value of the nb per page select.
- */
-function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
-    let spin_box = document.getElementById('page_nb_input');
-    let label = document.getElementById('page_max_nb_lb');
-    let select = document.getElementById('nb_per_page_select');
-
-    spin_box.max = Math.ceil(nb / nb_per_page);
-    label.innerHTML = " / " + Math.ceil(nb / nb_per_page);
-
-    if (current_page != null)
-        spin_box.value = current_page;
-
-    if (numberPerPage != null)
-        select.value = numberPerPage;
-}
-
-/**
- * Make cypher queries to get the scores of the author for the page pageNb, and display it in the html.
- * Uses {@linkcode getCollectionSize} and {@linkcode fetchPageN} to make the queries, and
- * {@linkcode createPreviews} and {@linkcode fillPreviews} from `preview_scores.js` to display the results.
- *
- * @param {string} author - the author name
- * @param {int} pageNb - the number of the page to load
- * @param {int} numberPerPage - the number of items per page
- * @param {boolean} [refresh=false] - if true, refresh the spin box values.
- * @param {boolean} [range_change=false] - if true, and if pageNb > lastPage, set pageNb to lastPage.
- */
-function loadPageN(author, pageNb, numberPerPage, refresh=false, range_change=false) {
-    //---Get the number of scores of this author
-    getCollectionSize(author).then(nb => {
-        const nbPages = Math.ceil(nb / numberPerPage);
-
-        if (range_change && pageNb > nbPages)
-            pageNb = nbPages;
-
-        if (refresh)
-            refreshPageNbInfos(nb, pageNb, numberPerPage);
-
-        if (1 <= pageNb && pageNb <= nbPages) { // Ensure that the page exists
-            //---Get the data of this page
-            fetchPageN(author, pageNb, numberPerPage).then(data => {
-                let results_container = $('#results-container');
-                createPreviews(results_container, data.results);
-                fillPreviews(tk, data.results);
-            });
-
-            //---Disable button if we are on the first or last page
-            if (pageNb == 1)
-                document.getElementById('prevPage').disabled = true;
-            else
-                document.getElementById('prevPage').disabled = false;
-
-            if (pageNb == nbPages)
-                document.getElementById('nextPage').disabled = true;
-            else
-                document.getElementById('nextPage').disabled = false;
-        }
-    });
-}
-
-/**
  * Handler of the author / collection selection.
  *
  * @param {string} author - the author name
@@ -226,59 +124,11 @@ const authorButtonHandler = function(author) {
     createArchivesLinks(author);
 
     //---Load the first page
-    loadPageN(author, 1, nb_per_page, true);
-}
-
-/**
- * Handler of the next page button
- * */
-const nextCollectionPageHandler = function() {
-    let spin_box = document.getElementById('page_nb_input');
-
-    //---Check that we are not at the last page
-    if (Number(spin_box.value) < Number(spin_box.max)) {
-        //---Change the value of the spin box
-        spin_box.value++;
-
-        //---Load the new content
-        loadPageN(current_author, spin_box.value, nb_per_page, false);
-    }
-}
-
-/**
- * Handler of the previous page button
- * */
-const prevCollectionPageHandler = function() {
-    let spin_box = document.getElementById('page_nb_input');
-
-    //---Check that we are not at the first page
-    if (Number(spin_box.value) > 1) {
-        //---Change the value of the spin box
-        spin_box.value--;
-
-        //---Load the new content
-        loadPageN(current_author, spin_box.value, nb_per_page, false);
-    }
-}
-
-/**
- * Handler of the spin box page selection
- */
-const spinBoxChangedHandler = function(change) {
-    let pageNb = Math.floor(change.srcElement.value);
-    loadPageN(current_author, pageNb, nb_per_page, false);
-}
-
-/**
- * Handler of the combo box to select the number of items per page.
- */
-const nbPerPageHandler = function(change) {
-    let spin_box = document.getElementById('page_nb_input');
-
-    //---Change the global variable
-    nb_per_page = change.srcElement.value;
-
-    loadPageN(current_author, Math.floor(spin_box.value), nb_per_page, true, true);
+    let dataDiv = document.getElementById('data');
+    fetchPageData(author).then(pageData => {
+        dataDiv.textContent = JSON.stringify(pageData.results);
+        loadPageN(1, null, true, true);
+    });
 }
 
 /**
@@ -286,12 +136,6 @@ const nbPerPageHandler = function(change) {
  */
 function init() {
     verovio.module.onRuntimeInitialized = () => {
-        //---Connect pagination buttons
-        document.getElementById("nextPage").addEventListener("click", nextCollectionPageHandler);
-        document.getElementById("prevPage").addEventListener("click", prevCollectionPageHandler);
-        document.getElementById("page_nb_input").addEventListener("change", spinBoxChangedHandler);
-        document.getElementById("nb_per_page_select").addEventListener("change", nbPerPageHandler);
-
         //---Set the current author
         let authors = JSON.parse(document.getElementById('authors').textContent);
         current_author = authors[0];
@@ -299,14 +143,11 @@ function init() {
         //---Fill the first page
         authorButtonHandler(authors[0]);
 
-        // let results = JSON.parse(document.getElementById('data').textContent);
-        // fillScorePreviews(results);
-        //
-        // refreshPageNbInfos(results.length);
-
         //---Create verovio toolkit (tk)
         tk = new verovio.toolkit();
+        setTk(tk);
 
+        //---Make `authorButtonHandler` available (as this script is a module in the html)
         window.authorButtonHandler = authorButtonHandler;
     }
 }
