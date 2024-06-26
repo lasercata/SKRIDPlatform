@@ -45,18 +45,24 @@ function unifyResults(queryResults) {
         if (!occurrences[name]) {
             occurrences[name] = 1;
             notes_temp = [];
-            // for(let i = 1; i <= melody.length; i++) { //TODO: add notes IDs (when there will be notes ids in results ...)
-            //     notes_temp.push(result._fields[i]);
-            // }
+
+            if ('notes' in result) { //EDIT
+                for(let i = 0; i < result.notes.length; i++) {
+                    notes_temp.push(result.notes[i].note.id); //EDIT
+                }
+            }
             results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
         } else {
             occurrences[name]++;
 
             const index = results.findIndex(item => item.name === name);
             results[index].number_of_occurrences = occurrences[name];
-            // for(let j = 1; j <= melody.length; j++) {
-            //     results[index].notes_id.push(result._fields[j]);
-            // }
+
+            if ('notes' in result) { //EDIT
+                for(let j = 0; j < result.notes.length; j++) {
+                    results[index].notes_id.push(result.notes[j].note.id); //EDIT
+                }
+            }
         }
     });
 
