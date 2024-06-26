@@ -3,6 +3,8 @@
  * @module manual_query_script
  */
 
+import { setTk, loadPageN } from './paginated_results.js';
+
 var input;
 var output;
 var is_fuzzy_cb;
@@ -13,6 +15,53 @@ var crisp_div;
 const malformatted_compiled_query = "MATCH \n,\nWHERE\n\nRETURN, \ne0.source AS source, e0.start AS start, e-1.end AS end\n"
 
 document.addEventListener("DOMContentLoaded", init);
+/**
+ * Take the results sent by the server and count the number of occurrences of the pattern here
+ * @param {*} queryResults 
+ * @returns an array of results correctly filtered
+ *
+ * @todo this is a copy/paste from home_script. Make this cleaner !
+ * @todo there are some edits, marked with //EDIT
+ */
+function unifyResults(queryResults) {
+    let results = [];
+    const occurrences = {};
+    let notes_temp = [];
+
+    queryResults.results.forEach(result => {
+        // BEGING EDIT
+        let name;
+        try {
+            name = result._fields[0];
+        }
+        catch {
+            if ('source' in result)
+                name = result.source;
+            else
+                name = result.name;
+        }
+        //END EDIT
+
+        if (!occurrences[name]) {
+            occurrences[name] = 1;
+            notes_temp = [];
+            // for(let i = 1; i <= melody.length; i++) { //TODO: add notes IDs (when there will be notes ids in results ...)
+            //     notes_temp.push(result._fields[i]);
+            // }
+            results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
+        } else {
+            occurrences[name]++;
+
+            const index = results.findIndex(item => item.name === name);
+            results[index].number_of_occurrences = occurrences[name];
+            // for(let j = 1; j <= melody.length; j++) {
+            //     results[index].notes_id.push(result._fields[j]);
+            // }
+        }
+    });
+
+    return results;
+}
 
 /**
  * Post a query to /query and display the result in the result field.
@@ -38,14 +87,23 @@ function postAndDisplayQuery(query) {
     })
     .then(data => {
         let formatted_out;
+        let dataDiv = document.getElementById('data');
 
         if ('results' in data) {
+            //---Show results in the text field
             formatted_out = JSON.stringify(data.results, null, '  ');
-
             formatted_out = `Number of results : ${data.results.length}\n\n` + formatted_out;
+
+            //---Display results with pagination
+            // dataDiv.textContent = JSON.stringify(data.results);
+            dataDiv.textContent = JSON.stringify(unifyResults(data));
+            loadPageN(1, null, true, true);
         }
         else if ('error' in data) {
             formatted_out = data.error;
+
+            dataDiv.textContent = '[]';
+            loadPageN(1, null, true, true);
         }
         else {
             formatted_out = JSON.stringify(data, null, '  ');
@@ -91,7 +149,7 @@ function postFuzzy(fuzzyQuery, format='json') {
  * @todo this post the query two times, so if the query is costly, this is not efficient. A way to solve this would be to add an option in the python parser that processes a result (given the query and the result), and make an endpoint for this. Then use `/compileFuzzy` endpoint to compile the query and then `/query` to get the result.
  */
 function postAndDisplayFuzzyQuery(fuzzyQuery) {
-    //---Post the request and display the result
+    //---Post the request and show results in the text field
     postFuzzy(fuzzyQuery, 'text').then(data => {
         let formatted_out;
 
@@ -111,13 +169,22 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
         console.error('Error:', err);
     });
 
-    //---Post the request again and get the json
+    //---Post the request again and get the json, to display the results in pagination.
     postFuzzy(fuzzyQuery, 'json').then(data => {
+        let dataDiv = document.getElementById('data');
+
         if ('results' in data) {
-            console.log(data.results); // this is a string. Use JSON.parse to get json.
+            //---Log the results
+            console.log(JSON.parse(data.results));
+
+            //---Load the first page
+            // dataDiv.textContent = data.results;
+            dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
+            loadPageN(1, null, true, true);
         }
         else if ('error' in data) {
-            //TODO
+            dataDiv.textContent = '[]';
+            loadPageN(1, null, true, true);
         }
     })
     .catch(err => {
@@ -193,8 +260,15 @@ function init() {
 
     //---Submit when ctrl+enter pressed
     input.addEventListener('keydown', (event) => {
-        console.log(event.key);
+        // console.log(event.key);
         if (event.key == "Enter" && event.ctrlKey)
             submitHandler();
     });
+
+    verovio.module.onRuntimeInitialized = () => {
+        let tk = new verovio.toolkit();
+        setTk(tk);
+
+        loadPageN(0); // hide the navigation buttons
+    }
 }

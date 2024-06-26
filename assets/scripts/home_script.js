@@ -805,7 +805,7 @@ function init() {
 
         let tk = new verovio.toolkit();
         setTk(tk);
-    }
 
-    loadPageN(0); // hide the navigation buttons
+        loadPageN(0); // hide the navigation buttons
+    }
 }

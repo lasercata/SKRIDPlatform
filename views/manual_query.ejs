@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="./styles/home_style.css" />
         <link rel="stylesheet" href="./styles/general_style.css" />
         <link rel="stylesheet" href="./styles/manual_query.css" />
+        <link rel="stylesheet" href="./styles/paginated_results.css" />
 
         <!-- CSS Bootstrap -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -21,7 +22,7 @@
         <script src="https://www.verovio.org/javascript/latest/verovio-toolkit-wasm.js" defer></script>
 
         <!-- Javascript of the page -->
-        <script type="text/javascript" src="./scripts/manual_query_script.js"></script>
+        <script type="module" src="./scripts/manual_query_script.js"></script>
 
         <!-- Jquery -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -50,17 +51,15 @@
                 <!-- <button id="submit_crisp_bt">Submit crisp</button> -->
                 <button id="submit_crisp_bt" style='visibility: hidden;'>Submit</button>
             </div>
-            <div class='text_area'>
-                <label class='label'>Result :</label>
-                <textarea id='result_field' rows=20 cols=140 readonly></textarea>
+            <label class='label'>Results :</label>
+            <div class='results-div'>
+                <div class='text_area'>
+                    <!-- <textarea id='result_field' rows=20 cols=140 readonly></textarea> -->
+                    <textarea id='result_field' rows=20 cols=60 readonly></textarea>
+                </div>
+                <%- include('./partials/paginated_results.ejs'); %>
             </div>
         </div>
-        <!-- <div id="data" style="display: none;"> -->
-        <!--   < %= JSON.stringify(results) %> -->
-        <!-- </div> -->
-        <!-- <div id="authors" style="display: none;"> -->
-        <!--     < %= JSON.stringify(authors) %> -->
-        <!-- </div> -->
     </body> 
     <%- include('./partials/footer'); %>
 </html>

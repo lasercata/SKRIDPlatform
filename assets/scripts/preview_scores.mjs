@@ -201,7 +201,19 @@ function createPreviews_2(results_container, tk, results) {
 
     // Get the collections associated with each result
     results.forEach(result => {
-        let author_data = { string: result.name, };
+        let source;
+        if ('name' in result)
+            source = result.name;
+        else if ('source' in result)
+            source = result.source
+        else
+            source = result._fields[0];
+
+        let notes_id = [];
+        if ('notes_id' in result)
+            notes_id = result.notes_id;
+
+        let author_data = { string: source };
         fetch('/findAuthor', {
             method: 'POST',
             headers: {
@@ -215,11 +227,11 @@ function createPreviews_2(results_container, tk, results) {
         .then(data_auth => {
             let collection = data_auth.results[0]._fields[0]
 
-            let url = makeUrl(collection, result.name, result.notes_id);
-            results_container.append(createPreview(url, result.name, result.number_of_occurrences));
+            let url = makeUrl(collection, source, result.notes_id);
+            results_container.append(createPreview(url, source, result.number_of_occurrences));
 
-            let score_div = document.getElementById(result.name);
-            let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + result.name;
+            let score_div = document.getElementById(source);
+            let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + source;
             fillPreview(score_div, score_path, tk, result.notes_id);
         });
     });
