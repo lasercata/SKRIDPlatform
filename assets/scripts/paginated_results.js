@@ -197,7 +197,7 @@ const nbPerPageHandler = function(change) {
     // if (nb_per_page == '*')
     //     nb_per_page = getPageData().length;
 
-    loadPageN(Math.floor(spin_box.value), nb_per_page, true, false);
+    loadPageN(Math.floor(spin_box.value), nb_per_page, true, true);
 }
 
 /**
