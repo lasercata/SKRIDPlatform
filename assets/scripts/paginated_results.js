@@ -55,6 +55,7 @@ function getPageN(data, pageNb, numberPerPage) {
 function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
     let spin_box = document.getElementById('page_nb_input');
     let label = document.getElementById('page_max_nb_lb');
+    let label_nb = document.getElementById('score_nb_lb');
     let label_bot = document.getElementById('page_max_nb_lb-bot');
     let select = document.getElementById('nb_per_page_select');
 
@@ -68,6 +69,7 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
         select.value = numberPerPage;
 
     label_bot.innerHTML = spin_box.value.toString() + label.innerHTML;
+    label_nb.innerHTML = `Number of scores : ${nb}`;
 }
 
 /**
