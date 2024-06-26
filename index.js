@@ -321,15 +321,59 @@ app.post('/compileFuzzy', (req, res) => {
     const query = req.body.query;
 
     const { spawn } = require('child_process');
-    const pyTest = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'compile', query]);
+    const pyParserCompile = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'compile', query]);
 
-    pyTest.stdout.on('data', data => {
-        // console.log(data.toString());
-        // console.log(JSON.stringify(data));
-        // res.write(data.toString());
-        // res.json(data);
-        res.json(data.toString());
+    let allData = '';
+    pyParserCompile.stdout.on('data', data => {
+        console.log(`Received data (${data.length} bytes) from python script (/compileFuzzy).`);
+
+        allData += data.toString();
     });
+
+    pyParserCompile.stdout.on('close', () => {
+        console.log('Connection closed.');
+        return res.json(allData);
+    });
+});
+
+/**
+ * This endpoint calls the python parser to send a fuzzy query and process the result of it.
+ *
+ * Data to post : {'query': some_fuzzy_query, 'format': f}, where f is 'json' or 'text'.
+ *
+ * POST
+ *
+ * @constant /queryFuzzy
+ */
+app.post('/queryFuzzy', (req, res) => {
+    const query = req.body.query;
+    const format = req.body.format;
+
+    // Filtering keywords to avoid the user editing the database
+    if (queryEditDB(query)) {
+        return res.json({ error: 'Operation not allowed.' });
+    }
+    else {
+        const { spawn } = require('child_process');
+
+        let pyParserSend;
+        if (format == 'json')
+            pyParserSend = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'send', '-f', '-j', query]);
+        else
+            pyParserSend = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'send', '-f', query]);
+
+        let allData = '';
+        pyParserSend.stdout.on('data', data => {
+            console.log(`Received data (${data.length} bytes) from python script (/queryFuzzy, format='${format}').`);
+
+            allData += data.toString();
+        });
+
+        pyParserSend.stdout.on('close', () => {
+            console.log('Connection closed.');
+            return res.json({ results: allData });
+        });
+    }
 });
 
 /**
