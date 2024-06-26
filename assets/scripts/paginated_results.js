@@ -37,11 +37,14 @@ function getPageData() {
  *
  * @param {*} data - the page data ;
  * @param {int} pageNb - the number of the page to get
- * @param {int} numberPerPage - the number of items per page
+ * @param {int | '*'} numberPerPage - the number of items per page. '*' for all.
  *
  * @return {json[]} data for the page `pageNb`.
  */
 function getPageN(data, pageNb, numberPerPage) {
+    if (numberPerPage == '*')
+        numberPerPage = data.length;
+
     return data.slice((pageNb - 1) * numberPerPage, pageNb * numberPerPage);
 }
 
@@ -59,8 +62,9 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
     let label_bot = document.getElementById('page_max_nb_lb-bot');
     let select = document.getElementById('nb_per_page_select');
 
-    spin_box.max = Math.ceil(nb / nb_per_page);
-    label.innerHTML = " / " + Math.ceil(nb / nb_per_page);
+    let max_ = nb_per_page == '*' ? 1 : Math.ceil(nb / nb_per_page)
+    spin_box.max = max_;
+    label.innerHTML = " / " + max_;
 
     if (current_page != null)
         spin_box.value = current_page;
@@ -81,14 +85,19 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
  * @param {boolean} [range_change=false] - if true, and if pageNb > lastPage, set pageNb to lastPage.
  */
 function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false) {
+    let pageData = getPageData();
+    let nb = pageData.length;
+
     if (numberPerPage == null)
         numberPerPage = nb_per_page;
 
-    let pageData = getPageData();
-    let nb = pageData.length;
-    const nbPages = Math.ceil(nb / numberPerPage);
+    let nbPages;
+    if (numberPerPage == '*')
+        nbPages = 1;
+    else
+        nbPages = Math.ceil(nb / numberPerPage);
 
-    //---If not data
+    //---Show or hide navigation accordingly to the number of results
     if (nb == 0) {
         hideNav();
         return;
@@ -185,8 +194,8 @@ const nbPerPageHandler = function(change) {
     //---Change the global variable
     nb_per_page = change.srcElement.value;
 
-    if (nb_per_page == '*')
-        nb_per_page = getPageData().length;
+    // if (nb_per_page == '*')
+    //     nb_per_page = getPageData().length;
 
     loadPageN(Math.floor(spin_box.value), nb_per_page, true, false);
 }
