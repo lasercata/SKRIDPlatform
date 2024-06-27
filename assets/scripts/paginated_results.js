@@ -100,6 +100,9 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
     //---Show or hide navigation accordingly to the number of results
     if (nb == 0) {
         hideNav();
+
+        let results_container = $('#results-container');
+        results_container.empty();
         return;
     }
     else {
@@ -204,7 +207,6 @@ const nbPerPageHandler = function(change) {
  * Connects buttons and fills the preview with the data that was queried from index.js
  */
 function init() {
-    // verovio.module.onRuntimeInitialized = () => {
     //---Connect pagination buttons
     document.getElementById("nextPage").addEventListener("click", nextDataPageHandler);
     document.getElementById("prevPage").addEventListener("click", prevDataPageHandler);
@@ -214,12 +216,13 @@ function init() {
     document.getElementById("nextPage-bot").addEventListener("click", nextDataPageHandler);
     document.getElementById("prevPage-bot").addEventListener("click", prevDataPageHandler);
 
-    //---Create verovio toolkit (tk)
-    // tk = new verovio.toolkit();
+    verovio.module.onRuntimeInitialized = () => {
+        //---Create verovio toolkit (tk)
+        tk = new verovio.toolkit();
 
-    //---Display first page
-    // loadPageN(1, nb_per_page, true);
-    // }
+        //---Display first page
+        // loadPageN(1, nb_per_page, true);
+    }
 }
 
 // export { init as init_pagination };

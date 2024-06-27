@@ -51,6 +51,9 @@ function unifyResults(queryResults) {
                     notes_temp.push(result.notes[i].note.id); //EDIT
                 }
             }
+            if ('id' in result) { //BEGIN EDIT
+                notes_temp.push(result.id);
+            } //END EDIT
             results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
         } else {
             occurrences[name]++;
@@ -63,6 +66,9 @@ function unifyResults(queryResults) {
                     results[index].notes_id.push(result.notes[j].note.id); //EDIT
                 }
             }
+            if ('id' in result) { //BEGIN EDIT
+                notes_temp.push(result.id);
+            } //END EDIT
         }
     });
 

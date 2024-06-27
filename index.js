@@ -331,7 +331,7 @@ app.post('/compileFuzzy', (req, res) => {
     });
 
     pyParserCompile.stdout.on('close', () => {
-        console.log('Connection closed.');
+        console.log('/compileFuzzy: Connection closed.');
         return res.json(allData);
     });
 });
@@ -370,7 +370,7 @@ app.post('/queryFuzzy', (req, res) => {
         });
 
         pyParserSend.stdout.on('close', () => {
-            console.log('Connection closed.');
+            console.log('/queryFuzzy: Connection closed.');
             return res.json({ results: allData });
         });
     }
