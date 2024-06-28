@@ -5,10 +5,15 @@
  * @module home_script
  */
 
+//========= Import =========//
 import { setTk, loadPageN } from './paginated_results.js';
 
+
+//============================= Init =============================//
 document.addEventListener("DOMContentLoaded", init);
 
+
+//============================= Global variables =============================//
 const { Renderer, Stave, Formatter, StaveNote, Beam, Accidental, MusicXMLParser} = Vex.Flow;
 
 // This is the array that will contain the music pattern inserted by the user
@@ -31,6 +36,11 @@ let pentagram_svg;
 
 let audio;
 
+/** Used to store the notes played when pressed with the computer keyboard. */
+var currently_played_notes = {}
+
+
+//============================= Global constants =============================//
 /*
   const durationNote = {
     '32': 0.125, //1/32
@@ -41,7 +51,7 @@ let audio;
     'w': 4, //1
   };*/
 
-// All the possibile durations for a note
+/** All the possible durations for a note */
 const durationNote = {
     '32': 0.03125, //1/32
     '16': 0.0625, //1/16
@@ -51,6 +61,36 @@ const durationNote = {
     'w': 1
 };
 
+/** The keyboard mapping */
+const mapping_azerty = {
+    'q': 'C/4',
+    'z': 'C#/4',
+    's': 'D/4',
+    'e': 'D#/4',
+    'd': 'E/4',
+    'f': 'F/4',
+    't': 'F#/4',
+    'g': 'G/4',
+    'y': 'G#/4',
+    'h': 'A/4',
+    'u': 'A#/4',
+    'j': 'B/4',
+    'k': 'C/5',
+    'o': 'C#/5',
+    'l': 'D/5',
+    'p': 'D#/5',
+    'm': 'E/5',
+    'ù': 'F/5',
+    // '^': 'F#/5',
+    ')': 'F#/5',
+    '*': 'G/5',
+    '$': 'G#/5'
+    //TODO: there is also A, A#, and B (/5) missing
+}
+
+
+//============================= Functions =============================//
+//========= Queries functions =========//
 /**
  * Take the results sent by the server and count the number of occurrences of the pattern here
  * @param {*} queryResults 
@@ -489,6 +529,8 @@ function constructSignatureForTheRhythm() {
     sendQuery(query);
 }
 
+
+//========= Handler functions =========//
 /**
  * Remove from the melody array all the inserted note and clear the stave as well
  */
@@ -523,6 +565,250 @@ const remove_last_note = () => {
 }
 
 /**
+ * Handle the research action (called with button or enter).
+ * If the button is pressed (or enter pressed), we check which one of the radio
+ * buttons has been selected and we call the corresponding function to create
+ * the query with the saved melody 
+ */
+const searchButtonHandler = function() {
+    const radioButtons = document.querySelectorAll('input[type="radio"]');
+
+    // Check which one of the radio buttons has been pressed
+    radioButtons.forEach(function (radioButton) {
+        if (radioButton.checked) {
+            // Call the corresponding function
+            switch (radioButton.id) {
+                case "check1":
+                    constructExactMatch();
+                    break;
+                case "check2":
+                    constructIgnoringTheRhythm();
+                    break;
+                case "check3":
+                    constructIgnoringTheMelody();
+                    break;
+                case "check4":
+                    constructIgnoringTheOctave();
+                    break;
+                // case "check5":
+                //   constructSignatureForTheRhythm();
+                //   break;
+            }
+        }
+    });
+}
+
+/**
+ * This function increases/decreases the volume according to the user input
+ * */
+const handleVolume = (e) => {
+    audio.volume = e.target.value; // passing the range slider value as an audio volume
+}
+
+/**
+ * This function hides/shows the keys for the buttons according to the user input
+ * */
+const showHideKeys = () => {
+    // toggling hide class from each key on the checkbox click
+    pianoKeys.forEach(key => key.classList.toggle("hide"));
+}
+
+/**
+ * Plays the sound of the button that has been pressed
+ * */
+const playTune = (key) => {
+    key = key.replace('#', 's');
+    audio.src = `tunes/${key}.wav`;
+    audio.play();
+    key = key.replace('s', '#');
+    const clickedKey = document.querySelector(`[data-key="${key}"]`); // getting clicked key element
+    clickedKey.classList.add("active"); 
+    // Removing active class after 150 ms from the clicked key element
+    setTimeout(() => { 
+        clickedKey.classList.remove("active");
+    }, 150);
+}
+
+/**
+ * Manages when a piano key is pressed down.
+ *
+ * It starts a timer and plays the note.
+ *
+ * @param {string} note - the note name (e.g C/5, C#/4, or C5, C#4, ...)
+ */
+function keyDown(note) {
+    note = note.replace('/', '');
+
+    currently_played_notes[note] = {start: new Date()};
+    playTune(note);
+}
+
+/**
+ * Manages when a piano key is released.
+ *
+ * It gets the duration, adds the note to `melody`, and display the note.
+ *
+ * @param {string} note - the note name (e.g C/5, C#/4, with the '/')
+ */
+function keyUp(note) {
+    let note_arr = note.replace('/', '');
+
+    let elapsed = (new Date() - currently_played_notes[note_arr].start) / 1000;
+    console.log(`Note : '${note}', duration : ${elapsed}s`);
+
+    currently_played_notes[note_arr] = {};
+
+    // Check the correct note duration based on the time elapsed (using the durationNote array previously defined)
+    const sortedKeys = Object.keys(durationNote).sort((a, b) => durationNote[a] - durationNote[b]);
+    let duration;
+
+    if (elapsed <= durationNote[sortedKeys[sortedKeys.length - 1]]) {
+        for (let i = 0; i < sortedKeys.length; i++) {
+            const durationCurrentNote = sortedKeys[i];
+            if (elapsed < durationNote[durationCurrentNote]) {
+                duration = durationCurrentNote;
+                break;
+            }
+        }
+    }
+    else // If the duration is longer than the longer note, just add the longer note.
+        duration = sortedKeys[sortedKeys.length - 1]; //TODO: maybe add multiple notes instead ?
+
+    // Display the note
+    let displayNote = new StaveNote({
+        keys: [note],
+        duration: duration,
+    });
+
+    if (note.includes('#'))
+        displayNote.addAccidental(0, new Accidental("#"));
+
+    melody.push(displayNote);
+
+
+    // stave.setContext(context).format();
+
+    // Format stave and all notes
+    Formatter.FormatAndDraw(context, stave, melody);
+
+    // The following code ensures that if the current stave is full, its width will be increased
+    // so that it adjusts according to the length of the melody
+    let totalWidth = 0;
+    melody.forEach((note) => {
+        totalWidth += note.getWidth();
+    });
+
+    // If the new width is greater than the initial width, update stave width and pentagran_width variable
+    if (totalWidth > pentagram_width) {
+        stave.setWidth(totalWidth + 50);
+        renderer.resize(totalWidth + 50, pentagram_height)
+        pentagram_width = totalWidth;
+    }
+
+    // Cancel the previous pentagram
+    const svg = document.querySelector("#music-score svg");
+    while (svg.firstChild) {
+        svg.removeChild(svg.firstChild);
+    }
+    stave.setContext(context).draw();
+
+    // Re-draw it
+    melody.forEach((note) => {
+        note.setContext(context).draw();
+    });
+}
+
+
+//========= Managing melody functions =========//
+/**
+ * Add event listeners to buttons on the page.
+ * Also ensure that only one radio button is selected.
+ */
+function manageOptions() {
+    const searchButton = document.getElementById("send-button"); // Search button
+    const radioButtons = document.querySelectorAll('input[type="radio"]'); // Get all the radio buttons
+    const optionsRow = document.querySelector(".options-row");
+    const clearAllButton = document.querySelector(".clear_all");
+    const clearLastNoteButton = document.querySelector(".clear_last_note");
+
+    // Add an event listener for the clear-buttons to call the corresponding method
+    clearAllButton.addEventListener("click", clear_all_pattern);
+    clearLastNoteButton.addEventListener("click", remove_last_note);
+
+    // Add an event listener for the 'search' button
+    searchButton.addEventListener("click", searchButtonHandler);
+
+    // Here we ensure that only one radio button is selected
+    optionsRow.addEventListener("click", function(event) {
+        if (event.target.nodeName === "INPUT") {
+            // Deselect the other radio buttons
+            radioButtons.forEach(function(radioButton) {
+                if (radioButton !== event.target) {
+                    radioButton.checked = false;
+                }
+            });
+        }
+    });
+}
+
+/**
+ * 
+ * @param {*} blackKey 
+ * @returns the next white key
+ */
+function getNextWhiteKey(blackKey) {
+    let nextElement = blackKey.nextElementSibling;
+    while (nextElement && !nextElement.classList.contains('white')) {
+        nextElement = nextElement.nextElementSibling;
+    }
+    return nextElement;
+}
+
+/**
+ * Initialize the pentagram, and connect the piano keys to it.
+ *
+ * When a new piano key is pressed, create a new note with the key value and its duration (using {@linkcode keyUp}).
+ * Also, manage the case where the melody is too long for the pentagram
+ * */
+function manageStaveAndMelody() {
+    // Create an SVG renderer and attach it to the pentagram
+    renderer = new Renderer(pentagram, Renderer.Backends.SVG);
+
+    // Configure the rendering context
+    renderer.resize(pentagram_width, pentagram_height);
+    context = renderer.getContext();
+
+    // Finally create the stave with the treble symbol and draw it
+    stave = new Stave(10, 40, pentagram_width);
+    stave.addClef("treble");
+    stave.setContext(context).draw();
+
+    // The following code manages what to do when the buttons of the piano are pressed
+    keysCheckbox.addEventListener("click", showHideKeys);
+    volumeSlider.addEventListener("input", handleVolume);
+
+    // By default, audio src is "C4" tune
+    audio = new Audio(`tunes/C4.wav`);
+
+    pianoKeys.forEach(key => {
+        key.addEventListener("mousedown", () => {
+            keyDown(key.dataset.key);
+        });
+        key.addEventListener("mouseup", () => {
+            // Make the note with the '/'
+            let newkey;
+
+            if (key.classList.contains('black'))
+                newkey = key.dataset.key.slice(0,2) + '/' + key.dataset.key.slice(2);
+            else
+                newkey = key.dataset.key.slice(0, 1) + '/' + key.dataset.key.slice(1);
+
+            keyUp(newkey);
+        });
+    });
+}
+
+/**
  * This function manages the box for selecting the collections in which the query should be executed.
  * Initially, if the user has not selected any collection, it will empty, so that the query will be executed over all the collections.
  * If the user selectes a collection (there is a change event), we add the collection to the 'selectedCollections' array.
@@ -547,236 +833,36 @@ function manageCollections() {
 }
 
 /**
- * This function increases/decreases the volume according to the user input
- * */
-const handleVolume = (e) => {
-    audio.volume = e.target.value; // passing the range slider value as an audio volume
-}
-
-/**
- * This function hides/shows the keys for the buttons according to the user input
- * */
-const showHideKeys = () => {
-    // toggling hide class from each key on the checkbox click
-    pianoKeys.forEach(key => key.classList.toggle("hide"));
-}
-
-/** 
- * Add an event listener to the search button.
- * If the button is pressed, we check which one of the radio buttons has been selected 
- * and we call the corresponding function to create the query with the saved melody 
- * */
-function manageOptions() {
-    // Get the send button
-    const searchButton = document.getElementById("send-button");
-    // Get all the radio buttons
-    const radioButtons = document.querySelectorAll('input[type="radio"]');
-    const optionsRow = document.querySelector(".options-row");
-    // Get the buttons to delete all the melody or the last node
-    const clearAllButton = document.querySelector(".clear_all");
-    const clearLastNoteButton = document.querySelector(".clear_last_note");
-
-    // Add an event listener for the clear-buttons to call the corresponding method
-    clearAllButton.addEventListener("click", clear_all_pattern);
-    clearLastNoteButton.addEventListener("click", remove_last_note);
-
-    // Add an event listener for the 'search' button
-    searchButton.addEventListener("click", function () {
-        // Check which one of the radio buttons has been pressed
-        radioButtons.forEach(function (radioButton) {
-            if (radioButton.checked) {
-                // Call the corresponding function
-                switch (radioButton.id) {
-                    case "check1":
-                        constructExactMatch();
-                        break;
-                    case "check2":
-                        constructIgnoringTheRhythm();
-                        break;
-                    case "check3":
-                        constructIgnoringTheMelody();
-                        break;
-                    case "check4":
-                        constructIgnoringTheOctave();
-                        break;
-                    // case "check5":
-                    //   constructSignatureForTheRhythm();
-                    //   break;
-                }
-            }
-        });
-    });
-
-    // Here we ensure that only one radio button is selected
-    optionsRow.addEventListener("click", function (event) {
-        if (event.target.nodeName === "INPUT") {
-            // Deselect the other radio buttons
-            radioButtons.forEach(function (radioButton) {
-                if (radioButton !== event.target) {
-                    radioButton.checked = false;
-                }
-            });
-        }
-    });
-}
-
-/**
- * Plays the sound of the button that has been pressed
- * */
-const playTune = (key) => {
-    key = key.replace('#', 's');
-    audio.src = `tunes/${key}.wav`;
-    audio.play();
-    key = key.replace('s', '#');
-    const clickedKey = document.querySelector(`[data-key="${key}"]`); // getting clicked key element
-    clickedKey.classList.add("active"); 
-    // Removing active class after 150 ms from the clicked key element
-    setTimeout(() => { 
-        clickedKey.classList.remove("active");
-    }, 150);
-}
-
-/**
- * 
- * @param {*} blackKey 
- * @returns the next white key
+ * Manages event associated to key presses.
  */
-function getNextWhiteKey(blackKey) {
-    let nextElement = blackKey.nextElementSibling;
-    while (nextElement && !nextElement.classList.contains('white')) {
-        nextElement = nextElement.nextElementSibling;
+function keyListener(event) {
+    //---Delete all
+    if (event.type == 'keydown' && event.key == 'Backspace' && event.ctrlKey)
+        clear_all_pattern();
+
+    //---Delete last note
+    if (event.type == 'keydown' && event.key == 'Backspace')
+        remove_last_note();
+
+    //---Ignore repeat key for all the following mappings
+    if (event.repeat)
+        return;
+
+    //---Research with enter
+    if (event.type == 'keydown' && event.key == 'Enter')
+        searchButtonHandler()
+
+    //---Handle piano keys
+    if (event.key in mapping_azerty) {
+        if (event.type == 'keydown') { // Pressed down : play sound, start timer
+            let note = mapping_azerty[event.key];
+            keyDown(note);
+        }
+        else if (event.type == 'keyup') { // Key released : add note
+            let note = mapping_azerty[event.key];
+            keyUp(note);
+        }
     }
-    return nextElement;
-}
-
-/**
- * When a new piano key is pressed, create a new note with the key value and its duration.
- * Then, add the new note to the melody array and display it on the pentagram
- * Also, manage the case where the melody is too long for the pentagram
- * */
-function manageStaveAndMelody() {
-    // Create an SVG renderer and attach it to the pentagram
-    renderer = new Renderer(pentagram, Renderer.Backends.SVG);
-
-    // Configure the rendering context
-    renderer.resize(pentagram_width, pentagram_height);
-    context = renderer.getContext();
-
-    // Finally create the stave with the treble symbol and draw it
-    stave = new Stave(10, 40, pentagram_width);
-    stave.addClef("treble");
-    stave.setContext(context).draw();
-
-    // The following code manages what to do when the buttons of the piano are pressed
-    keysCheckbox.addEventListener("click", showHideKeys);
-    volumeSlider.addEventListener("input", handleVolume);
-
-    // By default, audio src is "C4" tune
-    audio = new Audio(`tunes/C4.wav`);
-
-    pianoKeys.forEach(key => {
-        // 'start' is initialized when the user first pressed the piano key
-        let start;
-        // 'end' is initialized when the user releases the piano key
-        let end;
-        // 'elapsed' is calculated to see the pressuring time of the piano key
-        let elapsed;
-        key.addEventListener("mousedown", () => {
-            start = new Date();
-            playTune(key.dataset.key)
-        });
-        key.addEventListener("mouseup", (e) => {
-            end = new Date();
-            elapsed = (end - start) / 1000;
-            // console.log('The duration of the note is: ' + elapsed);
-
-            // Check the correct note duration based on the time elapsed (using the durationNote array previously defined)
-            const sortedKeys = Object.keys(durationNote).sort((a, b) => durationNote[a] - durationNote[b]);
-            let duration;
-            for (let i = 0; i < sortedKeys.length; i++) {
-                const durationCurrentNote = sortedKeys[i];
-                if (elapsed < durationNote[durationCurrentNote]) {
-                    duration = durationCurrentNote;
-                    break;
-                }
-            }
-
-            let newkey;
-            // Now check whether the key pressed is black
-            if(key.classList.contains('black')) {
-                // If it is, check if it is being pressed on the right
-                const button = e.target;
-                const rect = button.getBoundingClientRect();
-                const isRightHalf = e.clientX - rect.left > rect.width / 2;
-                if (isRightHalf) {
-                    // If it is, then the note is the flat version of the next white key
-                    // If it not, then it means that it has been pressed on the left, which is already the sharp version of the previous white key
-                    const whiteKey = getNextWhiteKey(key);
-                    if (whiteKey) {
-                        newkey = whiteKey.dataset.key[0] + 'b/' + whiteKey.dataset.key[1];
-                        //console.log('The note is: '+ newkey + '. Duration: ' + duration);
-                    }
-
-                    // Create a new StaveNote using the key pressed and its duration
-                    let note = new StaveNote({
-                        keys: [newkey],
-                        duration: duration,
-                    });
-                    // Add the 'b' notation
-                    note.addAccidental(0, new Accidental("b"));
-                    // Finally, add the note to the melody array
-                    melody.push(note);
-                } else {
-                    newkey = key.dataset.key.slice(0,2) + '/' + key.dataset.key.slice(2);
-                    let note = new StaveNote({
-                        keys: [newkey],
-                        duration: duration,
-                    });
-                    note.addAccidental(0, new Accidental("#"));
-                    melody.push(note);
-                }
-            } else {  // If a white key has been pressed
-                newkey = key.dataset.key.slice(0,1) + '/' + key.dataset.key.slice(1);
-                // console.log(newkey);
-                // Add a new note to the melody
-                melody.push(new StaveNote({
-                    keys: [newkey],
-                    duration: duration,
-                }));
-            }
-
-            // stave.setContext(context).format();
-
-            // Format stave and all notes
-            Formatter.FormatAndDraw(context, stave, melody);
-
-            // The following code ensures that if the current stave is full, its width will be increased
-            // so that it adjusts according to the length of the melody
-            let totalWidth = 0;
-            melody.forEach((note) => {
-                totalWidth += note.getWidth();
-            });
-
-            // If the new width is greater than the initial width, update stave width and pentagran_width variable
-            if (totalWidth > pentagram_width) {
-                stave.setWidth(totalWidth + 50);
-                renderer.resize(totalWidth + 50, pentagram_height)
-                pentagram_width = totalWidth;
-            }
-
-            // Cancel the previous pentagram
-            const svg = document.querySelector("#music-score svg");
-            while (svg.firstChild) {
-                svg.removeChild(svg.firstChild);
-            }
-            stave.setContext(context).draw();
-
-            // Re-draw it
-            melody.forEach((note) => {
-                note.setContext(context).draw();
-            });
-        });
-    });
 }
 
 /**
@@ -797,6 +883,9 @@ function init() {
     pianoKeys = document.querySelectorAll(".piano-keys .key"),
         volumeSlider = document.querySelector(".volume-slider input"),
         keysCheckbox = document.querySelector(".keys-checkbox input");
+
+    document.addEventListener('keydown', keyListener);
+    document.addEventListener('keyup', keyListener);
 
     verovio.module.onRuntimeInitialized = () => {
         manageOptions();
