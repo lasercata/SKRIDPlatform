@@ -55,29 +55,6 @@
         <button class="clear_all">Supprimer tout</button>
         <button class="clear_last_note">Supprimer la dernière note</button>
       </div>
-      <label for="collections">(Facultatif) Collections dans lesquelles rechercher : </label>
-      <select id="collections" name="collections">
-        <option value='-'>All</option>
-        <% for(var j = 0; j < authors.length; j++) { %>
-          <option value='<%= authors[j] %>'><%= authors[j] %></option>
-        <% } %>
-      </select>
-      <br>
-      <label>Collections sélectionnées (par d&eacute;faut, toutes les collections) :</label>
-      <ol id="selected-collections"></ol>
-      <div class="options-row">
-        <input type="radio" id="check1" name="check1">
-        <label for="check1">Correspondance exacte (rythme et hauteurs des notes)</label>
-        <input type="radio" id="check2" name="check2" checked>
-        <label for="check2">Correspondance des hauteurs de notes seulement (sans tenir compte du rythme)</label>
-        <input type="radio" id="check3" name="check3">
-        <label for="check3">Correspondance du rythme seulement (sans tenir compte de la mélodie)</label>
-        <input type="radio" id="check4" name="check4">
-        <label for="check4">Correspondance exacte sans tenir compte de l'octave</label>
-        <!--<input type="radio" id="check5" name="check5">
-        <label for="check5">Correspondance approximative (proportion rythmique)</label> -->
-        <button id="send-button">Recherche</button>
-      </div>
       <div class="wrapper">
         <header>
           <h2>Utilisez le piano pour d&eacute;finir le motif musical</h2>
@@ -114,7 +91,34 @@
           <li class="key black" data-key="A#5"><span>LA#(A#)</span></li>
           <li class="key white" data-key="B5"><span>SI(B)</span></li>
         </ul>
-      </div> 
+        <div class='silence'>
+          <button data-key='r' id='silence-bt'><span>Silence (b)</span></button>
+        </div>
+      </div>
+      <br>
+      <label for="collections">(Facultatif) Collections dans lesquelles rechercher : </label>
+      <select id="collections" name="collections">
+        <option value='-'>All</option>
+        <% for(var j = 0; j < authors.length; j++) { %>
+          <option value='<%= authors[j] %>'><%= authors[j] %></option>
+        <% } %>
+      </select>
+      <br>
+      <label>Collections sélectionnées (par d&eacute;faut, toutes les collections) :</label>
+      <ol id="selected-collections"></ol>
+      <div class="options-row">
+        <input type="radio" id="check1" name="check1">
+        <label for="check1">Correspondance exacte (rythme et hauteurs des notes)</label>
+        <input type="radio" id="check2" name="check2" checked>
+        <label for="check2">Correspondance des hauteurs de notes seulement (sans tenir compte du rythme)</label>
+        <input type="radio" id="check3" name="check3">
+        <label for="check3">Correspondance du rythme seulement (sans tenir compte de la mélodie)</label>
+        <input type="radio" id="check4" name="check4">
+        <label for="check4">Correspondance exacte sans tenir compte de l'octave</label>
+        <!--<input type="radio" id="check5" name="check5">
+        <label for="check5">Correspondance approximative (proportion rythmique)</label> -->
+        <button id="send-button">Recherche</button>
+      </div>
     </div>
     <div class="container_2">
         <%- include('./partials/paginated_results.ejs'); %>

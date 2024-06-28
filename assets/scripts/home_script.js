@@ -34,7 +34,7 @@ let selectedCollections;
 let pentagram;
 let pentagram_svg;
 
-let audio;
+let volume = 0.5;
 
 /** Used to store the notes played when pressed with the computer keyboard. */
 var currently_played_notes = {}
@@ -84,8 +84,9 @@ const mapping_azerty = {
     // '^': 'F#/5',
     ')': 'F#/5',
     '*': 'G/5',
-    '$': 'G#/5'
+    '$': 'G#/5',
     //TODO: there is also A, A#, and B (/5) missing
+    'b': 'r' // silence
 }
 
 
@@ -260,7 +261,11 @@ function constructIgnoringTheRhythm() {
 
     for(let j = 1; j < melody.length + 1; j++) {
         let music_note;
-        if(String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
+
+        if (melody[j - 1].noteType == 'r') //TODO: silences are not encoded in the graph (they are completely skipped) ...
+            // music_note = 'r';
+            continue;
+        else if (String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
             music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
         } else {
             music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
@@ -602,7 +607,7 @@ const searchButtonHandler = function() {
  * This function increases/decreases the volume according to the user input
  * */
 const handleVolume = (e) => {
-    audio.volume = e.target.value; // passing the range slider value as an audio volume
+    volume = e.target.value; // passing the range slider value as an audio volume
 }
 
 /**
@@ -618,15 +623,11 @@ const showHideKeys = () => {
  * */
 const playTune = (key) => {
     key = key.replace('#', 's');
-    audio.src = `tunes/${key}.wav`;
-    audio.play();
+    let aud = new Audio();
+    aud.volume = volume;
+    aud.src = `tunes/${key}.wav`;
+    aud.play();
     key = key.replace('s', '#');
-    const clickedKey = document.querySelector(`[data-key="${key}"]`); // getting clicked key element
-    clickedKey.classList.add("active"); 
-    // Removing active class after 150 ms from the clicked key element
-    setTimeout(() => { 
-        clickedKey.classList.remove("active");
-    }, 150);
 }
 
 /**
@@ -640,7 +641,17 @@ function keyDown(note) {
     note = note.replace('/', '');
 
     currently_played_notes[note] = {start: new Date()};
-    playTune(note);
+
+    if (note != 'r') // silence
+        playTune(note);
+
+    // Set key as selected in the html
+    const clickedKey = document.querySelector(`[data-key="${note}"]`); // getting clicked key element
+    clickedKey.classList.add("active"); 
+    // Removing active class after 150 ms from the clicked key element
+    // setTimeout(() => { 
+    //     clickedKey.classList.remove("active");
+    // }, 150);
 }
 
 /**
@@ -653,10 +664,12 @@ function keyDown(note) {
 function keyUp(note) {
     let note_arr = note.replace('/', '');
 
+    // Set key as unselected in the html
+    const clickedKey = document.querySelector(`[data-key="${note_arr}"]`); // getting clicked key element
+    clickedKey.classList.remove("active"); 
+
     let elapsed = (new Date() - currently_played_notes[note_arr].start) / 1000;
     console.log(`Note : '${note}', duration : ${elapsed}s`);
-
-    currently_played_notes[note_arr] = {};
 
     // Check the correct note duration based on the time elapsed (using the durationNote array previously defined)
     const sortedKeys = Object.keys(durationNote).sort((a, b) => durationNote[a] - durationNote[b]);
@@ -674,11 +687,44 @@ function keyUp(note) {
     else // If the duration is longer than the longer note, just add the longer note.
         duration = sortedKeys[sortedKeys.length - 1]; //TODO: maybe add multiple notes instead ?
 
+    if (Object.keys(currently_played_notes).length > 1)
+        currently_played_notes[note_arr] = {duration: duration};
+    else
+        delete currently_played_notes[note_arr];
+
+    let wait_for_chord = false;
+    for (let notePlayed in currently_played_notes) {
+        if ('start' in currently_played_notes[notePlayed]) // if there is a note that is not stopped, wait of it.
+            wait_for_chord = true;
+    }
+
+    if (wait_for_chord)
+        return;
+
+    let keys = [note];
+    for (let notePlayed in currently_played_notes) {
+        let nt = notePlayed.slice(0, -1) + '/' + notePlayed.slice(-1);
+        if (!keys.includes(nt))
+            keys.push(nt);
+        delete currently_played_notes[notePlayed];
+    }
+
     // Display the note
-    let displayNote = new StaveNote({
-        keys: [note],
-        duration: duration,
-    });
+    let displayNote;
+    if (note == 'r') {
+        displayNote = new StaveNote({
+            keys: ['B/4'],
+            type: 'r',
+            duration: duration,
+        });
+    }
+    else {
+        displayNote = new StaveNote({
+            // keys: [note],
+            keys: keys,
+            duration: duration,
+        });
+    }
 
     if (note.includes('#'))
         displayNote.addAccidental(0, new Accidental("#"));
@@ -771,6 +817,11 @@ function getNextWhiteKey(blackKey) {
  * Also, manage the case where the melody is too long for the pentagram
  * */
 function manageStaveAndMelody() {
+    // Connect silence button
+    const silenceBt = document.getElementById('silence-bt');
+    silenceBt.addEventListener('mousedown', () => keyDown('r'));
+    silenceBt.addEventListener('mouseup', () => keyUp('r'));
+
     // Create an SVG renderer and attach it to the pentagram
     renderer = new Renderer(pentagram, Renderer.Backends.SVG);
 
@@ -788,7 +839,7 @@ function manageStaveAndMelody() {
     volumeSlider.addEventListener("input", handleVolume);
 
     // By default, audio src is "C4" tune
-    audio = new Audio(`tunes/C4.wav`);
+    // audio = new Audio(`tunes/C4.wav`);
 
     pianoKeys.forEach(key => {
         key.addEventListener("mousedown", () => {
@@ -841,19 +892,19 @@ function keyListener(event) {
         clear_all_pattern();
 
     //---Delete last note
-    if (event.type == 'keydown' && event.key == 'Backspace')
+    else if (event.type == 'keydown' && event.key == 'Backspace')
         remove_last_note();
 
     //---Ignore repeat key for all the following mappings
-    if (event.repeat)
+    else if (event.repeat)
         return;
 
     //---Research with enter
-    if (event.type == 'keydown' && event.key == 'Enter')
+    else if (event.type == 'keydown' && event.key == 'Enter')
         searchButtonHandler()
 
     //---Handle piano keys
-    if (event.key in mapping_azerty) {
+    else if (event.key in mapping_azerty) {
         if (event.type == 'keydown') { // Pressed down : play sound, start timer
             let note = mapping_azerty[event.key];
             keyDown(note);
