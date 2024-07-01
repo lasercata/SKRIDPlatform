@@ -9,6 +9,7 @@ import { unifyResults } from './preview_scores.mjs';
 var input;
 var output;
 var is_fuzzy_cb;
+var show_out_text_cb;
 var crisp_field;
 var crisp_div;
 
@@ -196,6 +197,16 @@ const fuzzyCbHandler = function() {
 }
 
 /**
+ * Hides or show the text output field according to the `text_out` checkbox
+ */
+const textOutCbHandler = function() {
+    if (show_out_text_cb.checked)
+        output.hidden = false;
+    else
+        output.hidden = true;
+}
+
+/**
  * Connects the button.
  */
 function init() {
@@ -205,10 +216,12 @@ function init() {
     input = document.getElementById('text_field');
     output = document.getElementById('result_field');
     is_fuzzy_cb = document.getElementById('fuzzy_cb');
+    show_out_text_cb = document.getElementById('text_out_cb');
 
     crisp_field = document.getElementById('crisp_field');
     crisp_div = document.getElementById('crisp_div');
 
+    show_out_text_cb.addEventListener('change', textOutCbHandler);
     is_fuzzy_cb.addEventListener('change', fuzzyCbHandler);
     fuzzyCbHandler();
 

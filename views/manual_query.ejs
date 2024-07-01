@@ -52,10 +52,13 @@
                 <button id="submit_crisp_bt" style='visibility: hidden;'>Submit</button>
             </div>
             <label class='label'>Results :</label>
+            <label>
+                <input type='checkbox' id='text_out_cb' value='text_out'/>
+                Text output
+            </label>
             <div class='results-div'>
                 <div class='text_area'>
-                    <!-- <textarea id='result_field' rows=20 cols=140 readonly></textarea> -->
-                    <textarea id='result_field' rows=20 cols=60 readonly></textarea>
+                    <textarea id='result_field' rows=20 cols=60 readonly hidden></textarea>
                 </div>
                 <%- include('./partials/paginated_results.ejs'); %>
             </div>
