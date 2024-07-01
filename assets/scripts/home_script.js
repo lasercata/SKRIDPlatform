@@ -5,8 +5,9 @@
  * @module home_script
  */
 
-//========= Import =========//
+//========= Imports =========//
 import { setTk, loadPageN } from './paginated_results.js';
+import { unifyResults } from './preview_scores.mjs';
 
 
 //============================= Init =============================//
@@ -92,37 +93,6 @@ const mapping_azerty = {
 
 //============================= Functions =============================//
 //========= Queries functions =========//
-/**
- * Take the results sent by the server and count the number of occurrences of the pattern here
- * @param {*} queryResults 
- * @returns an array of results correctly filtered
- */
-function unifyResults(queryResults) {
-    let results = [];
-    const occurrences = {};
-    let notes_temp = [];
-
-    queryResults.results.forEach(result => {
-        const name = result._fields[0];
-        if (!occurrences[name]) {
-            occurrences[name] = 1;
-            notes_temp = [];
-            for(let i = 1; i <= melody.length; i++) {
-                notes_temp.push(result._fields[i]);
-            }
-            results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
-        } else {
-            occurrences[name]++;
-
-            const index = results.findIndex(item => item.name === name);
-            results[index].number_of_occurrences = occurrences[name];
-            for(let j = 1; j <= melody.length; j++) {
-                results[index].notes_id.push(result._fields[j]);
-            }
-        }
-    });
-    return results;
-}
 
 /**
  * This function sends the query for the pattern and displays the results (using {@linkcode loadPageN})

@@ -4,6 +4,87 @@
  */
 
 /**
+ * Take the results sent by the server and merge duplicates.
+ *
+ * It count the number of occurrences, and add the note IDs when possible.
+ *
+ * @param {*} queryResults - the result of the query ;
+ * @param {*} queryResults.result - the content of the result.
+ *
+ * @returns an array of results correctly filtered, in the following format : `[\{source, number_of_occurrences: <nb>, notes_id: \{id: degree, ...\}\}, ...]`
+ */
+function unifyResults(queryResults) {
+    let results = []; // the array that will be returned ;
+    const occurrences = {}; // used to count the number of occurrences of scores ;
+    let notes_temp = {}; // used to store the IDs of the notes (format: {id: degree, ...}) ;
+
+    queryResults.results.forEach(result => {
+        //---Get the source
+        let name;
+        try {
+            name = result._fields[0];
+        }
+        catch {
+            if ('source' in result)
+                name = result.source;
+            else
+                name = result.name;
+        }
+
+        //---Get note array
+        let notes_arr = [];
+        if ('notes' in result)
+            notes_arr = result.notes;
+        else if ('_fields' in result)
+            notes_arr = result._fields.slice(1); // Remove the first element
+
+        //---Adding it to results
+        if (!occurrences[name]) { // The source element has not been seen yet
+            occurrences[name] = 1;
+            notes_temp = {};
+
+            //-Adding the IDs to the id array
+            for(let k = 0; k < notes_arr.length; k++) {
+                if (typeof(notes_arr[k] == 'string'))
+                    notes_temp[notes_arr[k]] = 1;
+                else if ('note_deg' in notes_arr[k]) // For fuzzy queries, add the 'note_deg'info
+                    notes_temp[notes_arr[k].note.id] = notes_arr[k].note_deg;
+                else
+                    notes_temp[notes_arr[k].note.id] = 1;
+            }
+            if ('id' in result) { // This is for crisp queries (when returning id)
+                notes_temp.push(result.id);
+            }
+            results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
+        }
+        else { // The source element has already been seen
+            //-Find the source in results and increase number of occurrences
+            occurrences[name]++;
+
+            const index = results.findIndex(item => item.name === name);
+            results[index].number_of_occurrences = occurrences[name];
+
+            //-Adding the IDs to the id array
+            for(let k = 0; k < notes_arr.length; k++) {
+                // results[index].notes_id.push(notes_arr[k].note.id);
+
+                if (typeof(notes_arr[k] == 'string'))
+                    results[index].notes_id[notes_arr[k]] = 1;
+                else if ('note_deg' in notes_arr[k]) // For fuzzy queries, add the 'note_deg'info
+                    results[index].notes_id[notes_arr[k].note.id] = notes_arr[k].note_deg;
+                else
+                    results[index].notes_id[notes_arr[k].note.id] = 1;
+            }
+            if ('id' in result) {
+                notes_temp.push(result.id);
+            }
+        }
+    });
+
+    return results;
+}
+
+/**
  * Try to retreive `source` and `collection` from `result`
  *
  * @param {*} result - the json object.
@@ -43,8 +124,10 @@ function makeUrl(collection, source, red_notes=null) {
     let url = '/result?author='+ collection +'&score_name=' + source;
 
     if (red_notes != null) {
-        for(let i = 0; i < red_notes.length; i++) {
-            url += '&note_id'+ i + '=' + red_notes[i];
+        let i = 0;
+        for (let id in red_notes) {
+            url += '&note_id'+ i + '=' + id;
+            i++;
         }
     }
 
@@ -122,11 +205,13 @@ function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, p
         score_div.innerHTML = svg;
 
         // Then, for each id in the noteIds array, find the note and set the color to red
-        for(let i = 0; i < red_notes.length; i++) {
-            let note = document.getElementById(red_notes[i]);
+        for (let id in red_notes) {
+            let note = document.getElementById(id);
 
             if(note != null) {
                 note.setAttribute('fill', 'red');
+                //TODO: use gradient here with red_notes[id] !
+                console.log(`TODO: use note degree : id=${id}, deg=${red_notes[id]}`)
             }
         }
     })
@@ -190,15 +275,6 @@ function createPreviews_1(results_container, results) {
  * @param {*} results - the query result containing all the scores ;
  */
 function createPreviews_2(results_container, tk, results) {
-    // // Take the container already containing previous results and empty it
-    // const results_container = $('.container_2');
-    // results_container.empty();
-    //
-    // const results_title = $('<h2>').text('The following music scores contain your pattern: ');
-    // results_container.append(results_title);
-    // const parentDiv = $('<div>').addClass('results-container');
-    // results_container.append(parentDiv);
-
     // Get the collections associated with each result
     results.forEach(result => {
         let source;
@@ -255,4 +331,4 @@ function fillPreviews(tk, results) {
     }
 }
 
-export { loadPreviews };
+export { loadPreviews, unifyResults };

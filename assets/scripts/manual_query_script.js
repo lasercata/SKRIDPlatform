@@ -4,6 +4,7 @@
  */
 
 import { setTk, loadPageN } from './paginated_results.js';
+import { unifyResults } from './preview_scores.mjs';
 
 var input;
 var output;
@@ -15,65 +16,6 @@ var crisp_div;
 const malformatted_compiled_query = "MATCH \n,\nWHERE\n\nRETURN, \ne0.source AS source, e0.start AS start, e-1.end AS end\n"
 
 document.addEventListener("DOMContentLoaded", init);
-/**
- * Take the results sent by the server and count the number of occurrences of the pattern here
- * @param {*} queryResults 
- * @returns an array of results correctly filtered
- *
- * @todo this is a copy/paste from home_script. Make this cleaner !
- * @todo there are some edits, marked with //EDIT
- */
-function unifyResults(queryResults) {
-    let results = [];
-    const occurrences = {};
-    let notes_temp = [];
-
-    queryResults.results.forEach(result => {
-        // BEGING EDIT
-        let name;
-        try {
-            name = result._fields[0];
-        }
-        catch {
-            if ('source' in result)
-                name = result.source;
-            else
-                name = result.name;
-        }
-        //END EDIT
-
-        if (!occurrences[name]) {
-            occurrences[name] = 1;
-            notes_temp = [];
-
-            if ('notes' in result) { //EDIT
-                for(let i = 0; i < result.notes.length; i++) {
-                    notes_temp.push(result.notes[i].note.id); //EDIT
-                }
-            }
-            if ('id' in result) { //BEGIN EDIT
-                notes_temp.push(result.id);
-            } //END EDIT
-            results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
-        } else {
-            occurrences[name]++;
-
-            const index = results.findIndex(item => item.name === name);
-            results[index].number_of_occurrences = occurrences[name];
-
-            if ('notes' in result) { //EDIT
-                for(let j = 0; j < result.notes.length; j++) {
-                    results[index].notes_id.push(result.notes[j].note.id); //EDIT
-                }
-            }
-            if ('id' in result) { //BEGIN EDIT
-                notes_temp.push(result.id);
-            } //END EDIT
-        }
-    });
-
-    return results;
-}
 
 /**
  * Post a query to /query and display the result in the result field.
