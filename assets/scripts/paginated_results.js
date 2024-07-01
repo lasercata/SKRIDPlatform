@@ -83,8 +83,9 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
  * @param {int} [numberPerPage=null] - the number of items per page. If null, use default global value.
  * @param {boolean} [refresh=false] - if true, refresh the spin box values.
  * @param {boolean} [range_change=false] - if true, and if pageNb > lastPage, set pageNb to lastPage.
+ * @param {boolean} [show_no_res=false] - if true, display "no score found" when the data array is empty.
  */
-function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false) {
+function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false, show_no_res=false) {
     let pageData = getPageData();
     let nb = pageData.length;
 
@@ -103,6 +104,10 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
 
         let results_container = $('#results-container');
         results_container.empty();
+
+        if (show_no_res)
+            results_container.append($('<h2>').text('No music score found'));
+
         return;
     }
     else {

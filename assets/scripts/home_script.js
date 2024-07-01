@@ -125,7 +125,7 @@ function unifyResults(queryResults) {
 }
 
 /**
- * This function sends the query for the pattern and displays the results (including the preview)
+ * This function sends the query for the pattern and displays the results (using {@linkcode loadPageN})
  * @param {string} query - the query to send
  */
 function sendQuery(query) {
@@ -150,19 +150,10 @@ function sendQuery(query) {
         let results_container = $('#results-container');
         results_container.empty();
 
-        if (unifiedResults.length == 0) {
-            const default_text = $('<h2>').text('No music score found');
-            results_container.append(default_text);
-        }
-        // else {
-        //     const results_title = $('<h2>').text('The following music scores contain your pattern: ');
-        //     results_container.append(results_title);
-        // }
-
         //---Load the first page
         let dataDiv = document.getElementById('data');
         dataDiv.textContent = JSON.stringify(unifiedResults);
-        loadPageN(1, null, true, true);
+        loadPageN(1, null, true, true, true);
     });
 }
 

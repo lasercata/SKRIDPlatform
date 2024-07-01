@@ -192,7 +192,7 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
             //---Load the first page
             // dataDiv.textContent = data.results;
             dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
-            loadPageN(1, null, true, true);
+            loadPageN(1, null, true, true, true);
         }
         else if ('error' in data) {
             dataDiv.textContent = '[]';
