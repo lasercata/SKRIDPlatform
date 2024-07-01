@@ -3,12 +3,15 @@
  * @module result_script
  */
 
+import { getGradientColor } from "./preview_scores.mjs";
+
 document.addEventListener("DOMContentLoaded", init);
 
 let datadir;
 let score_name;
 let note;
 let noteIds;
+let noteDegs;
 // The current page, which will change when playing through the piece
 let currentPage;
 // Verovio toolkit variable
@@ -20,6 +23,7 @@ let tk;
 function init() {
     datadir = "./data/";
     noteIds = [];
+    noteDegs = [];
     currentPage = 1;
 
     verovio.module.onRuntimeInitialized = () => {
@@ -35,7 +39,7 @@ function init() {
         let pageWidth = parentWidth * 100 / zoom;
 
         // Use those parameters to set the options
-        options = {
+        let options = {
             pageHeight: pageHeight,
             pageWidth: pageWidth,
             scale: zoom,
@@ -78,7 +82,8 @@ function init() {
                 note = document.getElementById(noteIds[i]);
 
                 if(note != null) {
-                    note.setAttribute('fill', 'red');
+                    // note.setAttribute('fill', 'red');
+                    note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
                 }
             }
 
@@ -145,6 +150,7 @@ function init() {
 
 /**
  * Retrieve from the url the parameter
+ *
  * @param {string} parameter - search parameter
  * @returns the value of the given parameter from the url
  */
@@ -160,9 +166,14 @@ function readFromUrl(parameter) {
 function readNoteIds() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
+
     for (const [key, value] of urlParams.entries()) {
         if (key.startsWith('note_id')) {
             noteIds.push(value);
+        }
+
+        if (key.startsWith('note_deg')) {
+            noteDegs.push(value);
         }
     }
 }
@@ -231,7 +242,7 @@ const nextPageHandler = function() {
         note = document.getElementById(noteIds[i]);
 
         if(note != null) {
-            note.setAttribute('fill', 'red');
+            note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
         }
     }
 }
@@ -251,7 +262,8 @@ const prevPageHandler = function() {
         note = document.getElementById(noteIds[i]);
 
         if(note != null) {
-            note.setAttribute('fill', 'red');
+            // note.setAttribute('fill', 'red');
+            note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
         }
     }
 }
@@ -265,9 +277,9 @@ const prevPageHandler = function() {
  */
 function refreshPagination(currentPage, lastPage) {
     //---Init
-    next_bt = document.getElementById('nextPage');
-    prev_bt = document.getElementById('prevPage');
-    page_info_lb = document.getElementById('page_info');
+    let next_bt = document.getElementById('nextPage');
+    let prev_bt = document.getElementById('prevPage');
+    let page_info_lb = document.getElementById('page_info');
 
     //---Page info
     page_info_lb.innerHTML = String(currentPage) + ' / ' + String(lastPage);

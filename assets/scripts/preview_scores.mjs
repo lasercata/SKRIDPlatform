@@ -45,15 +45,16 @@ function unifyResults(queryResults) {
 
             //-Adding the IDs to the id array
             for(let k = 0; k < notes_arr.length; k++) {
-                if (typeof(notes_arr[k] == 'string'))
+                if (typeof(notes_arr[k]) == 'string') {
                     notes_temp[notes_arr[k]] = 1;
+                }
                 else if ('note_deg' in notes_arr[k]) // For fuzzy queries, add the 'note_deg'info
                     notes_temp[notes_arr[k].note.id] = notes_arr[k].note_deg;
                 else
                     notes_temp[notes_arr[k].note.id] = 1;
             }
             if ('id' in result) { // This is for crisp queries (when returning id)
-                notes_temp.push(result.id);
+                notes_temp[result.id] = 1;
             }
             results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
         }
@@ -76,11 +77,12 @@ function unifyResults(queryResults) {
                     results[index].notes_id[notes_arr[k].note.id] = 1;
             }
             if ('id' in result) {
-                notes_temp.push(result.id);
+                notes_temp[result.id] = 1;
             }
         }
     });
 
+    console.log(results);
     return results;
 }
 
@@ -127,6 +129,7 @@ function makeUrl(collection, source, red_notes=null) {
         let i = 0;
         for (let id in red_notes) {
             url += '&note_id'+ i + '=' + id;
+            url += '&note_deg'+ i + '=' + Math.floor(100 * red_notes[id]);
             i++;
         }
     }
@@ -209,15 +212,47 @@ function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, p
             let note = document.getElementById(id);
 
             if(note != null) {
-                note.setAttribute('fill', 'red');
-                //TODO: use gradient here with red_notes[id] !
-                console.log(`TODO: use note degree : id=${id}, deg=${red_notes[id]}`)
+                note.setAttribute('fill', getGradientColor(red_notes[id]));
             }
         }
     })
     .catch (err => {
         console.error('fill_preview: fetch(): error: ' + err);
     })
+}
+
+/**
+ * Return a color between `fromColor` and `toColor`, a `percent`%
+ *
+ * @param {json} fromColor - the origin color (0%). Format : {r: <nb>, g: <nb>, b: <nb>} ;
+ * @param {json} toColor - the destination color (100%). Format : {r: <nb>, g: <nb>, b: <nb>} ;
+ * @param {int} percent - the percentage.
+ *
+ * @returns {string} an RGB string.
+ */
+function interpolateBetweenColors(fromColor, toColor, percent) {
+    const delta = percent / 100;
+    const r = Math.round(toColor.r + (fromColor.r - toColor.r) * delta);
+    const g = Math.round(toColor.g + (fromColor.g - toColor.g) * delta);
+    const b = Math.round(toColor.b + (fromColor.b - toColor.b) * delta);
+
+    return `rgb(${r}, ${g}, ${b})`;
+};
+
+/**
+ * Return the color to use
+ *
+ * @param {float} degree - the match degree for a given note
+ * @returns {string} a color corresponding best to `degree`
+ */
+function getGradientColor(degree) {
+    const fromColor = {r: 255, g: 0, b: 0}; // red
+    // const toColor = {r: 0, g: 0, b: 0}; // black
+    const toColor = {r: 255, g: 255, b: 255}; // white
+    // const toColor = {r: 0, g: 255, b: 0}; // green
+    
+    // return interpolateBetweenColors(fromColor, toColor, 100 * degree);
+    return interpolateBetweenColors(fromColor, toColor, 100 * degree);
 }
 
 /**
@@ -331,4 +366,4 @@ function fillPreviews(tk, results) {
     }
 }
 
-export { loadPreviews, unifyResults };
+export { loadPreviews, unifyResults, getGradientColor };
