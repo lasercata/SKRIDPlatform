@@ -27,6 +27,8 @@ function unifyResults(queryResults) {
         catch {
             if ('source' in result)
                 name = result.source;
+            else if ('event1.source' in result)
+                name = result['event1.source'];
             else
                 name = result.name;
         }
@@ -56,6 +58,9 @@ function unifyResults(queryResults) {
             if ('id' in result) { // This is for crisp queries (when returning id)
                 notes_temp[result.id] = 1;
             }
+            else if ('mei_id_event1' in result) {
+                notes_temp[result['mei_id_event1']] = 1;
+            }
             results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
         }
         else { // The source element has already been seen
@@ -82,7 +87,6 @@ function unifyResults(queryResults) {
         }
     });
 
-    console.log(results);
     return results;
 }
 

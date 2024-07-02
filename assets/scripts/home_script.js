@@ -54,12 +54,12 @@ var currently_played_notes = {}
 
 /** All the possible durations for a note */
 const durationNote = {
-    '32': 0.03125, //1/32
-    '16': 0.0625, //1/16
-    '8': 0.125,
-    'q': 0.25,
-    'h': 0.5,
-    'w': 1
+    '32': 0.03125, // 1/32 (triple croche)
+    '16': 0.0625,  // 1/16 (double croche)
+    '8': 0.125,    // (1/8) (croche)
+    'q': 0.25,     // (quarter)
+    'h': 0.5,      // (half)
+    'w': 1         // (whole)
 };
 
 /** The keyboard mapping */
@@ -189,10 +189,9 @@ function constructExactMatch() {
             query += ', event' + k + ' as event' + k;
         }
 
-        // Here it has to be changed from composer to collection
-        query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
         for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
         }
 
     }
@@ -274,10 +273,9 @@ function constructIgnoringTheRhythm() {
             query += ', event' + k + ' as event' + k;
         }
 
-        // Here it has to be changed from composer to collection
-        query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
         for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
         }
 
     }
@@ -319,10 +317,9 @@ function constructIgnoringTheMelody() {
             query += ', event' + k + ' as event' + k;
         }
 
-        // Here it has to be changed from composer to collection
-        query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
         for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
         }
 
     }
@@ -400,10 +397,9 @@ function constructIgnoringTheOctave() {
             query += ', event' + k + ' as event' + k;
         }
 
-        // Here it has to be changed from composer to collection
-        query += ' WHERE s.composer CONTAINS "' + selectedCollections[0] + '"';
+        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
         for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.composer CONTAINS "' + selectedCollections[k] + '"';
+            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
         }
 
     }
@@ -646,7 +642,7 @@ function keyUp(note) {
         }
     }
     else // If the duration is longer than the longer note, just add the longer note.
-        duration = sortedKeys[sortedKeys.length - 1]; //TODO: maybe add multiple notes instead ?
+        duration = sortedKeys[sortedKeys.length - 1];
 
     if (Object.keys(currently_played_notes).length > 1)
         currently_played_notes[note_arr] = {duration: duration};

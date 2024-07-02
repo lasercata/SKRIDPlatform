@@ -36,7 +36,7 @@ app.use('/data', express.static('data'));
  * @returns {boolean} true if query would modify the database, false otherwise.
  */
 function queryEditDB(query) {
-    let keywords = ['create', 'delete', 'set', 'remove', 'detach', 'call', 'load'];
+    let keywords = ['create', 'delete', 'set', 'remove', 'detach', 'load'];
     let queryLower = query.toLowerCase();
 
     for (let k = 0 ; k < keywords.length ; ++k) {
