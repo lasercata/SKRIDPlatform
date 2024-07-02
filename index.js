@@ -30,6 +30,16 @@ app.use(express.static('data'));
 app.use('/data', express.static('data'));
 
 /**
+ * Print the date and time, `level`, and `msg`.
+ *
+ * @param {string} level - the level of the log ('error', 'warn', 'info', ...) ;
+ * @param {string} msg - the message to log.
+ */
+function log(level, msg) {
+    console.log(`${(new Date().toUTCString())} - ${level}: ${msg}`);
+}
+
+/**
  * Check if the query contain some keywords that modify the database.
  *
  * @param {string} query - the cypher query
@@ -41,7 +51,7 @@ function queryEditDB(query) {
 
     for (let k = 0 ; k < keywords.length ; ++k) {
         if (queryLower.includes(keywords[k])) {
-            console.log(`query contains "${keywords[k].toUpperCase()}" keyword. Aborting it.`);
+            log('info', `query contains "${keywords[k].toUpperCase()}" keyword. Aborting it.`);
             return true;
         }
     }
@@ -110,9 +120,8 @@ app.get('/interface', async function (req, res) {
             //authors.push(record._fields[0].substring(13).slice(0,-6));
             authors.push(record._fields[0]);
         });
-        console.log(authors);
     } catch(err) {
-        console.log(err);
+        log('error', `/interface: ${err}`)
     }
     res.render("index", {
         // results: results,
@@ -144,7 +153,6 @@ app.get('/collections', async function (req, res) {
             //authors.push(record._fields[0].substring(13).slice(0,-6));
             authors.push(record._fields[0]);
         });
-        console.log(authors);
 
         //---Get collection of the first author
         // const name = authors[0];
@@ -153,7 +161,7 @@ app.get('/collections', async function (req, res) {
         // results = temp.records;
 
     } catch(err) {
-        console.log(err);
+        log('error', `/collections: ${err}`)
     }
 
     res.render("collections", {
@@ -191,7 +199,7 @@ app.get('/getCollectionByAuthor', async (req, res) => {
         let temp = await session.run(myQuery, {name: name});
         results = temp.records;
     } catch(err) {
-        console.log(err);
+        log('error', `/getCollectionByAuthor: ${err}`)
     }
 
     res.json({
@@ -203,7 +211,7 @@ app.get('/getCollectionByAuthor', async (req, res) => {
 /**
  * This endpoint will search for all the scores containing in the title the string inserted by the user in the search bar.
  *
- * Note: not currently used.
+ * Note: not currently used (seems that it was used with a text search bar at the top of the piano interface page).
  *
  * GET
  *
@@ -228,9 +236,8 @@ app.get('/search', async function(req, res) {
             //authors.push(record._fields[0].substring(13).slice(0,-6));
             authors.push(record._fields[0]);
         });
-        console.log(authors);
     } catch(err) {
-        console.log(err);
+        log('error', err);
     }
 
     res.render("index", {
@@ -254,17 +261,18 @@ app.post('/findPattern', async function(req, res) {
         res.json({ error: 'Operation not allowed.' });
     }
     else {
+        log('info', `Performing query on /findPattern: "${myQuery}"`);
+
         const session = driver.session();
 
         try {
             await session.run(myQuery).then(result => {
                 const results = result.records;
-                console.log(results);
                 res.json({ results: results});
             });
 
         } catch(error) {
-            console.error('Error in the query:', error);
+            log('error', `Error in the query: ${error}`);
             res.sendStatus(500);
 
         } finally {
@@ -291,6 +299,7 @@ app.post('/findAuthor', async function(req, res) {
         res.json({ error: 'Operation not allowed.' });
     }
     else {
+        log('info', `Performing query on /findAuthor: "${myQuery}"`);
         const session = driver.session();
         try {
             await session.run(myQuery).then(result => {
@@ -299,7 +308,7 @@ app.post('/findAuthor', async function(req, res) {
             });
 
         } catch(error) {
-            console.error('Error in the query:', error);
+            log('error', `Error in the query: ${error}`);
             res.sendStatus(500);
 
         } finally {
@@ -320,18 +329,19 @@ app.post('/findAuthor', async function(req, res) {
 app.post('/compileFuzzy', (req, res) => {
     const query = req.body.query;
 
+    log('info', '/compileFuzzy: openning connection.')
     const { spawn } = require('child_process');
     const pyParserCompile = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'compile', query]);
 
     let allData = '';
     pyParserCompile.stdout.on('data', data => {
-        console.log(`Received data (${data.length} bytes) from python script (/compileFuzzy).`);
+        log('info', `/compileFuzzy: received data (${data.length} bytes) from python script.`);
 
         allData += data.toString();
     });
 
     pyParserCompile.stdout.on('close', () => {
-        console.log('/compileFuzzy: Connection closed.');
+        log('info', '/compileFuzzy: Connection closed.');
         return res.json(allData);
     });
 });
@@ -354,6 +364,7 @@ app.post('/queryFuzzy', (req, res) => {
         return res.json({ error: 'Operation not allowed.' });
     }
     else {
+        log('info', `/queryFuzzy: openning connection (format='${format}').`);
         const { spawn } = require('child_process');
 
         let pyParserSend;
@@ -364,13 +375,13 @@ app.post('/queryFuzzy', (req, res) => {
 
         let allData = '';
         pyParserSend.stdout.on('data', data => {
-            console.log(`Received data (${data.length} bytes) from python script (/queryFuzzy, format='${format}').`);
+            log('info', `/queryFuzzy (format='${format}') received data (${data.length} bytes) from python script.`);
 
             allData += data.toString();
         });
 
         pyParserSend.stdout.on('close', () => {
-            console.log('/queryFuzzy: Connection closed.');
+            log('info', `/queryFuzzy: connection closed (format='${format}').`);
             return res.json({ results: allData });
         });
     }
@@ -393,6 +404,7 @@ app.post('/query', (req, res) => {
     }
     else {
         // Execute the query
+        log('info', `Performing query on /query: "${query}"`);
         const session = driver.session();
         session.run(query)
             .then(result => {
@@ -401,11 +413,12 @@ app.post('/query', (req, res) => {
                 res.json({ results });
             })
             .catch(error => {
+                log('error', `/query: ${error.message}`)
                 res.json({ error: error.message });
             });
     }
 });
 
 app.listen(port, () => {
-    console.log(`Server listening on port ${port}`)
+    log('info', `Server listening on port ${port}`)
 })

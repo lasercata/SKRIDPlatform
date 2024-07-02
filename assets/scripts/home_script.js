@@ -410,6 +410,7 @@ function constructIgnoringTheOctave() {
         query += ', event'+ k +'.id as mei_id_event'+ k;
     }
 
+    // Log the query
     console.log(query);
 
     sendQuery(query);
