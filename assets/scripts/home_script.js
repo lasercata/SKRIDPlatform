@@ -54,12 +54,26 @@ var currently_played_notes = {}
 
 /** All the possible durations for a note */
 const durationNote = {
-    '32': 0.03125, // 1/32 (triple croche)
-    '16': 0.0625,  // 1/16 (double croche)
-    '8': 0.125,    // (1/8) (croche)
-    'q': 0.25,     // (quarter)
-    'h': 0.5,      // (half)
-    'w': 1         // (whole)
+    '32': 1/32,         // thirty-second (triple croche)
+    '16': 1/16,         // sixteenth (double croche)
+    '8': 1/8,           // eighth (croche)
+    'q': 1/4,           // (quarter)
+    'h': 1/2,           // (half)
+    'w': 1              // (whole)
+};
+
+const durationNoteWithDots = {
+    '32': 1/32,         // thirty-second (triple croche)
+    '32d': 1/32 + 1/64, // dotted thirty-second (triple croche pointée)
+    '16': 1/16,         // sixteenth (double croche)
+    '16d': 1/16 + 1/32, // dotted sixteenth (double croche pointée)
+    '8': 1/8,           // eighth (croche)
+    '8d': 1/8 + 1/16,   // dotted eighth (croche pointée)
+    'q': 1/4,           // (quarter)
+    'qd': 1/4 + 1/8,    // (dotted quarter)
+    'h': 1/2,           // (half)
+    'hd': .5 + .25,     // (dotted half)
+    'w': 1              // (whole)
 };
 
 /** The keyboard mapping */
@@ -627,7 +641,7 @@ function keyUp(note) {
     clickedKey.classList.remove("active"); 
 
     let elapsed = (new Date() - currently_played_notes[note_arr].start) / 1000;
-    console.log(`Note : '${note}', duration : ${elapsed}s`);
+    elapsed /= 2;
 
     // Check the correct note duration based on the time elapsed (using the durationNote array previously defined)
     const sortedKeys = Object.keys(durationNote).sort((a, b) => durationNote[a] - durationNote[b]);
@@ -635,15 +649,16 @@ function keyUp(note) {
 
     if (elapsed <= durationNote[sortedKeys[sortedKeys.length - 1]]) {
         for (let i = 0; i < sortedKeys.length; i++) {
-            const durationCurrentNote = sortedKeys[i];
-            if (elapsed < durationNote[durationCurrentNote]) {
-                duration = durationCurrentNote;
+            if (elapsed < durationNote[sortedKeys[i]]) {
+                duration = sortedKeys[i];;
                 break;
             }
         }
     }
     else // If the duration is longer than the longer note, just add the longer note.
         duration = sortedKeys[sortedKeys.length - 1];
+
+    console.log(`Note : '${note}', duration : ${duration} (${elapsed}s)`);
 
     if (Object.keys(currently_played_notes).length > 1)
         currently_played_notes[note_arr] = {duration: duration};
@@ -668,58 +683,40 @@ function keyUp(note) {
     }
 
     // Display the note
-    let displayNote;
-    if (note == 'r') {
-        displayNote = new StaveNote({
-            keys: ['B/4'],
-            type: 'r',
-            duration: duration,
-        });
+    displayNote(note, keys, duration);
+}
+
+/**
+ * Manages event associated to key presses.
+ */
+function keyListener(event) {
+    //---Delete all
+    if (event.type == 'keydown' && event.key == 'Backspace' && event.ctrlKey)
+        clear_all_pattern();
+
+    //---Delete last note
+    else if (event.type == 'keydown' && event.key == 'Backspace')
+        remove_last_note();
+
+    //---Ignore repeat key for all the following mappings
+    else if (event.repeat)
+        return;
+
+    //---Research with enter
+    else if (event.type == 'keydown' && event.key == 'Enter')
+        searchButtonHandler()
+
+    //---Handle piano keys
+    else if (event.key in mapping_azerty) {
+        if (event.type == 'keydown') { // Pressed down : play sound, start timer
+            let note = mapping_azerty[event.key];
+            keyDown(note);
+        }
+        else if (event.type == 'keyup') { // Key released : add note
+            let note = mapping_azerty[event.key];
+            keyUp(note);
+        }
     }
-    else {
-        displayNote = new StaveNote({
-            // keys: [note],
-            keys: keys,
-            duration: duration,
-        });
-    }
-
-    if (note.includes('#'))
-        displayNote.addAccidental(0, new Accidental("#"));
-
-    melody.push(displayNote);
-
-
-    // stave.setContext(context).format();
-
-    // Format stave and all notes
-    Formatter.FormatAndDraw(context, stave, melody);
-
-    // The following code ensures that if the current stave is full, its width will be increased
-    // so that it adjusts according to the length of the melody
-    let totalWidth = 0;
-    melody.forEach((note) => {
-        totalWidth += note.getWidth();
-    });
-
-    // If the new width is greater than the initial width, update stave width and pentagran_width variable
-    if (totalWidth > pentagram_width) {
-        stave.setWidth(totalWidth + 50);
-        renderer.resize(totalWidth + 50, pentagram_height)
-        pentagram_width = totalWidth;
-    }
-
-    // Cancel the previous pentagram
-    const svg = document.querySelector("#music-score svg");
-    while (svg.firstChild) {
-        svg.removeChild(svg.firstChild);
-    }
-    stave.setContext(context).draw();
-
-    // Re-draw it
-    melody.forEach((note) => {
-        note.setContext(context).draw();
-    });
 }
 
 
@@ -815,6 +812,103 @@ function manageStaveAndMelody() {
             keyUp(newkey);
         });
     });
+
+    // Connect rhythm note keys
+    document.getElementById('whole-bt').addEventListener('mousedown', () => changeLastNoteRhythm('w'));
+    document.getElementById('half-dotted-bt').addEventListener('mousedown', () => changeLastNoteRhythm('hd'));
+    document.getElementById('half-bt').addEventListener('mousedown', () => changeLastNoteRhythm('h'));
+    document.getElementById('quarter-dotted-bt').addEventListener('mousedown', () => changeLastNoteRhythm('qd'));
+    document.getElementById('quarter-bt').addEventListener('mousedown', () => changeLastNoteRhythm('q'));
+    document.getElementById('8th-dotted-bt').addEventListener('mousedown', () => changeLastNoteRhythm('8d'));
+    document.getElementById('8th-bt').addEventListener('mousedown', () => changeLastNoteRhythm('8'));
+    document.getElementById('16th-dotted-bt').addEventListener('mousedown', () => changeLastNoteRhythm('16d'));
+    document.getElementById('16th-bt').addEventListener('mousedown', () => changeLastNoteRhythm('16'));
+    document.getElementById('32th-dotted-bt').addEventListener('mousedown', () => changeLastNoteRhythm('32d'));
+    document.getElementById('32th-bt').addEventListener('mousedown', () => changeLastNoteRhythm('32'));
+}
+
+/**
+ * Displays the note to the stave and add it to `melody`.
+ *
+ * @param {string} note - the note name (e.g C/5, C#/4, with the '/') ;
+ * @param {string[]} keys - array of keys ;
+ * @param {string} duration - the note duration (w, h, q, 8, 16, 32, hd, qd, 8d, 16d, 32d).
+ */
+function displayNote(note, keys, duration) {
+    let displayNote;
+    if (note == 'r') {
+        displayNote = new StaveNote({
+            keys: ['B/4'], // just for middle height
+            type: 'r', // rest
+            duration: duration,
+        });
+    }
+    else {
+        displayNote = new StaveNote({
+            keys: keys,
+            duration: duration,
+        });
+    }
+
+    if (note.includes('#'))
+        displayNote.addAccidental(0, new Accidental("#"));
+
+    if (duration.includes('d'))
+        displayNote.addDotToAll();
+
+    melody.push(displayNote);
+    console.log(displayNote.duration);
+
+    // Format stave and all notes
+    Formatter.FormatAndDraw(context, stave, melody);
+
+    // The following code ensures that if the current stave is full, its width will be increased
+    // so that it adjusts according to the length of the melody
+    let totalWidth = 0;
+    melody.forEach((note) => {
+        totalWidth += note.getWidth();
+    });
+
+    // If the new width is greater than the initial width, update stave width and pentagran_width variable
+    if (totalWidth > pentagram_width) {
+        stave.setWidth(totalWidth + 50);
+        renderer.resize(totalWidth + 50, pentagram_height)
+        pentagram_width = totalWidth;
+    }
+
+    // Cancel the previous pentagram
+    const svg = document.querySelector("#music-score svg");
+    while (svg.firstChild) {
+        svg.removeChild(svg.firstChild);
+    }
+    stave.setContext(context).draw();
+
+    // Re-draw it
+    melody.forEach((note) => {
+        note.setContext(context).draw();
+    });
+}
+
+/**
+ * Changes the last note on the stave for one with the same pitch, but with a different rhythm.
+ *
+ * @param {*} newRhythm - the new wanted rhythm.
+ */
+function changeLastNoteRhythm(newRhythm) {
+    // If there is no note to modify, abort
+    if (melody.length == 0)
+        return;
+
+    // Remove last note
+    let last_note = melody.slice(-1)[0];
+    let note = last_note.keys[0];
+    if (last_note.noteType == 'r')
+        note = 'r';
+
+    remove_last_note();
+
+    // Add the note with the new rhythm
+    displayNote(note, last_note.keys, newRhythm);
 }
 
 /**
@@ -841,39 +935,8 @@ function manageCollections() {
     });
 }
 
-/**
- * Manages event associated to key presses.
- */
-function keyListener(event) {
-    //---Delete all
-    if (event.type == 'keydown' && event.key == 'Backspace' && event.ctrlKey)
-        clear_all_pattern();
 
-    //---Delete last note
-    else if (event.type == 'keydown' && event.key == 'Backspace')
-        remove_last_note();
-
-    //---Ignore repeat key for all the following mappings
-    else if (event.repeat)
-        return;
-
-    //---Research with enter
-    else if (event.type == 'keydown' && event.key == 'Enter')
-        searchButtonHandler()
-
-    //---Handle piano keys
-    else if (event.key in mapping_azerty) {
-        if (event.type == 'keydown') { // Pressed down : play sound, start timer
-            let note = mapping_azerty[event.key];
-            keyDown(note);
-        }
-        else if (event.type == 'keyup') { // Key released : add note
-            let note = mapping_azerty[event.key];
-            keyUp(note);
-        }
-    }
-}
-
+//========= Init =========//
 /**
  * Initialize all the variables and the Vexflow pentagram
  * */
