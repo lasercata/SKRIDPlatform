@@ -835,29 +835,28 @@ function manageStaveAndMelody() {
  * @param {string} duration - the note duration (w, h, q, 8, 16, 32, hd, qd, 8d, 16d, 32d).
  */
 function displayNote(note, keys, duration) {
-    let displayNote;
+    let display_note;
     if (note == 'r') {
-        displayNote = new StaveNote({
+        display_note = new StaveNote({
             keys: ['B/4'], // just for middle height
             type: 'r', // rest
             duration: duration,
         });
     }
     else {
-        displayNote = new StaveNote({
+        display_note = new StaveNote({
             keys: keys,
             duration: duration,
         });
     }
 
     if (note.includes('#'))
-        displayNote.addAccidental(0, new Accidental("#"));
+        display_note.addAccidental(0, new Accidental("#"));
 
     if (duration.includes('d'))
-        displayNote.addDotToAll();
+        display_note.addDotToAll();
 
-    melody.push(displayNote);
-    console.log(displayNote.duration);
+    melody.push(display_note);
 
     // Format stave and all notes
     Formatter.FormatAndDraw(context, stave, melody);
