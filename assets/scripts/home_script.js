@@ -42,6 +42,8 @@ var currently_played_notes = {}
 
 
 //============================= Global constants =============================//
+const init_pentagram_width = 450;
+
 /*
   const durationNote = {
     '32': 0.125, //1/32
@@ -520,6 +522,8 @@ const clear_all_pattern = () => {
         pentagram_svg.removeChild(pentagram_svg.firstChild);
     }
     stave.setContext(context).draw();
+
+    resizeStave();
 }
 
 /**
@@ -539,6 +543,8 @@ const remove_last_note = () => {
     melody.forEach((note) => {
         note.setContext(context).draw();
     });
+
+    resizeStave();
 }
 
 /**
@@ -863,17 +869,26 @@ function displayNote(note, keys, duration) {
     // Format stave and all notes
     Formatter.FormatAndDraw(context, stave, melody);
 
-    // The following code ensures that if the current stave is full, its width will be increased
-    // so that it adjusts according to the length of the melody
+    resizeStave();
+}
+
+
+/**
+ * Resizes the stave width, according to the notes in the melody.
+ * Ensures that the minimal width is respected (`init_pentagram_width`).
+ */
+function resizeStave() {
     let totalWidth = 0;
     melody.forEach((note) => {
         totalWidth += note.getWidth();
     });
 
-    // If the new width is greater than the initial width, update stave width and pentagran_width variable
-    if (totalWidth > pentagram_width) {
-        stave.setWidth(totalWidth + 50);
-        renderer.resize(totalWidth + 50, pentagram_height)
+    totalWidth = Math.max(totalWidth, init_pentagram_width);
+
+    // If the new width is greater or smaller than the initial width, update stave width and pentagran_width variable
+    if (totalWidth > pentagram_width || totalWidth < pentagram_width) {
+        stave.setWidth(totalWidth + 100);
+        renderer.resize(totalWidth + 100, pentagram_height)
         pentagram_width = totalWidth;
     }
 
