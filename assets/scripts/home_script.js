@@ -847,6 +847,8 @@ function displayNote(note, keys, duration) {
         display_note = new StaveNote({
             keys: keys,
             duration: duration,
+            clef: 'treble',
+            auto_stem: true
         });
     }
 
