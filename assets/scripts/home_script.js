@@ -598,14 +598,52 @@ const showHideKeys = () => {
 
 /**
  * Plays the sound of the button that has been pressed
+ *
+ * @param {string} note - the note to play (format example : C#/4, C/4)
  * */
-const playTune = (key) => {
-    key = key.replace('#', 's');
-    let aud = new Audio();
+const playTune = (note) => {
+    currently_played_notes[note].audio = new Audio();
+    let aud = currently_played_notes[note].audio;
+
+    let key = note.replace('#', 's');
+
+    if (key.includes('s')) { // convert sharp to flat
+        const Notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+        for (let k = 0 ; k < Notes.length ; ++k) {
+            if (key[0] == Notes[k]) {
+                key = key.replace(Notes[k], Notes[(k + 1) % Notes.length]);
+                key = key.replace('s', 'b');
+                break;
+            }
+        }
+    }
+
     aud.volume = volume;
-    aud.src = `tunes/${key}.wav`;
+    aud.src = `acoustic_grand_piano-mp3/${key}.mp3`;
+
     aud.play();
-    key = key.replace('s', '#');
+}
+
+/**
+ * Stops the sound for the given note, with a fade out.
+ *
+ * @param {string} note - the note to stop playing (format example : C#/4, C/4)
+ */
+const stopTune = (note) => {
+    let audio = currently_played_notes[note].audio;
+
+    var fadeAudio = setInterval(function() {
+        if (audio.volume > 0) {
+            audio.volume -= 1/8;
+        }
+        else {
+            clearInterval(fadeAudio);
+            audio.pause();
+        }
+    }, 50);
+
+    // audio.pause();
 }
 
 /**
@@ -646,6 +684,10 @@ function keyUp(note) {
     const clickedKey = document.querySelector(`[data-key="${note_arr}"]`); // getting clicked key element
     clickedKey.classList.remove("active"); 
 
+    // Stop the playing sound
+    stopTune(note_arr)
+
+    // Calculate duration
     let elapsed = (new Date() - currently_played_notes[note_arr].start) / 1000;
     elapsed /= 2;
 
