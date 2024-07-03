@@ -56,6 +56,7 @@ function postAndDisplayQuery(query) {
         }
         else if ('error' in data) {
             formatted_out = data.error;
+            alert(formatted_out);
 
             dataDiv.textContent = '[]';
             loadPageN(1, null, true, true);
@@ -167,7 +168,14 @@ const submitHandler = function() {
         })
         .then(crisp_query => {
             if (crisp_query == malformatted_compiled_query) {
-                crisp_field.value = 'Fuzzy query is not correctly formatted.';
+                let dataDiv = document.getElementById('data');
+                dataDiv.textContent = '[]';
+                loadPageN(1, null, true, true);
+
+                let err_txt = 'Fuzzy query is not correctly formatted.';
+                crisp_field.value = err_txt;
+                alert(err_txt);
+
                 return;
             }
 
