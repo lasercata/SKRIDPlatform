@@ -3,6 +3,7 @@
  * @module index.js
  */
 
+//============================= Init =============================//
 const express = require('express');
 const neo4j = require('neo4j-driver');
 const bodyParser = require('body-parser');
@@ -29,6 +30,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('data'));
 app.use('/data', express.static('data'));
 
+//============================= Functions =============================//
 /**
  * Print the date and time, `level`, and `msg`.
  *
@@ -59,8 +61,20 @@ function queryEditDB(query) {
     return false;
 }
 
+//============================= Images =============================//
+app.use(express.static('assets/public/')); // Everything in this folder will be available through the web
+
+//============================= Pages (get) =============================//
+/**
+ * Route for the home page.
+ *
+ * GET
+ *
+ * @constant /
+ */
 app.get("/", function(req,res){
-    res.render("home");});
+    res.render("home");
+});
 
 /**
  * Route for the plus page.
@@ -246,6 +260,7 @@ app.get('/search', async function(req, res) {
     });
 });
 
+//============================= Endpoints (post) =============================//
 /**
  * This endpoint is called when the user wants to retrieve the results containing the inserted pattern.
  *
