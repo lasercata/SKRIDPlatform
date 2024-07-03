@@ -74,6 +74,11 @@ Launch the local server :
 node index.js
 ```
 
+To keep the logs :
+```
+node index.js >> skrid.log
+```
+
 It will print something like `Server listening on port 3000`.
 
 And then open the following url in your browser : `localhost:3000` (change the port accordingly to the previous result).
