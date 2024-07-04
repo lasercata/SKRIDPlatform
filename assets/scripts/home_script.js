@@ -152,7 +152,8 @@ function constructExactMatch() {
     let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
-        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+        let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
+        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNoteWithDots[duration] +'}]->'; 
     }
     query += '(eventanonymous)';
 
@@ -315,7 +316,8 @@ function constructIgnoringTheMelody() {
     let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
-        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+        let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
+        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNoteWithDots[duration] +'}]->'; 
     }
     query += '(eventanonymous)' 
 
@@ -360,7 +362,8 @@ function constructIgnoringTheOctave() {
     let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
-        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+        let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
+        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNoteWithDots[duration] +'}]->'; 
     }
     query += '(eventanonymous)';
 
@@ -441,7 +444,9 @@ function constructSignatureForTheRhythm() {
     let query = 'MATCH';
 
     for(let i = 1; i < melody.length + 1; i++) {
-        //query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
+        // let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
+        // query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[duration] +'}]->'; 
+        // //query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
         query += '(event' + i + ':Event)-[r' + i + ':NEXT{duration:0.125}]->';
     }
     query += '(eventanonymous)';
@@ -695,12 +700,15 @@ function sleep(ms) {
  */
 async function playMelody() {
     for (let k = 0 ; k < melody.length ; ++k) {
+
+        let duration = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration;
+
         if (melody[k].noteType == 'r')
             playNoteWithRhythm('r')
         else
-            melody[k].keys.forEach((key) => {playNoteWithRhythm(key.replace('/', ''), melody[k].duration)}); // Play chord (or just one note)
+            melody[k].keys.forEach((key) => {playNoteWithRhythm(key.replace('/', ''), duration)}); // Play chord (or just one note)
 
-        await sleep(1000 * durationNoteWithDots[melody[k].duration]);
+        await sleep(1000 * durationNoteWithDots[duration]);
     }
 }
 
