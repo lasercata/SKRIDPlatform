@@ -6,8 +6,7 @@
   align-items: center;
   flex-direction: row;
 }
-.clear_all,
-.clear_last_note {
+.stave_buttons {
   width: 130px;
   height: 60px;
   border-radius: 20px;
@@ -20,7 +19,8 @@
   cursor: pointer;
   margin: 10px;
 }
-.clear_last_note:hover, .clear_all:hover, #send-button:hover {
+.stave_buttons:hover,
+#send-button:hover {
   box-shadow: 0 5px 10px rgba(0,0,0,0.3);
 }
 .container, .container_2 {

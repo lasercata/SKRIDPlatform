@@ -39,6 +39,7 @@ let volume = 0.5;
 
 /** Used to store the notes played when pressed with the computer keyboard. */
 var currently_played_notes = {}
+var currently_played_notes_playback = {}
 
 
 //============================= Global constants =============================//
@@ -78,7 +79,7 @@ const durationNoteWithDots = {
     'w': 1              // (whole)
 };
 
-/** The keyboard mapping */
+/** The keyboard mapping that tie computer keys with piano notes */
 const mapping_azerty = {
     'q': 'C/4',
     'z': 'C#/4',
@@ -599,11 +600,17 @@ const showHideKeys = () => {
 /**
  * Plays the sound of the button that has been pressed
  *
- * @param {string} note - the note to play (format example : C#/4, C/4)
+ * @param {string} note - the note to play (format example : C#4, C4)
+ * @param {Audio} [audio=null] - if not null, use this audio to make the sound.
  * */
-const playTune = (note) => {
-    currently_played_notes[note].audio = new Audio();
-    let aud = currently_played_notes[note].audio;
+const playTune = (note, audio=null) => {
+    if (note == 'r')
+        return;
+
+    if (audio == null) {
+        currently_played_notes_playback[note] = {audio: new Audio()};
+        audio = currently_played_notes_playback[note].audio;
+    }
 
     let key = note.replace('#', 's');
 
@@ -619,19 +626,28 @@ const playTune = (note) => {
         }
     }
 
-    aud.volume = volume;
-    aud.src = `acoustic_grand_piano-mp3/${key}.mp3`;
+    audio.volume = volume;
+    audio.src = `acoustic_grand_piano-mp3/${key}.mp3`;
 
-    aud.play();
+    audio.play();
 }
 
 /**
  * Stops the sound for the given note, with a fade out.
  *
  * @param {string} note - the note to stop playing (format example : C#/4, C/4)
+ * @param {Audio} [audio=null] - if not null, use this audio to stop the sound.
  */
-const stopTune = (note) => {
-    let audio = currently_played_notes[note].audio;
+const stopTune = (note, audio=null) => {
+    if (note == 'r')
+        return;
+
+    let note_arr = note.replace('/', '');
+
+    if (audio == null) {
+        audio = currently_played_notes_playback[note_arr].audio;
+        delete currently_played_notes_playback[note_arr];
+    }
 
     var fadeAudio = setInterval(function() {
         if (audio.volume > 0) {
@@ -642,8 +658,50 @@ const stopTune = (note) => {
             audio.pause();
         }
     }, 50);
+}
 
-    // audio.pause();
+/**
+ * Plays a note and stop after the given rhythm.
+ *
+ * @param {string} note - the note (pitch) to play (e.g C#/4) ;
+ * @param {string} rhythm - the rhythm of the note (e.g h, 8d, ...)
+ */
+function playNoteWithRhythm(note, rhythm) {
+    let audio = new Audio();
+
+    playTune(note, audio);
+
+    // let audio = currently_played_notes_playback[note].audio;
+
+    var stopAudio = setInterval(function() {
+        if (audio.currentTime >= 2 * durationNoteWithDots[rhythm]) {
+            clearInterval(stopAudio);
+            stopTune(note, audio);
+        }
+    }, 1)
+}
+
+/**
+ * Wait `ms` ms.
+ *
+ * @param {int} ms - the time to wait, in ms.
+ */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Play the melody from the `melody` global array.
+ */
+async function playMelody() {
+    for (let k = 0 ; k < melody.length ; ++k) {
+        if (melody[k].noteType == 'r')
+            playNoteWithRhythm('r')
+        else
+            melody[k].keys.forEach((key) => {playNoteWithRhythm(key.replace('/', ''), melody[k].duration)}); // Play chord (or just one note)
+
+        await sleep(1000 * durationNoteWithDots[melody[k].duration]);
+    }
 }
 
 /**
@@ -777,12 +835,14 @@ function manageOptions() {
     const searchButton = document.getElementById("send-button"); // Search button
     const radioButtons = document.querySelectorAll('input[type="radio"]'); // Get all the radio buttons
     const optionsRow = document.querySelector(".options-row");
-    const clearAllButton = document.querySelector(".clear_all");
-    const clearLastNoteButton = document.querySelector(".clear_last_note");
+    const clearAllButton = document.getElementById("clear_all");
+    const clearLastNoteButton = document.getElementById("clear_last_note");
+    const playBt = document.getElementById('play_melody');
 
     // Add an event listener for the clear-buttons to call the corresponding method
     clearAllButton.addEventListener("click", clear_all_pattern);
     clearLastNoteButton.addEventListener("click", remove_last_note);
+    playBt.addEventListener("click", playMelody);
 
     // Add an event listener for the 'search' button
     searchButton.addEventListener("click", searchButtonHandler);
@@ -922,7 +982,7 @@ function displayNote(note, keys, duration) {
 function resizeStave() {
     let totalWidth = 0;
     melody.forEach((note) => {
-        totalWidth += note.getWidth();
+        totalWidth += note.getWidth() + 5;
     });
 
     totalWidth = Math.max(totalWidth, init_pentagram_width);
