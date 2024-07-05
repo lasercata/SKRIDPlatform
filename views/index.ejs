@@ -93,9 +93,9 @@
           <li class="key white" data-key="B5"><span>SI(B)</span></li>
         </ul>
         <div class='below-keyboard'>
-          <div class='extra-keys'>
-            <button data-key='r' id='silence-bt'><span>Silence (b)</span></button>
+          <button data-key='r' id='silence-bt'><span>Silence (b)</span></button>
 
+          <div class='rhythm-modif'>
             <button class='rhythm-modif-bt' data-key='w' id='whole-bt'><img src='public/notes_pics/1.png' height=50px alt='Whole'></button>
             <button class='rhythm-modif-bt' data-key='hd' id='half-dotted-bt'><img src='public/notes_pics/2d.png' height=50px alt='Dotted half'></button>
             <button class='rhythm-modif-bt' data-key='h' id='half-bt'><img src='public/notes_pics/2.png' height=50px alt='Half'></button>
@@ -107,9 +107,13 @@
             <button class='rhythm-modif-bt' data-key='16' id='16th-bt'><img src='public/notes_pics/16.png' height=50px alt='16-th'></button>
             <button class='rhythm-modif-bt' data-key='32d' id='32th-dotted-bt'><img src='public/notes_pics/32d.png' height=50px alt='Dotted 32-th'></button>
             <button class='rhythm-modif-bt' data-key='32' id='32th-bt'><img src='public/notes_pics/32.png' height=50px alt='32-th'></button>
+          </div>
 
-            <button class='octave-modif' data-key='<' id='octave-minus'><span>Octave - (c)</span></button>
-            <button class='octave-modif' data-key='>' id='octave-plus'><span>Octave + (v)</span></button>
+          <div class='octave-modif'>
+            <div class='octave-modif-bt-div'>
+              <button class='octave-modif-bt' data-key='<' id='octave-minus'><span>Octave - (c)</span></button>
+              <button class='octave-modif-bt' data-key='>' id='octave-plus'><span>Octave + (v)</span></button>
+            </div>
             <label id='octave-lb'>4</label>
           </div>
         </div>

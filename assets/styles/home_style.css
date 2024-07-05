@@ -161,7 +161,27 @@ header input {
   background:linear-gradient(to bottom, #fff 0%, #eee 100%);
 }
 
-.rhythm-modif-bt, .octave-modif {
+.below-keyboard {
+    display: flex;
+}
+
+.rhythm-modif {
+    display: flex;
+    margin: 10px;
+}
+
+.octave-modif-bt-div {
+    display: grid;
+    margin-right: 10px;
+}
+
+.octave-modif {
+    display: flex;
+    align-items: center;
+    margin: 10px;
+}
+
+.rhythm-modif-bt, .octave-modif-bt {
     border-radius: 8px;
 }
 
