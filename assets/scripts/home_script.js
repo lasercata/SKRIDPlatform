@@ -44,6 +44,12 @@ var currently_played_notes_playback = {}
 /** Store the current octave (in [1 ; 6]) */
 var octave = 4;
 
+/** Store when the user plays the melody */
+var is_playing = false;
+
+/** Used as a flag to stop the melody from playing */
+var stop_melody = false;
+
 
 //============================= Global constants =============================//
 const init_pentagram_width = 450;
@@ -704,16 +710,45 @@ function sleep(ms) {
  */
 async function playMelody() {
     for (let k = 0 ; k < melody.length ; ++k) {
+        if (!stop_melody) {
+            let duration = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration;
 
-        let duration = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration;
+            if (melody[k].noteType == 'r')
+                playNoteWithRhythm('r')
+            else
+                melody[k].keys.forEach((key) => {playNoteWithRhythm(key.replace('/', ''), duration)}); // Play chord (or just one note)
 
-        if (melody[k].noteType == 'r')
-            playNoteWithRhythm('r')
-        else
-            melody[k].keys.forEach((key) => {playNoteWithRhythm(key.replace('/', ''), duration)}); // Play chord (or just one note)
-
-        await sleep(1000 * durationNoteWithDots[duration]);
+            await sleep(1000 * durationNoteWithDots[duration]);
+        }
+        else {
+            stop_melody = false;
+            break;
+        }
     }
+}
+
+/**
+ * Plays the melody if it not currently playing.
+ * Otherwise stop it.
+ */
+async function playMelodyBtHandler() {
+    const play_bt = document.getElementById('play_melody');
+
+    if (!is_playing) {
+        is_playing = true;
+        // play_bt.disabled = true;
+        play_bt.innerText = 'Arrêter la mélodie';
+        play_bt.style.backgroundColor = 'red';
+
+        await playMelody();
+
+        is_playing = false;
+        // play_bt.disabled = false;
+        play_bt.innerText = 'Jouer la mélodie';
+        play_bt.style.backgroundColor = '#62aadd';
+    }
+    else
+        stop_melody = true;
 }
 
 /**
@@ -878,7 +913,7 @@ function manageOptions() {
     // Add an event listener for the clear-buttons to call the corresponding method
     clearAllButton.addEventListener("click", clear_all_pattern);
     clearLastNoteButton.addEventListener("click", remove_last_note);
-    playBt.addEventListener("click", playMelody);
+    playBt.addEventListener("click", playMelodyBtHandler);
 
     // Add an event listener for the 'search' button
     searchButton.addEventListener("click", searchButtonHandler);
@@ -977,6 +1012,30 @@ function manageStaveAndMelody() {
 
     document.getElementById('octave-minus').addEventListener('mousedown', () => changeOctave(-1));
     document.getElementById('octave-plus').addEventListener('mousedown', () => changeOctave(1));
+}
+
+/**
+ * This function manages the box for selecting the collections in which the query should be executed.
+ * Initially, if the user has not selected any collection, it will empty, so that the query will be executed over all the collections.
+ * If the user selectes a collection (there is a change event), we add the collection to the 'selectedCollections' array.
+ * If the user changes idea, the '-' option will reset everything, emptying the 'selectedCollections' array
+ */
+function manageCollections() {
+    const select = document.getElementById("collections");
+    const list = document.getElementById("selected-collections");
+
+    select.addEventListener("change", function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (!selectedCollections.includes(selectedOption.value) && (selectedOption.value != '-')) {
+            selectedCollections.push(selectedOption.value);
+            const listItem = document.createElement("li");
+            listItem.textContent = selectedOption.textContent;
+            list.appendChild(listItem);
+        } else if(selectedOption.value == '-') {
+            selectedCollections = [];
+            list.textContent = "";
+        } 
+    });
 }
 
 /**
@@ -1090,30 +1149,6 @@ function changeOctave(diff) {
         octave = 6;
 
     octave_lb.innerText = octave;
-}
-
-/**
- * This function manages the box for selecting the collections in which the query should be executed.
- * Initially, if the user has not selected any collection, it will empty, so that the query will be executed over all the collections.
- * If the user selectes a collection (there is a change event), we add the collection to the 'selectedCollections' array.
- * If the user changes idea, the '-' option will reset everything, emptying the 'selectedCollections' array
- */
-function manageCollections() {
-    const select = document.getElementById("collections");
-    const list = document.getElementById("selected-collections");
-
-    select.addEventListener("change", function() {
-        const selectedOption = this.options[this.selectedIndex];
-        if (!selectedCollections.includes(selectedOption.value) && (selectedOption.value != '-')) {
-            selectedCollections.push(selectedOption.value);
-            const listItem = document.createElement("li");
-            listItem.textContent = selectedOption.textContent;
-            list.appendChild(listItem);
-        } else if(selectedOption.value == '-') {
-            selectedCollections = [];
-            list.textContent = "";
-        } 
-    });
 }
 
 

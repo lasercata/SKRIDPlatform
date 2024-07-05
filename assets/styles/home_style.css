@@ -30,6 +30,12 @@
   align-items: center;
   margin: 20px;
 }
+.stave_buttons:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
 #music-score{
   overflow-x: auto;
   /* width: 500px; */
