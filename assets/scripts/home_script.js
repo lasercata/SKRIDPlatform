@@ -826,8 +826,8 @@ function keyListener(event) {
         remove_last_note();
 
     //---Change octave
-    else if (event.type == 'keydown' && (event.key == '-' || event.key == '+' || event.key == 'x' || event.key == 'c')) {
-        if (event.key == '-' || event.key == 'x')
+    else if (event.type == 'keydown' && (event.key == '-' || event.key == '+' || event.key == 'c' || event.key == 'v')) {
+        if (event.key == '-' || event.key == 'c')
             changeOctave(-1);
         else
             changeOctave(1);
