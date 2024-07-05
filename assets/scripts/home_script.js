@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", init);
 //============================= Global variables =============================//
 const { Renderer, Stave, Formatter, StaveNote, Beam, Accidental, MusicXMLParser} = Vex.Flow;
 
-// This is the array that will contain the music pattern inserted by the user
+/** This is the array that will contain the music pattern inserted by the user */
 let melody;
 
 let stave;
@@ -143,6 +143,7 @@ function sendQuery(query) {
     .then(data => {
         // First, call a function that converts the data
         let unifiedResults = unifyResults(data);
+        console.log(data);
 
         let results_container = $('#results-container');
         results_container.empty();

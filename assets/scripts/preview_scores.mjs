@@ -55,12 +55,23 @@ function unifyResults(queryResults) {
                 else
                     notes_temp[notes_arr[k].note.id] = 1;
             }
+
             if ('id' in result) { // This is for crisp queries (when returning id)
                 notes_temp[result.id] = 1;
             }
-            else if ('mei_id_event1' in result) {
-                notes_temp[result['mei_id_event1']] = 1;
+            else { // This is also for crisp queries (taken from console of piano interface) with 'mei_id_event1, ...' id
+                let k = 1;
+                while (true) { // Adding all the IDs that are present ('mei_id_event1', 'mei_id_event2', ...)
+                    if ('mei_id_event' + k in result) {
+                        notes_temp[result['mei_id_event' + k]] = 1;
+                    }
+                    else
+                        break;
+
+                    ++k;
+                }
             }
+
             results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
         }
         else { // The source element has already been seen
