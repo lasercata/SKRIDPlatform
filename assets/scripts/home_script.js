@@ -41,6 +41,9 @@ let volume = 0.5;
 var currently_played_notes = {}
 var currently_played_notes_playback = {}
 
+/** Store the current octave (in [1 ; 6]) */
+var octave = 4;
+
 
 //============================= Global constants =============================//
 const init_pentagram_width = 450;
@@ -79,32 +82,33 @@ const durationNoteWithDots = {
     'w': 1              // (whole)
 };
 
-/** The keyboard mapping that tie computer keys with piano notes */
+/** The keyboard mapping that tie computer keys with piano notes. Use with `octave` global var. */
 const mapping_azerty = {
-    'q': 'C/4',
-    'z': 'C#/4',
-    's': 'D/4',
-    'e': 'D#/4',
-    'd': 'E/4',
-    'f': 'F/4',
-    't': 'F#/4',
-    'g': 'G/4',
-    'y': 'G#/4',
-    'h': 'A/4',
-    'u': 'A#/4',
-    'j': 'B/4',
-    'k': 'C/5',
-    'o': 'C#/5',
-    'l': 'D/5',
-    'p': 'D#/5',
-    'm': 'E/5',
-    'ù': 'F/5',
+    'q': {pitch: 'C', octave: 0},
+    'z': {pitch: 'C#', octave: 0},
+    's': {pitch: 'D', octave: 0},
+    'e': {pitch: 'D#', octave: 0},
+    'd': {pitch: 'E', octave: 0},
+    'f': {pitch: 'F', octave: 0},
+    't': {pitch: 'F#', octave: 0},
+    'g': {pitch: 'G', octave: 0},
+    'y': {pitch: 'G#', octave: 0},
+    'h': {pitch: 'A', octave: 0},
+    'u': {pitch: 'A#', octave: 0},
+    'j': {pitch: 'B', octave: 0},
+    'k': {pitch: 'C', octave: 1},
+    'o': {pitch: 'C#', octave: 1},
+    'l': {pitch: 'D', octave: 1},
+    'p': {pitch: 'D#', octave: 1},
+    'm': {pitch: 'E', octave: 1},
+    'ù': {pitch: 'F', octave: 1},
     // '^': 'F#/5',
-    ')': 'F#/5',
-    '*': 'G/5',
-    '$': 'G#/5',
+    ')': {pitch: 'F#', octave: 1},
+    '*': {pitch: 'G', octave: 1},
+    '$': {pitch: 'G#', octave: 1},
     //TODO: there is also A, A#, and B (/5) missing
-    'b': 'r' // silence
+    // 'b': 'r' // silence
+    'b': {pitch: 'r', octave: 0},
 }
 
 
@@ -718,8 +722,9 @@ async function playMelody() {
  * It starts a timer and plays the note.
  *
  * @param {string} note - the note name (e.g C/5, C#/4, or C5, C#4, ...)
+ * @param {string} [key_id=null] - the html `data-key` field. If null, uses `note` instead.
  */
-function keyDown(note) {
+function keyDown(note, key_id=null) {
     note = note.replace('/', '');
 
     currently_played_notes[note] = {start: new Date()};
@@ -728,7 +733,11 @@ function keyDown(note) {
         playTune(note);
 
     // Set key as selected in the html
-    const clickedKey = document.querySelector(`[data-key="${note}"]`); // getting clicked key element
+    if (key_id == null || note == 'r')
+        key_id = note;
+
+    console.log(key_id)
+    const clickedKey = document.querySelector(`[data-key="${key_id}"]`); // getting clicked key element
     clickedKey.classList.add("active"); 
     // Removing active class after 150 ms from the clicked key element
     // setTimeout(() => { 
@@ -742,12 +751,16 @@ function keyDown(note) {
  * It gets the duration, adds the note to `melody`, and display the note.
  *
  * @param {string} note - the note name (e.g C/5, C#/4, with the '/')
+ * @param {string} [key_id=null] - the html `data-key` field. If null, uses `note_arr` instead.
  */
-function keyUp(note) {
+function keyUp(note, key_id=null) {
     let note_arr = note.replace('/', '');
 
     // Set key as unselected in the html
-    const clickedKey = document.querySelector(`[data-key="${note_arr}"]`); // getting clicked key element
+    if (key_id == null || note == 'r')
+        key_id = note_arr;
+
+    const clickedKey = document.querySelector(`[data-key="${key_id}"]`); // getting clicked key element
     clickedKey.classList.remove("active"); 
 
     // Stop the playing sound
@@ -812,6 +825,14 @@ function keyListener(event) {
     else if (event.type == 'keydown' && event.key == 'Backspace')
         remove_last_note();
 
+    //---Change octave
+    else if (event.type == 'keydown' && (event.key == '-' || event.key == '+' || event.key == 'x' || event.key == 'c')) {
+        if (event.key == '-' || event.key == 'x')
+            changeOctave(-1);
+        else
+            changeOctave(1);
+    }
+
     //---Ignore repeat key for all the following mappings
     else if (event.repeat)
         return;
@@ -822,13 +843,20 @@ function keyListener(event) {
 
     //---Handle piano keys
     else if (event.key in mapping_azerty) {
+        let note_json = mapping_azerty[event.key];
+        let note = note_json.pitch + '/' + (note_json.octave + octave);
+        let key_id = note_json.pitch + (note_json.octave + 4);
+
+        if (note_json.pitch == 'r') {
+            note = 'r';
+            key_id = 'r';
+        }
+
         if (event.type == 'keydown') { // Pressed down : play sound, start timer
-            let note = mapping_azerty[event.key];
-            keyDown(note);
+            keyDown(note, key_id);
         }
         else if (event.type == 'keyup') { // Key released : add note
-            let note = mapping_azerty[event.key];
-            keyUp(note);
+            keyUp(note, key_id);
         }
     }
 }
@@ -914,7 +942,9 @@ function manageStaveAndMelody() {
 
     pianoKeys.forEach(key => {
         key.addEventListener("mousedown", () => {
-            keyDown(key.dataset.key);
+            let oct = parseInt(key.dataset.key.slice(-1)[0]) - 4;
+            let key_ = key.dataset.key.slice(0, -1) + (oct + octave);
+            keyDown(key_, key.dataset.key);
         });
         key.addEventListener("mouseup", () => {
             // Make the note with the '/'
@@ -925,7 +955,10 @@ function manageStaveAndMelody() {
             else
                 newkey = key.dataset.key.slice(0, 1) + '/' + key.dataset.key.slice(1);
 
-            keyUp(newkey);
+            let oct = parseInt(key.dataset.key.slice(-1)[0]) - 4;
+            newkey = newkey.slice(0, -1) + (oct + octave);
+
+            keyUp(newkey, key.dataset.key);
         });
     });
 
@@ -941,6 +974,9 @@ function manageStaveAndMelody() {
     document.getElementById('16th-bt').addEventListener('mousedown', () => changeLastNoteRhythm('16'));
     document.getElementById('32th-dotted-bt').addEventListener('mousedown', () => changeLastNoteRhythm('32d'));
     document.getElementById('32th-bt').addEventListener('mousedown', () => changeLastNoteRhythm('32'));
+
+    document.getElementById('octave-minus').addEventListener('mousedown', () => changeOctave(-1));
+    document.getElementById('octave-plus').addEventListener('mousedown', () => changeOctave(1));
 }
 
 /**
@@ -1038,6 +1074,25 @@ function changeLastNoteRhythm(newRhythm) {
 }
 
 /**
+ * Changes the current octave
+ *
+ * @param {int} diff - the number of octaves to change (e.g +1, -1, ...)
+ */
+function changeOctave(diff) {
+    const octave_lb = document.getElementById('octave-lb');
+
+    octave += diff;
+
+    if (octave < 1)
+        octave = 1;
+
+    if (octave > 6)
+        octave = 6;
+
+    octave_lb.innerText = octave;
+}
+
+/**
  * This function manages the box for selecting the collections in which the query should be executed.
  * Initially, if the user has not selected any collection, it will empty, so that the query will be executed over all the collections.
  * If the user selectes a collection (there is a change event), we add the collection to the 'selectedCollections' array.
@@ -1075,7 +1130,7 @@ function init() {
     renderer = null;
 
     pentagram_width = 450;
-    pentagram_height = 150;
+    pentagram_height = 200;
     pentagram = document.getElementById("music-score");
 
     pianoKeys = document.querySelectorAll(".piano-keys .key"),
