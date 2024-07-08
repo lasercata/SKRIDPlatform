@@ -155,11 +155,18 @@ function init() {
             if (noteIds.length > 0) {
                 for (let k = 100 ; k >= 0 ; k -= 10) {
                     let grad_color = document.createElement('div');
-                    grad_color.style = `padding:8px; background-color: ${getGradientColor(k / 100)}`;
+                    grad_color.setAttribute('class', 'grad-color');
                     grad_color.innerText = k + '%';
-                    grad_div.append(grad_color);
 
-                    // grad_div.append(`<div style='padding:8px; color:#FFF; background-color: ${getGradientColor(k / 100)}'>${k}%</div>`)
+                    let style = `background-color: ${getGradientColor(k / 100)};`;
+                    if (k == 100)
+                        style += 'border-top-left-radius: 10px; border-top-right-radius: 10px;'
+                    else if (k == 0)
+                        style += 'border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;'
+
+                    grad_color.style = style;
+
+                    grad_div.append(grad_color);
                 }
             }
             else {
