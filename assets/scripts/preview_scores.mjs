@@ -47,9 +47,8 @@ function unifyResults(queryResults) {
 
             //-Adding the IDs to the id array
             for(let k = 0; k < notes_arr.length; k++) {
-                if (typeof(notes_arr[k]) == 'string') {
+                if (typeof(notes_arr[k]) == 'string')
                     notes_temp[notes_arr[k]] = 1;
-                }
                 else if ('note_deg' in notes_arr[k]) // For fuzzy queries, add the 'note_deg'info
                     notes_temp[notes_arr[k].note.id] = notes_arr[k].note_deg;
                 else
@@ -61,13 +60,8 @@ function unifyResults(queryResults) {
             }
             else { // This is also for crisp queries (taken from console of piano interface) with 'mei_id_event1, ...' id
                 let k = 1;
-                while (true) { // Adding all the IDs that are present ('mei_id_event1', 'mei_id_event2', ...)
-                    if ('mei_id_event' + k in result) {
-                        notes_temp[result['mei_id_event' + k]] = 1;
-                    }
-                    else
-                        break;
-
+                while ('mei_id_event' + k in result) { // Adding all the IDs that are present ('mei_id_event1', 'mei_id_event2', ...)
+                    notes_temp[result['mei_id_event' + k]] = 1;
                     ++k;
                 }
             }
@@ -85,7 +79,7 @@ function unifyResults(queryResults) {
             for(let k = 0; k < notes_arr.length; k++) {
                 // results[index].notes_id.push(notes_arr[k].note.id);
 
-                if (typeof(notes_arr[k] == 'string'))
+                if (typeof(notes_arr[k]) == 'string')
                     results[index].notes_id[notes_arr[k]] = 1;
                 else if ('note_deg' in notes_arr[k]) // For fuzzy queries, add the 'note_deg'info
                     results[index].notes_id[notes_arr[k].note.id] = notes_arr[k].note_deg;
