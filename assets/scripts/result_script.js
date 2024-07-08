@@ -3,7 +3,7 @@
  * @module result_script
  */
 
-import { getGradientColor } from "./preview_scores.mjs";
+import { getGradientColor } from "./preview_scores.js";
 
 document.addEventListener("DOMContentLoaded", init);
 

@@ -100,7 +100,7 @@ function unifyResults(queryResults) {
  *
  * @param {*} result - the json object.
  *
- * @returns {source: `source`, collection: `collection`}
+ * @returns \{source: `source`, collection: `collection`\}
  */
 function getSourceAndCollection(result) {
     let res = {};
@@ -231,10 +231,10 @@ function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, p
 }
 
 /**
- * Return a color between `fromColor` and `toColor`, a `percent`%
+ * Return a color between `fromColor` and `toColor`, at `percent`%
  *
- * @param {json} fromColor - the origin color (0%). Format : {r: <nb>, g: <nb>, b: <nb>} ;
- * @param {json} toColor - the destination color (100%). Format : {r: <nb>, g: <nb>, b: <nb>} ;
+ * @param {json} fromColor - the origin color (0%). Format : {r: [nb], g: [nb], b: [nb]}, with 0 <= nb < 256 ;
+ * @param {json} toColor - the destination color (100%). Format : {r: [nb], g: [nb], b: [nb]} ;
  * @param {int} percent - the percentage.
  *
  * @returns {string} an RGB string.

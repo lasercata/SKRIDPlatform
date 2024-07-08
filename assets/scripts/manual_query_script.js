@@ -4,7 +4,7 @@
  */
 
 import { setTk, loadPageN } from './paginated_results.js';
-import { unifyResults } from './preview_scores.mjs';
+import { unifyResults } from './preview_scores.js';
 
 var input;
 var output;

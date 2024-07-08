@@ -5,8 +5,8 @@
  * @module paginated_results
  */
 
-// import { createPreviews, fillPreviews } from "./preview_scores.mjs";
-import { loadPreviews } from "./preview_scores.mjs";
+// import { createPreviews, fillPreviews } from "./preview_scores.js";
+import { loadPreviews } from "./preview_scores.js";
 
  /** The number of items per page */
 var nb_per_page = 10;
@@ -77,7 +77,7 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
 }
 
 /**
- * Extract the right sub-array from `pageData` and display it using functions from `preview_scores.mjs`.
+ * Extract the right sub-array from `pageData` and display it using functions from `preview_scores.js`.
  *
  * @param {int} pageNb - the number of the page to load
  * @param {int} [numberPerPage=null] - the number of items per page. If null, use default global value.
