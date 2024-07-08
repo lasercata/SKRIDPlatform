@@ -115,31 +115,37 @@ function init() {
 
             var link_mei = document.createElement('a');
             link_mei.setAttribute('href',datadir+folder+score_name);
+            link_mei.setAttribute('class', 'file-link');
             link_mei.innerHTML = score_name;
             document.getElementById('fichier_mei').appendChild(link_mei);
 
             var link_ly = document.createElement('a');
             link_ly.setAttribute('href',datadir+folder+filename+'.ly');
+            link_ly.setAttribute('class', 'file-link');
             link_ly.innerHTML = filename+'.ly';
             document.getElementById('fichier_ly').appendChild(link_ly);
 
             var link_mid = document.createElement('a');
             link_mid.setAttribute('href',datadir+folder+filename+'.mid');
+            link_mid.setAttribute('class', 'file-link');
             link_mid.innerHTML = filename+'.mid';
             document.getElementById('fichier_mid').appendChild(link_mid);
 
             var link_musicxml = document.createElement('a');
             link_musicxml.setAttribute('href',datadir+folder+filename+'.musicxml');
+            link_musicxml.setAttribute('class', 'file-link');
             link_musicxml.innerHTML = filename+'.musicxml';
             document.getElementById('fichier_musicxml').appendChild(link_musicxml);
 
             var link_pdf = document.createElement('a');
             link_pdf.setAttribute('href',datadir+folder+filename+'.pdf');
+            link_pdf.setAttribute('class', 'file-link');
             link_pdf.innerHTML = filename+'.pdf';
             document.getElementById('fichier_pdf').appendChild(link_pdf);
 
             var link_svg = document.createElement('a');
             link_svg.setAttribute('href',datadir+folder+filename+'.svg');
+            link_svg.setAttribute('class', 'file-link');
             link_svg.innerHTML = filename+'.svg';
             document.getElementById('fichier_svg').appendChild(link_svg);
 

@@ -178,7 +178,7 @@ function createPreview(url, source, nb_occ=null) {
     // Score title
     const h3 = document.createElement('h3');
     h3.className = "score_title";
-    h3.textContent = source.slice(0, -4);
+    h3.textContent = source.slice(0, -4).replaceAll('_', ' ');
 
     // Number of occurrences
     if (nb_occ != null) {
