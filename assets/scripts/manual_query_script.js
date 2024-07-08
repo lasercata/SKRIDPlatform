@@ -52,7 +52,14 @@ function postAndDisplayQuery(query) {
             //---Display results with pagination
             // dataDiv.textContent = JSON.stringify(data.results);
             dataDiv.textContent = JSON.stringify(unifyResults(data));
-            loadPageN(1, null, true, true);
+            try {
+                loadPageN(1, null, true, true);
+            }
+            catch {
+                dataDiv.textContent = '[]';
+                loadPageN(1, null, true, true);
+                alert('Cannot display previews !\nMaybe try to rename in RETURN clause (e.g RETURN s.source AS source).\nYou can also check the text output.')
+            }
         }
         else if ('error' in data) {
             formatted_out = data.error;
@@ -136,7 +143,14 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
             //---Load the first page
             // dataDiv.textContent = data.results;
             dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
-            loadPageN(1, null, true, true, true);
+            try {
+                loadPageN(1, null, true, true, true);
+            }
+            catch {
+                dataDiv.textContent = '[]';
+                loadPageN(1, null, true, true);
+                alert('Cannot display previews !\nMaybe try to rename in RETURN clause (e.g RETURN s.source AS source).\nYou can also check the text output.')
+            }
         }
         else if ('error' in data) {
             dataDiv.textContent = '[]';
