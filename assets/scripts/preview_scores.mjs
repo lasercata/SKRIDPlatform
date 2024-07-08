@@ -249,7 +249,9 @@ function interpolateBetweenColors(fromColor, toColor, percent) {
 };
 
 /**
- * Return the color to use
+ * Return the color to use.
+ *
+ * Internally it uses three colours.
  *
  * @param {float} degree - the match degree for a given note
  * @returns {string} a color corresponding best to `degree`
@@ -331,9 +333,12 @@ function createPreviews_1(results_container, results) {
  * @param {*} tk - the verovio toolkit ;
  * @param {*} results - the query result containing all the scores ;
  */
-function createPreviews_2(results_container, tk, results) {
+async function createPreviews_2(results_container, tk, results) {
     // Get the collections associated with each result
-    results.forEach(result => {
+    for (let k = 0 ; k < results.length ; ++k) {
+        const result = results[k];
+
+        // Get the source
         let source;
         if ('name' in result)
             source = result.name;
@@ -342,12 +347,14 @@ function createPreviews_2(results_container, tk, results) {
         else
             source = result._fields[0];
 
+        // Get the notes IDs
         let notes_id = [];
         if ('notes_id' in result)
             notes_id = result.notes_id;
 
+        // Get the author (needs a fetch since it is not in the result)
         let author_data = { string: source };
-        fetch('/findAuthor', {
+        await fetch('/findAuthor', { // await is needed here to keep the order of the results
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -367,7 +374,7 @@ function createPreviews_2(results_container, tk, results) {
             let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + source;
             fillPreview(score_div, score_path, tk, result.notes_id);
         });
-    });
+    }
 }
 
 /**
