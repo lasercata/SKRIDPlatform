@@ -255,13 +255,26 @@ function interpolateBetweenColors(fromColor, toColor, percent) {
  * @returns {string} a color corresponding best to `degree`
  */
 function getGradientColor(degree) {
-    const fromColor = {r: 255, g: 0, b: 0}; // red
-    // const toColor = {r: 0, g: 0, b: 0}; // black
-    const toColor = {r: 255, g: 255, b: 255}; // white
-    // const toColor = {r: 0, g: 255, b: 0}; // green
-    
-    // return interpolateBetweenColors(fromColor, toColor, 100 * degree);
-    return interpolateBetweenColors(fromColor, toColor, 100 * degree);
+    const gray = {r: 100, g: 100, b: 100};
+    const white = {r: 255, g: 255, b: 255};
+    const red = {r: 255, g: 0, b: 0};
+    const green = {r: 0, g: 255, b: 0};
+    const dark_green = {r: 0, g: 179, b: 0};
+    const blue = {r: 0, g: 0, b: 255};
+    const yellow = {r: 255, g: 255, b: 0};
+    const dark_yellow = {r: 215, g: 215, b: 0};
+    const cyan = {r: 0, g: 255, b: 255};
+
+    let a = dark_green;
+    let b = dark_yellow;
+    let c = red;
+
+    if (degree > 0.5)
+        return interpolateBetweenColors(a, b, 200 * (degree - 0.5)); // the degree is transformed from interval ]0.5 ; 1] to ]0 ; 100] linearly.
+    else
+        return interpolateBetweenColors(b, c, 200 * degree); // the degree is transformed from interval [0 ; 0.5] to [0 ; 100] linearly.
+
+    // return interpolateBetweenColors(dark_green, red, 100 * degree);
 }
 
 /**

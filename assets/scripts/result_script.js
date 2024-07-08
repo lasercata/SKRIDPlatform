@@ -149,6 +149,23 @@ function init() {
             link_svg.innerHTML = filename+'.svg';
             document.getElementById('fichier_svg').appendChild(link_svg);
 
+            // Add gradient legend
+            const grad_div = document.getElementById('gradient-legend');
+
+            if (noteIds.length > 0) {
+                for (let k = 100 ; k >= 0 ; k -= 10) {
+                    let grad_color = document.createElement('div');
+                    grad_color.style = `padding:8px; background-color: ${getGradientColor(k / 100)}`;
+                    grad_color.innerText = k + '%';
+                    grad_div.append(grad_color);
+
+                    // grad_div.append(`<div style='padding:8px; color:#FFF; background-color: ${getGradientColor(k / 100)}'>${k}%</div>`)
+                }
+            }
+            else {
+                grad_div.style = 'display: none';
+            }
+
             refreshPagination(currentPage, tk.getPageCount());
         });
     }
