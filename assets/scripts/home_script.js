@@ -117,6 +117,19 @@ const mapping_azerty = {
     'b': {pitch: 'r', octave: 0},
 }
 
+/** Used to convert qwerty keys to the azerty corresponding ones. */
+const qwerty_us_to_azerty = {
+    'q': 'a',
+    'w': 'z',
+    'a': 'q',
+    'z': 'w',
+    ';': 'm',
+    "'": 'ù',
+    '\\': '*',
+    'm': ',',
+    '[': '^',
+    ']': '$',
+}
 
 //============================= Functions =============================//
 //========= Queries functions =========//
@@ -718,7 +731,9 @@ function sleep(ms) {
 }
 
 /**
- * Play the melody from the `melody` global array.
+ * Plays / stop the melody from the `melody` global array.
+ *
+ * If the melody is already playing, it stops it. Otherwise, it plays it.
  */
 async function playMelody() {
     for (let k = 0 ; k < melody.length ; ++k) {
@@ -864,6 +879,17 @@ function keyUp(note, key_id=null) {
  * Manages event associated to key presses.
  */
 function keyListener(event) {
+    //------Get the key (convert if qwerty)
+    const qwerty_ch = document.getElementById('qwerty-checkbox');
+    let key;
+
+    if (qwerty_ch.checked) {
+        key = qwerty_us_to_azerty[event.key] || event.key;
+    }
+    else
+        key = event.key;
+
+    //------Select the action corresponding to the key
     //---Delete all
     if (event.type == 'keydown' && event.key == 'Backspace' && event.ctrlKey)
         clear_all_pattern();
@@ -889,8 +915,8 @@ function keyListener(event) {
         searchButtonHandler()
 
     //---Handle piano keys
-    else if (event.key in mapping_azerty) {
-        let note_json = mapping_azerty[event.key];
+    else if (key in mapping_azerty) {
+        let note_json = mapping_azerty[key];
         let note = note_json.pitch + '/' + (note_json.octave + octave);
         let key_id = note_json.pitch + (note_json.octave + 4);
 
