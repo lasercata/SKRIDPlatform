@@ -110,35 +110,28 @@ app.get("/manualQuery", function (req, res) {
 });
 
 /**
- * Route for the research page.
+ * Route for the research page with the piano interface.
  *
  * GET
  *
  * @constant /interface
- * @todo doc this better, and remove the first request !
  */
 app.get('/interface', async function (req, res) {
-    // let results = [];
     let authors = [];
-    try {
-        // const myQuery = "MATCH (s:Score) WHERE s.collection CONTAINS 'Joseph Mahe Original' RETURN s ORDER BY s.source LIMIT 30";
-        // let temp = await session.run(myQuery); //
-        // results = temp.records;
 
+    try {
         // The query to get the authors is necessary to display the list of possible collections
-        //const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.composer";
         const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.collection";
         let temp2 = await session.run(authorQuery);
         temp2 = temp2.records;
         temp2.forEach((record) => {
-            //authors.push(record._fields[0].substring(13).slice(0,-6));
             authors.push(record._fields[0]);
         });
     } catch(err) {
         log('error', `/interface: ${err}`)
     }
+
     res.render("index", {
-        // results: results,
         authors: authors
     });
 });
