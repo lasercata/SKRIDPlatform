@@ -32,7 +32,8 @@ function init() {
         const parent = document.getElementById('notation');
 
         // Set the parameters for the correct visualization of the score
-        let zoom = 75;
+        // let zoom = 75;
+        let zoom = 50;
         const parentWidth = parent.offsetWidth;
         const parentHeight = parent.offsetHeight;
         let pageHeight = parentHeight * 100 / zoom;
@@ -43,6 +44,11 @@ function init() {
             pageHeight: pageHeight,
             pageWidth: pageWidth,
             scale: zoom,
+            // adjustPageWidth: true,
+            // adjustPageHeight: true,
+            // scaleToPageSize: true,
+            // shrinkToFit: true,
+            // font: 'Bravura',
         };
         tk.setOptions(options);
 
