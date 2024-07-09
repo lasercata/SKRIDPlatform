@@ -1,5 +1,5 @@
-CREATE (top_10343_Avant_deux_mei:TopRhythmic {inputfile: '10343_Avant_deux_mei', source:'10343_Avant_deux.mei',composer:'Collecté par Albert Poulain', name: 'topRhythmic'})
-CREATE (StaffGroup1_10343_Avant_deux_mei:Score {inputfile: '10343_Avant_deux_mei', source:'10343_Avant_deux.mei',composer:'Collecté par Albert Poulain', id:'StaffGroup1_10343_Avant_deux_mei'})
+CREATE (top_10343_Avant_deux_mei:TopRhythmic {inputfile: '10343_Avant_deux_mei', source:'10343_Avant_deux.mei',composer:'Collecté par Albert Poulain', collection:'Albert Poulain', name: 'topRhythmic'})
+CREATE (StaffGroup1_10343_Avant_deux_mei:Score {inputfile: '10343_Avant_deux_mei', source:'10343_Avant_deux.mei',composer:'Collecté par Albert Poulain', collection:'Albert Poulain', id:'StaffGroup1_10343_Avant_deux_mei'})
 CREATE ((StaffGroup1_10343_Avant_deux_mei)-[:RHYTHMIC]->(top_10343_Avant_deux_mei))
 CREATE (_10343_Avant_deux_mei1:Voice {inputfile: '10343_Avant_deux_mei', source:'10343_Avant_deux.mei' ,id:'Staff2',name: 'main droite', shape_clef:'', staff_number:'1', line_clef:''})
 CREATE ((StaffGroup1_10343_Avant_deux_mei)-[:VOICE]->(_10343_Avant_deux_mei1))

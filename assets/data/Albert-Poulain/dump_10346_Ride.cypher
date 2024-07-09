@@ -1,5 +1,5 @@
-CREATE (top_10346_Ride_mei:TopRhythmic {inputfile: '10346_Ride_mei', source:'10346_Ride.mei',composer:'Collecté par Albert Poulain', name: 'topRhythmic'})
-CREATE (StaffGroup1_10346_Ride_mei:Score {inputfile: '10346_Ride_mei', source:'10346_Ride.mei',composer:'Collecté par Albert Poulain', id:'StaffGroup1_10346_Ride_mei'})
+CREATE (top_10346_Ride_mei:TopRhythmic {inputfile: '10346_Ride_mei', source:'10346_Ride.mei',composer:'Collecté par Albert Poulain', collection:'Albert Poulain', name: 'topRhythmic'})
+CREATE (StaffGroup1_10346_Ride_mei:Score {inputfile: '10346_Ride_mei', source:'10346_Ride.mei',composer:'Collecté par Albert Poulain', collection:'Albert Poulain', id:'StaffGroup1_10346_Ride_mei'})
 CREATE ((StaffGroup1_10346_Ride_mei)-[:RHYTHMIC]->(top_10346_Ride_mei))
 CREATE (_10346_Ride_mei1:Voice {inputfile: '10346_Ride_mei', source:'10346_Ride.mei' ,id:'Staff2',name: 'main droite', shape_clef:'', staff_number:'1', line_clef:''})
 CREATE ((StaffGroup1_10346_Ride_mei)-[:VOICE]->(_10346_Ride_mei1))

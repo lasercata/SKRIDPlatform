@@ -37,7 +37,7 @@ WITH e1, e2, f1, f2, r,
      END + (f2.octave * 12) AS semitone2
 WITH e1, e2, r, (semitone2 - semitone1) / 2.0 AS interval
 SET r.interval = interval
-RETURN e1, e2, r.interval
+RETURN e1, e2, r.interval;
 
 MATCH (e1:Event)-[r:NEXT]->(e2:Event), 
       (e1)-[:IS]->(f1:Fact), 
@@ -47,7 +47,7 @@ WITH e1, e2, f1, f2, r,
      f2.halfTonesFromA4 AS semitone2
 WITH e1, e2, r, (semitone2 - semitone1) / 2.0 AS interval
 SET r.interval = interval
-RETURN e1, e2, r.interval
+RETURN e1, e2, r.interval;
 
 MATCH (f:Fact)
 WITH f,
@@ -65,4 +65,4 @@ WITH f, halfTonesFromA4,
      440 * toFloat(2) ^ (toFloat(halfTonesFromA4) / 12) AS frequency
 SET f.halfTonesFromA4 = halfTonesFromA4,
     f.frequency = frequency
-RETURN f.class, f.octave, f.alterationInHalfTones, f.halfTonesFromA4, f.frequency
+RETURN f.class, f.octave, f.alterationInHalfTones, f.halfTonesFromA4, f.frequency;
