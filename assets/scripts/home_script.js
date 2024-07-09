@@ -571,7 +571,18 @@ const remove_last_note = () => {
  * the query with the saved melody 
  */
 const searchButtonHandler = function() {
+    const results_container = $('#results-container');
     const radioButtons = document.querySelectorAll('input[type="radio"]');
+
+    // Check that melody is not empty
+    if (melody.length == 0) {
+        alert('Stave is empty !\nPlease enter some notes to search for.');
+        return;
+    }
+
+    // Write that a search is performing
+    results_container.empty();
+    results_container.append($('<h3>').text('Loading...'));
 
     // Check which one of the radio buttons has been pressed
     radioButtons.forEach(function (radioButton) {

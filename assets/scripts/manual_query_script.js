@@ -168,8 +168,16 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
 const submitHandler = function() {
     //---Init
     let query = input.value;
+    const results_container = $('#results-container');
 
+    // Write that a search is performing
+    results_container.empty();
+    results_container.append($('<h3>').text('Loading...'));
+
+    // Perform queries
     if (is_fuzzy_cb.checked) { //---Fuzzy query (use python script to convert it)
+        crisp_field.value = 'Loading...';
+
         fetch('/compileFuzzy', {
             method: 'POST',
             headers: {
