@@ -140,10 +140,10 @@ const qwerty_us_to_azerty = {
  */
 function sendQuery(query) {
     let data = {
-        string: query,
+        query: query,
     };
 
-    fetch('/findPattern', {
+    fetch('/query', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

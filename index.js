@@ -255,41 +255,6 @@ app.get('/search', async function(req, res) {
 
 //============================= Endpoints (post) =============================//
 /**
- * This endpoint is called when the user wants to retrieve the results containing the inserted pattern.
- *
- * POST
- *
- * @constant /findPattern
- */
-app.post('/findPattern', async function(req, res) {
-    const myQuery = req.body.string;
-
-    // Filtering keywords to avoid the user editing the database
-    if (queryEditsDB(myQuery)) {
-        res.json({ error: 'Operation not allowed.' });
-    }
-    else {
-        log('info', `Performing query on /findPattern: "${myQuery}"`);
-
-        const session = driver.session();
-
-        try {
-            await session.run(myQuery).then(result => {
-                const results = result.records;
-                res.json({ results: results});
-            });
-
-        } catch(error) {
-            log('error', `Error in the query: ${error}`);
-            res.sendStatus(500);
-
-        } finally {
-            await session.close();
-        }
-    }
-});
-
-/**
  * This endpoint will retrieve the author of a specific music score.
  *
  * POST
@@ -322,6 +287,38 @@ app.post('/findAuthor', async function(req, res) {
         } finally {
             await session.close();
         }
+    }
+});
+
+/**
+ * This endpoint sends the query to the database (if it does not modify the database) and send the result back to the client.
+ *
+ * POST
+ *
+ * @constant /query
+ */
+app.post('/query', (req, res) => {
+    // Retrieve the melody from the body
+    const query = req.body.query;
+
+    // Filtering keywords to avoid the user editing the database
+    if (queryEditsDB(query)) {
+        res.json({ error: 'Operation not allowed.' });
+    }
+    else {
+        // Execute the query
+        log('info', `Performing query on /query: "${query}"`);
+        const session = driver.session();
+        session.run(query)
+            .then(result => {
+                const results = result.records.map(record => record.toObject());
+                // Give back the results containing the melody
+                res.json({ results });
+            })
+            .catch(error => {
+                log('error', `/query: ${error.message}`)
+                res.json({ error: error.message });
+            });
     }
 });
 
@@ -392,38 +389,6 @@ app.post('/queryFuzzy', (req, res) => {
             log('info', `/queryFuzzy: connection closed (format='${format}').`);
             return res.json({ results: allData });
         });
-    }
-});
-
-/**
- * This endpoint is called when the user wants to send a specific (self-written) query to the database.
- *
- * POST
- *
- * @constant /query
- */
-app.post('/query', (req, res) => {
-    // Retrieve the melody from the body
-    const query = req.body.query;
-
-    // Filtering keywords to avoid the user editing the database
-    if (queryEditsDB(query)) {
-        res.json({ error: 'Operation not allowed.' });
-    }
-    else {
-        // Execute the query
-        log('info', `Performing query on /query: "${query}"`);
-        const session = driver.session();
-        session.run(query)
-            .then(result => {
-                const results = result.records.map(record => record.toObject());
-                // Give back the results containing the melody
-                res.json({ results });
-            })
-            .catch(error => {
-                log('error', `/query: ${error.message}`)
-                res.json({ error: error.message });
-            });
     }
 });
 
