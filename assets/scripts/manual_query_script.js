@@ -138,7 +138,7 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
 
         if ('results' in data) {
             //---Log the results
-            console.log(JSON.parse(data.results));
+            console.log('raw results:', JSON.parse(data.results));
 
             //---Load the first page
             // dataDiv.textContent = data.results;

@@ -1,14 +1,16 @@
 <div class='paginated-result'>
     <div class="navigation">
+        <button id='csv-button' class='pagination-bt'>Download results as CSV</button>
+
         <label id="score_nb_lb">Number of scores : 0</label>
-        <button id="prevPage" class="prevpage-button">Previous page</button>
+        <button id="prevPage" class='pagination-bt'>Previous page</button>
         <input type=number min=1 value=1 id="page_nb_input" class="page-nb-input">
         <label id="page_max_nb_lb">/ 0</label>
-        <button id="nextPage" class="nextpage-button">Next page</button>
+        <button id="nextPage" class='pagination-bt'>Next page</button>
         <select id="nb_per_page_select">
             <option value=10>10</option>
-            <option value=15>15</option>
             <option value=20>20</option>
+            <option value=50>50</option>
             <option value=100>100</option>
             <option value=*>All</option>
         </select>
@@ -19,9 +21,9 @@
     </div>
 
     <div class="navigation">
-        <button id="prevPage-bot" class="prevpage-button">Previous page</button>
+        <button id="prevPage-bot" class='pagination-bt'>Previous page</button>
         <label id="page_max_nb_lb-bot">/ 0</label>
-        <button id="nextPage-bot" class="nextpage-button">Next page</button>
+        <button id="nextPage-bot" class='pagination-bt'>Next page</button>
     </div>
 
     <div id="data" style="display: none;">[]</div>

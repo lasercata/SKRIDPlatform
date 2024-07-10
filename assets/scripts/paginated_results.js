@@ -112,6 +112,11 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
     }
     else {
         showNav();
+
+        if ('s' in pageData[0]) // Hide 'Download results as CSV' button on 'collection' page
+            $('#csv-button').hide();
+        else // Show it otherwise
+            $('#csv-button').show();
     }
 
     //---If the user changed the numberPerPage, check that the selected page is still in the range.
@@ -151,6 +156,43 @@ function hideNav() {
  */
 function showNav() {
     $('.navigation').show();
+}
+
+/**
+ * Converts `data` to a CSV string
+ *
+ * @param {json} data - the data to convert
+ * @returns {string} the CSV representation of `data`.
+ */
+function dataToCSV(data) {
+    // Calculate max notes_id length
+    let max_notes_id_len = 0; // The maximum of data[k].notes_id.length for k in range 0 data.length - 1.
+
+    data.forEach(score => {
+        let len = Object.keys(score.notes_id).length;
+
+        if (len > max_notes_id_len)
+            max_notes_id_len = len;
+    });
+
+    // Construct CSV header
+    let csv_string = 'source, number of occurrences';
+
+    for (let k = 0 ; k < max_notes_id_len ; ++k) {
+        csv_string += ', note id, match %';
+    }
+
+    data.forEach(score => {
+        csv_string += `\n${score.name}, ${score.number_of_occurrences}`;
+
+        for (let id in score.notes_id) {
+            csv_string += `, ${id}, ${score.notes_id[id]}`;
+        }
+    });
+
+    console.log(csv_string);
+
+    return csv_string;
 }
 
 /**
@@ -209,6 +251,25 @@ const nbPerPageHandler = function(change) {
 }
 
 /**
+ * Handler of the 'Download results as CSV' button.
+ */
+const csvBtHandler = function() {
+    // Get csv
+    const csv_string = dataToCSV(getPageData());
+
+    // Download it as a file
+    const fn = 'results.csv';
+    const a = document.createElement('a');
+    const file = new Blob([csv_string], {type: 'text/csv'});
+
+    a.href = URL.createObjectURL(file);
+    a.download = fn;
+    a.click();
+
+    URL.revokeObjectURL(a.href);
+}
+
+/**
  * Connects buttons and fills the preview with the data that was queried from index.js
  */
 function init() {
@@ -220,6 +281,8 @@ function init() {
 
     document.getElementById("nextPage-bot").addEventListener("click", nextDataPageHandler);
     document.getElementById("prevPage-bot").addEventListener("click", prevDataPageHandler);
+
+    document.getElementById('csv-button').addEventListener("click", csvBtHandler);
 
     verovio.module.onRuntimeInitialized = () => {
         //---Create verovio toolkit (tk)
