@@ -178,12 +178,23 @@ function dataToCSV(data) {
     // Construct CSV header
     let csv_string = 'source, number of occurrences';
 
+    if ('overall_degree' in data[0])
+        csv_string += ', overall degree';
+
     for (let k = 0 ; k < max_notes_id_len ; ++k) {
-        csv_string += ', note id, match %';
+        csv_string += `, note id (${k + 1}), match % (${k + 1})`;
     }
 
+    // Add each score on its line
     data.forEach(score => {
         csv_string += `\n${score.name}, ${score.number_of_occurrences}`;
+
+        if ('overall_degree' in data[0]) {
+            if ('overall_degree' in score)
+                csv_string += ', ' + score.overall_degree;
+            else
+                csv_string += ',';
+        }
 
         for (let id in score.notes_id) {
             csv_string += `, ${id}, ${score.notes_id[id]}`;

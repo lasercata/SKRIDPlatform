@@ -47,7 +47,7 @@ function log(level, msg) {
  * @param {string} query - the cypher query
  * @returns {boolean} true if query would modify the database, false otherwise.
  */
-function queryEditDB(query) {
+function queryEditsDB(query) {
     let keywords = ['create', 'delete', 'set', 'remove', 'detach', 'load'];
     let queryLower = query.toLowerCase();
 
@@ -265,7 +265,7 @@ app.post('/findPattern', async function(req, res) {
     const myQuery = req.body.string;
 
     // Filtering keywords to avoid the user editing the database
-    if (queryEditDB(myQuery)) {
+    if (queryEditsDB(myQuery)) {
         res.json({ error: 'Operation not allowed.' });
     }
     else {
@@ -303,7 +303,7 @@ app.post('/findAuthor', async function(req, res) {
     const myQuery = "MATCH (s:Score {source: '" + score_name + "'}) RETURN s.collection";
 
     // Filtering keywords to avoid the user editing the database
-    if (queryEditDB(myQuery)) {
+    if (queryEditsDB(myQuery)) {
         res.json({ error: 'Operation not allowed.' });
     }
     else {
@@ -368,7 +368,7 @@ app.post('/queryFuzzy', (req, res) => {
     const format = req.body.format;
 
     // Filtering keywords to avoid the user editing the database
-    if (queryEditDB(query)) {
+    if (queryEditsDB(query)) {
         return res.json({ error: 'Operation not allowed.' });
     }
     else {
@@ -407,7 +407,7 @@ app.post('/query', (req, res) => {
     const query = req.body.query;
 
     // Filtering keywords to avoid the user editing the database
-    if (queryEditDB(query)) {
+    if (queryEditsDB(query)) {
         res.json({ error: 'Operation not allowed.' });
     }
     else {

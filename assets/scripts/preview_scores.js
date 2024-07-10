@@ -64,9 +64,18 @@ function unifyResults(queryResults) {
                     notes_temp[result['mei_id_event' + k]] = 1;
                     ++k;
                 }
+
+                k = 0 // Same but for fuzzy queries compilated to crisp queries.
+                while ('id_' + k in result) { // Adding all the IDs that are present ('id_0', 'id_1', ...)
+                    notes_temp[result['id_' + k]] = 1;
+                    ++k;
+                }
             }
 
-            results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
+            if ('overall_degree' in result)
+                results.push({ name, number_of_occurrences: 1, overall_degree: result.overall_degree, notes_id: notes_temp});
+            else
+                results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
         }
         else { // The source element has already been seen
             //-Find the source in results and increase number of occurrences
