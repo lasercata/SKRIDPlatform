@@ -114,9 +114,9 @@ app.get("/manualQuery", function (req, res) {
  *
  * GET
  *
- * @constant /interface
+ * @constant /searchInterface
  */
-app.get('/interface', async function (req, res) {
+app.get('/searchInterface', async function (req, res) {
     let authors = [];
 
     try {
@@ -128,10 +128,10 @@ app.get('/interface', async function (req, res) {
             authors.push(record._fields[0]);
         });
     } catch(err) {
-        log('error', `/interface: ${err}`)
+        log('error', `/searchInterface: ${err}`)
     }
 
-    res.render("index", {
+    res.render("search_interface", {
         authors: authors
     });
 });
@@ -223,7 +223,7 @@ app.get('/getCollectionByAuthor', async (req, res) => {
  * GET
  *
  * @constant /search
- * @todo this seems to be a duplicate of /interface
+ * @todo this seems to be a duplicate of /searchInterface
  */
 app.get('/search', async function(req, res) {
     const query = req.query.query;
@@ -247,7 +247,7 @@ app.get('/search', async function(req, res) {
         log('error', err);
     }
 
-    res.render("index", {
+    res.render("search_interface", {
         results: results,
         authors: authors,
     });
