@@ -46,7 +46,9 @@ You can finally paste the content of the modified file into the prompt and run i
 
 Repeat the same steps with the other databases.
 
-To correct the database, paste the queries from `config/data_corrections.cypher` (one by one) in the prompt of neo4j-desktop.
+To correct the database (frequencies are not correct, thus compilated fuzzy queries will fail), paste the queries from `config/data_corrections.cypher` in the prompt of neo4j-desktop.
+
+Note: if you want to add a new database, do not forget to rerun the correction queries.
 
 
 ### Testing (run in local)
