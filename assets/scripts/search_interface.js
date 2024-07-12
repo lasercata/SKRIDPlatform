@@ -133,12 +133,158 @@ const qwerty_us_to_azerty = {
 
 //============================= Functions =============================//
 //========= Queries functions =========//
+/**
+ * Uses `melody` to create an input of the following format for the python script (write mode) :
+ * ```
+ * [(class|None, octave|None, duration|None), ...]
+ * ```
+ *
+ * It then fetches the python script and returns the fuzzy query.
+ *
+ * @param {boolean} [ignore_pitch=false]        - if true, construct a query that will ignore the pitch ;
+ * @param {boolean} [ignore_octave=false]       - if true, construct a query that will ignore the octave ;
+ * @param {boolean} [ignore_rhythm=false]       - if true, construct a query that will ignore the rhythm.
+ * @param {number}  [pitch_dist=0]              - the tone distance allowed for results (fuzzy param). Should be in \dfrac{1}{2} \N ;
+ * @param {number}  [duration_factor=1]         - the duration factor (multiplicative factor) (fuzzy param) ;
+ * @param {number}  [duration_gap=0]            - the duration gap (fuzzy param) ;
+ * @param {number}  [alpha=0]                   - (in [0 ; 1]) will remove every result whose score is below `alpha` (fuzzy param) ;
+ * @param {boolean} [allow_transposition=false] - allow transposition (fuzzy param) ;
+ *
+ * @returns {promise} the fuzzy query corresponding to the parameters
+ *
+ * @example
+ * createQuery().then(fuzzyQuery => sendQuery(fuzzyQuery));
+ */
+async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false) {
+    //------Create the `notes` for the python script
+    let notes = '[';
+    for (let k = 0 ; k < melody.length ; ++k) {
+        let note = melody[k].keys[0]; //TODO: chord are ignored (taking only the first note) for the moment.
+
+        //---Add note class ('a', 'gs', ...)
+        if (ignore_pitch)
+            notes += '(None, ';
+        else if (melody[k].noteType == 'r') // rest
+            notes += "('r', ";
+        else {
+            let class_ = note.split('/')[0];
+            class_ = class_.toLowerCase().replace('#', 's');
+            notes += `('${class_}', `
+        }
+
+        //---Add octave
+        if (ignore_octave)
+            notes += 'None, ';
+        else {
+            let octave = note.split('/')[1];
+            notes += `${octave}, `;
+        }
+
+        //---Add duration
+        if (ignore_rhythm)
+            notes += 'None), ';
+        else {
+            let duration_string = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration;
+            let dur_inv = 1 / durationNoteWithDots[duration_string]; //TODO: won't work with dots
+
+            notes += `${dur_inv}), `;
+        }
+    }
+
+    notes = notes.slice(0, -2) + ']' // Remove trailing ', ' and add ']'.
+
+    //------Use the python script to get a fuzzy query
+    let data = {
+        notes: notes,
+        pitch_distance: pitch_dist,
+        duration_factor: duration_factor,
+        duration_gap: duration_gap,
+        alpha: alpha,
+        allow_transposition: allow_transposition
+    };
+
+    return fetch('/formulateQuery', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        return data.query;
+    });
+
+    // sendQuery(query);
+}
+/**
+ * This function sends the query for the pattern and displays the results (using {@linkcode loadPageN})
+ * @param {string} fuzzyQuery - the (fuzzy) query to send
+ */
+function sendQuery(fuzzyQuery) {
+    // Log the query
+    console.log('Sending query:\n', fuzzyQuery);
+
+    // Send the query
+    fetch('/queryFuzzy', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 'query': fuzzyQuery, 'format': 'json' })
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        let dataDiv = document.getElementById('data');
+
+        if ('results' in data) {
+            // Load the first page
+            dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
+            loadPageN(1, null, true, true, true);
+        }
+        else if ('error' in data) {
+            dataDiv.textContent = '[]';
+            loadPageN(1, null, true, true);
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+    });
+
+    // fetch('/query', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify(data)
+    // })
+    // .then(response => {
+    //     return response.json();
+    // })
+    // .then(data => {
+    //     // First, call a function that converts the data
+    //     let unifiedResults = unifyResults(data);
+    //     console.log(data);
+    //
+    //     let results_container = $('#results-container');
+    //     results_container.empty();
+    //
+    //     //---Load the first page
+    //     let dataDiv = document.getElementById('data');
+    //     dataDiv.textContent = JSON.stringify(unifiedResults);
+    //     loadPageN(1, null, true, true, true);
+    // });
+}
 
 /**
  * This function sends the query for the pattern and displays the results (using {@linkcode loadPageN})
  * @param {string} query - the query to send
  */
-function sendQuery(query) {
+function sendQuery_old(query) {
     let data = {
         query: query,
     };
@@ -598,21 +744,34 @@ const searchButtonHandler = function() {
     results_container.append($('<h3>').text('Loading...'));
 
     // Check which one of the radio buttons has been pressed
+    let ignore_pitch, ignore_octave, ignore_rhythm;
     radioButtons.forEach(function (radioButton) {
         if (radioButton.checked) {
             // Call the corresponding function
-            switch (radioButton.id) {
+            switch (radioButton.id) { //TODO: use three checkbuttons instead of the radio buttons
                 case "check1":
-                    constructExactMatch();
+                    // constructExactMatch();
+                    ignore_pitch = false;
+                    ignore_octave = false;
+                    ignore_rhythm = false;
                     break;
                 case "check2":
-                    constructIgnoringTheRhythm();
+                    // constructIgnoringTheRhythm();
+                    ignore_pitch = false;
+                    ignore_octave = true;
+                    ignore_rhythm = true;
                     break;
                 case "check3":
-                    constructIgnoringTheMelody();
+                    // constructIgnoringTheMelody();
+                    ignore_pitch = true;
+                    ignore_octave = true;
+                    ignore_rhythm = false;
                     break;
                 case "check4":
-                    constructIgnoringTheOctave();
+                    // constructIgnoringTheOctave();
+                    ignore_pitch = false;
+                    ignore_octave = true;
+                    ignore_rhythm = true;
                     break;
                 // case "check5":
                 //   constructSignatureForTheRhythm();
@@ -620,6 +779,8 @@ const searchButtonHandler = function() {
             }
         }
     });
+
+    createQuery(ignore_pitch, ignore_octave, ignore_rhythm).then(fuzzyQuery => sendQuery(fuzzyQuery)); //TODO: add fuzzy params
 }
 
 /**

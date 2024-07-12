@@ -352,9 +352,93 @@ app.post('/compileFuzzy', (req, res) => {
 });
 
 /**
+ * This endpoint calls the python parser to make a fuzzy query from notes.
+ *
+ * Data to post :
+ *     ```
+ *     {
+ *         'notes': "[(class, octave, duration), ...]",
+ *         'pitch_distance': float,
+ *         'duration_factor': float,
+ *         'duration_gap': float,
+ *         'alpha': float,
+ *         'allow_transposition': bool
+ *     }
+ *     ```
+ * 
+ * Returns a fuzzy query, in the following form: `{'query': string}`
+ *
+ * POST
+ *
+ * @constant /formulateQuery
+ */
+app.post('/formulateQuery', (req, res) => {
+    // Get the params
+    const notes = req.body.notes;
+    let pitch_distance = req.body.pitch_distance;
+    let duration_factor = req.body.duration_factor;
+    let duration_gap = req.body.duration_gap;
+    let alpha = req.body.alpha;
+    let allow_transposition = req.body.allow_transposition;
+
+    // Set default values if some params are null
+    if (pitch_distance == null)
+        pitch_distance = 0;
+    if (duration_factor == null)
+        duration_factor = 1;
+    if (duration_gap == null)
+        duration_gap = 0;
+    if (alpha == null)
+        alpha = 0;
+    if (allow_transposition == null)
+        allow_transposition = false;
+
+    // Create the connection
+    log('info', `/formulateQuery: openning connection.`);
+    const { spawn } = require('child_process');
+
+    let args = [
+        'compilation_requete_fuzzy/main_parser.py',
+        'write',
+        '-p', pitch_distance,
+        '-f', duration_factor,
+        '-g', duration_gap,
+        '-a', alpha,
+        notes
+    ];
+
+    if (allow_transposition == 'true') //TODO: check the type of allow_transposition !
+        args.push('-t');
+
+    let pyParserWrite = spawn('python3', args);
+
+    // Get the data
+    let allData = '';
+    pyParserWrite.stdout.on('data', data => {
+        log('info', `/formulateQuery received data (${data.length} bytes) from python script.`);
+
+        allData += data.toString();
+    });
+
+    // log stderr
+    pyParserWrite.stderr.on('data', data => {
+        if (!(data.toString().includes('site-packages/pydub/utils.py:') && data.toString().includes(' SyntaxWarning: invalid escape sequence')))
+            log('error', `/formulateQuery received data on stderr from python script: "${data}"`);
+    });
+
+    // Send the data to the client
+    pyParserWrite.stdout.on('close', () => {
+        log('info', `/formulateQuery: connection closed.`);
+        return res.json({ query: allData });
+    });
+});
+
+/**
  * This endpoint calls the python parser to send a fuzzy query and process the result of it.
  *
- * Data to post : {'query': some_fuzzy_query, 'format': f}, where f is 'json' or 'text'.
+ * Data to post : `{'query': some_fuzzy_query, 'format': f}`, where f is 'json' or 'text'.
+ *
+ * Returns `{results: json[]}`
  *
  * POST
  *
@@ -369,6 +453,7 @@ app.post('/queryFuzzy', (req, res) => {
         return res.json({ error: 'Operation not allowed.' });
     }
     else {
+        // Create the connection
         log('info', `/queryFuzzy: openning connection (format='${format}').`);
         const { spawn } = require('child_process');
 
@@ -378,6 +463,7 @@ app.post('/queryFuzzy', (req, res) => {
         else
             pyParserSend = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'send', '-f', query]);
 
+        // Get the data
         let allData = '';
         pyParserSend.stdout.on('data', data => {
             log('info', `/queryFuzzy (format='${format}') received data (${data.length} bytes) from python script.`);
@@ -385,6 +471,13 @@ app.post('/queryFuzzy', (req, res) => {
             allData += data.toString();
         });
 
+        // log stderr
+        pyParserSend.stderr.on('data', data => {
+            if (!(data.toString().includes('site-packages/pydub/utils.py:') && data.toString().includes(' SyntaxWarning: invalid escape sequence')))
+                log('error', `/queryFuzzy (format='${format}') received data on stderr from python script: "${data}"`);
+        });
+
+        // Send the data to the client
         pyParserSend.stdout.on('close', () => {
             log('info', `/queryFuzzy: connection closed (format='${format}').`);
             return res.json({ results: allData });
