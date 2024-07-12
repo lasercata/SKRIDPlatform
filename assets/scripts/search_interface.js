@@ -154,6 +154,8 @@ const qwerty_us_to_azerty = {
  *
  * @example
  * createQuery().then(fuzzyQuery => sendQuery(fuzzyQuery));
+ *
+ * @todo ADD Collection filter !
  */
 async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false) {
     //------Create the `notes` for the python script
@@ -219,8 +221,10 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
 
     // sendQuery(query);
 }
+
 /**
  * This function sends the query for the pattern and displays the results (using {@linkcode loadPageN})
+ *
  * @param {string} fuzzyQuery - the (fuzzy) query to send
  */
 function sendQuery(fuzzyQuery) {
@@ -281,41 +285,9 @@ function sendQuery(fuzzyQuery) {
 }
 
 /**
- * This function sends the query for the pattern and displays the results (using {@linkcode loadPageN})
- * @param {string} query - the query to send
- */
-function sendQuery_old(query) {
-    let data = {
-        query: query,
-    };
-
-    fetch('/query', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        return response.json();
-    })
-    .then(data => {
-        // First, call a function that converts the data
-        let unifiedResults = unifyResults(data);
-        console.log(data);
-
-        let results_container = $('#results-container');
-        results_container.empty();
-
-        //---Load the first page
-        let dataDiv = document.getElementById('data');
-        dataDiv.textContent = JSON.stringify(unifiedResults);
-        loadPageN(1, null, true, true, true);
-    });
-}
-
-/**
  * This function creates a query for the exact match and send it.
+ *
+ * @todo remove
  * */
 function constructExactMatch() {
     let containsAlterations = false;
@@ -395,295 +367,6 @@ function constructExactMatch() {
     sendQuery(query);
 }
 
-/**
- * This function creates a query ignoring the rhythm and send it.
- * */
-function constructIgnoringTheRhythm() {
-    let containsAlterations = false;
-    let query = 'MATCH';
-
-    for(let i = 1; i < melody.length + 1; i++) {
-        query += '(event' + i + ':Event)-[:NEXT]->'; 
-    }
-    query += '(eventanonymous)';
-
-    for(let j = 1; j < melody.length + 1; j++) {
-        let music_note;
-
-        if (melody[j - 1].noteType == 'r') //TODO: silences are not encoded in the graph (they are completely skipped) ...
-            // music_note = 'r';
-            continue;
-        else if (String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
-            music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
-        } else {
-            music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
-        }
-        query += ',(event' + j + ')-[:IS]->(fact' + j + '{pname:"'+ music_note +'"})';
-    }
-
-    // For loop to take care of the alterations (WHERE CLAUSE)
-    for(let k = 1; k < melody.length + 1; k++) {
-        if(String(melody[k-1].keys).slice(0,-2).endsWith("#")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-            }
-        } else if(String(melody[k-1].keys).slice(0,-2).endsWith("b")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-            }
-        }
-    }
-
-    if(containsAlterations) {
-        query += ')';
-    } 
-
-    if(selectedCollections.length != 0) {
-        // From here on we add the part of the query to handle the collections
-        query += ' WITH event1 as event1'
-        for(let k = 2; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
-
-        query += ' WITH s as s';
-
-        for(let k = 1; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
-        for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
-        }
-
-    }
-
-    query += ' RETURN event1.source';
-
-    for(let k = 1; k < melody.length + 1; k++) {
-        query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
-
-    console.log(query);
-
-    sendQuery(query);
-}
-
-/**
- * This function creates a query ignoring the melody and send it.
- * */
-function constructIgnoringTheMelody() {
-    let query = 'MATCH';
-
-    for(let i = 1; i < melody.length + 1; i++) {
-        let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
-        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNoteWithDots[duration] +'}]->'; 
-    }
-    query += '(eventanonymous)' 
-
-    if(selectedCollections.length != 0) {
-        // From here on we add the part of the query to handle the collections
-        query += ' WITH event1 as event1'
-        for(let k = 2; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
-
-        query += ' WITH s as s';
-
-        for(let k = 1; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
-        for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
-        }
-
-    }
-
-    query += ' RETURN event1.source';
-
-    for(let k = 1; k < melody.length + 1; k++) {
-        query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
-
-    console.log(query);
-
-    sendQuery(query);
-}
-
-/**
- * This function creates a query ignoring the octave and send it.
- * */
-function constructIgnoringTheOctave() {
-    let containsAlterations = false;
-    let query = 'MATCH';
-
-    for(let i = 1; i < melody.length + 1; i++) {
-        let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
-        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNoteWithDots[duration] +'}]->'; 
-    }
-    query += '(eventanonymous)';
-
-    for(let j = 1; j < melody.length + 1; j++) {
-        let music_note;
-        if(String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
-            music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
-        } else {
-            music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
-        }
-        query += ',(event' + j + ')-[:IS]->(fact' + j + '{pname:"'+ music_note +'"})';
-    }
-
-    // For loop to take care of the alterations (WHERE CLAUSE)
-    for(let k = 1; k < melody.length + 1; k++) {
-        if(String(melody[k-1].keys).slice(0,-2).endsWith("#")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-            }
-        } else if(String(melody[k-1].keys).slice(0,-2).endsWith("b")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-            }
-        }
-    }
-
-    if(containsAlterations) {
-        query += ')';
-    } 
-
-    if(selectedCollections.length != 0) {
-        // From here on we add the part of the query to handle the collections
-        query += ' WITH event1 as event1'
-        for(let k = 2; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
-
-        query += ' WITH s as s';
-
-        for(let k = 1; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
-        for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
-        }
-
-    }
-
-    query += ' RETURN event1.source';
-
-    for(let k = 1; k < melody.length + 1; k++) {
-        query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
-
-    // Log the query
-    console.log(query);
-
-    sendQuery(query);
-}
-
-/**
- * This function creates a query with the signature for the rhythm and send it.
- * */
-function constructSignatureForTheRhythm() {
-    let containsAlterations = false;
-    let query = 'MATCH';
-
-    for(let i = 1; i < melody.length + 1; i++) {
-        // let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
-        // query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[duration] +'}]->'; 
-        // //query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNote[melody[i-1].duration] +'}]->'; 
-        query += '(event' + i + ':Event)-[r' + i + ':NEXT{duration:0.125}]->';
-    }
-    query += '(eventanonymous)';
-
-    for(let j = 1; j < melody.length + 1; j++) {
-        let music_note;
-        if(String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
-            music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
-        } else {
-            music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
-        }
-        query += ',(event' + j + ')-[:IS]->(fact' + j + '{pname:"'+ music_note +'",octave:'+ String(melody[j-1].keys).slice(String(melody[j-1].keys).length - 1) +'})';
-    }
-
-    //for loop to take care of the alterations (WHERE CLAUSE)
-    for(let k = 1; k < melody.length + 1; k++) {
-        if(String(melody[k-1].keys).slice(0,-2).endsWith("#")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-            }
-        } else if(String(melody[k-1].keys).slice(0,-2).endsWith("b")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-            }
-        }
-    }
-
-    if(containsAlterations) {
-        query += ')';
-    }
-
-    //WHAT IF THERE IS ONLY ONE NOTE???
-
-    //from here the new part of the WHERE clause where we check the duration
-    if(melody.length >= 2) {
-        for(let w = 1; w < melody.length + 1; w++) {
-            let counter = 2;
-            if(!containsAlterations) {
-                query += ' WHERE r'+ counter + '.duration = r1.duration/2'
-                containsAlterations = true;
-            } else {
-                query += ' and r'+ counter + '.duration = r1.duration/2';
-            }
-            counter++;
-        }
-    } 
-
-    query += ' RETURN event1.source';
-
-
-    for(let k = 1; k < melody.length + 1; k++) {
-        query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
-
-    console.log(query);
-
-    sendQuery(query);
-}
-
 
 //========= Handler functions =========//
 /**
@@ -733,9 +416,18 @@ const searchButtonHandler = function() {
     const results_container = $('#results-container');
     const radioButtons = document.querySelectorAll('input[type="radio"]');
 
+    const pitch_cb = document.getElementById('pitch-cb');
+    const octave_cb = document.getElementById('octave-cb');
+    const rhythm_cb = document.getElementById('rhythm-cb');
+
     // Check that melody is not empty
     if (melody.length == 0) {
         alert('Stave is empty !\nPlease enter some notes to search for.');
+        return;
+    }
+
+    if (!pitch_cb.checked && !octave_cb.checked && !rhythm_cb.checked) {
+        alert('You have ignored all settings (pitch, octave and rhythm).\nPlease deselect one.\nIf you want to browse the scores, check the collection page.')
         return;
     }
 
@@ -743,44 +435,7 @@ const searchButtonHandler = function() {
     results_container.empty();
     results_container.append($('<h3>').text('Loading...'));
 
-    // Check which one of the radio buttons has been pressed
-    let ignore_pitch, ignore_octave, ignore_rhythm;
-    radioButtons.forEach(function (radioButton) {
-        if (radioButton.checked) {
-            // Call the corresponding function
-            switch (radioButton.id) { //TODO: use three checkbuttons instead of the radio buttons
-                case "check1":
-                    // constructExactMatch();
-                    ignore_pitch = false;
-                    ignore_octave = false;
-                    ignore_rhythm = false;
-                    break;
-                case "check2":
-                    // constructIgnoringTheRhythm();
-                    ignore_pitch = false;
-                    ignore_octave = true;
-                    ignore_rhythm = true;
-                    break;
-                case "check3":
-                    // constructIgnoringTheMelody();
-                    ignore_pitch = true;
-                    ignore_octave = true;
-                    ignore_rhythm = false;
-                    break;
-                case "check4":
-                    // constructIgnoringTheOctave();
-                    ignore_pitch = false;
-                    ignore_octave = true;
-                    ignore_rhythm = true;
-                    break;
-                // case "check5":
-                //   constructSignatureForTheRhythm();
-                //   break;
-            }
-        }
-    });
-
-    createQuery(ignore_pitch, ignore_octave, ignore_rhythm).then(fuzzyQuery => sendQuery(fuzzyQuery)); //TODO: add fuzzy params
+    createQuery(!pitch_cb.checked, !octave_cb.checked, !rhythm_cb.checked).then(fuzzyQuery => sendQuery(fuzzyQuery)); //TODO: add fuzzy params
 }
 
 /**
@@ -1103,8 +758,6 @@ function keyListener(event) {
  */
 function manageOptions() {
     const searchButton = document.getElementById("send-button"); // Search button
-    const radioButtons = document.querySelectorAll('input[type="radio"]'); // Get all the radio buttons
-    const optionsRow = document.querySelector(".options-row");
     const clearAllButton = document.getElementById("clear_all");
     const clearLastNoteButton = document.getElementById("clear_last_note");
     const playBt = document.getElementById('play_melody');
@@ -1116,18 +769,6 @@ function manageOptions() {
 
     // Add an event listener for the 'search' button
     searchButton.addEventListener("click", searchButtonHandler);
-
-    // Here we ensure that only one radio button is selected
-    optionsRow.addEventListener("click", function(event) {
-        if (event.target.nodeName === "INPUT") {
-            // Deselect the other radio buttons
-            radioButtons.forEach(function(radioButton) {
-                if (radioButton !== event.target) {
-                    radioButton.checked = false;
-                }
-            });
-        }
-    });
 }
 
 /**
