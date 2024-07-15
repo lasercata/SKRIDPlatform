@@ -154,8 +154,6 @@ const qwerty_us_to_azerty = {
  *
  * @example
  * createQuery().then(fuzzyQuery => sendQuery(fuzzyQuery));
- *
- * @todo ADD Collection filter !
  */
 async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false) {
     //------Create the `notes` for the python script
@@ -187,13 +185,21 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
             notes += 'None), ';
         else {
             let duration_string = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration;
-            let dur_inv = 1 / durationNoteWithDots[duration_string]; //TODO: won't work with dots
+            let dur_inv = 1 / durationNoteWithDots[duration_string];
 
             notes += `${dur_inv}), `;
         }
     }
 
     notes = notes.slice(0, -2) + ']' // Remove trailing ', ' and add ']'.
+
+    //------Create the 'collections' filter for the python script
+    let collections = null;
+    if(selectedCollections.length != 0) {
+        collections = '';
+        selectedCollections.forEach(col => {collections += `"${col}",`})
+        collections = collections.slice(0, -1); // Removing trailing ','
+    }
 
     //------Use the python script to get a fuzzy query
     let data = {
@@ -202,7 +208,8 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         duration_factor: duration_factor,
         duration_gap: duration_gap,
         alpha: alpha,
-        allow_transposition: allow_transposition
+        allow_transposition: allow_transposition,
+        collections: collections
     };
 
     return fetch('/formulateQuery', {
@@ -218,8 +225,6 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
     .then(data => {
         return data.query;
     });
-
-    // sendQuery(query);
 }
 
 /**
@@ -282,89 +287,6 @@ function sendQuery(fuzzyQuery) {
     //     dataDiv.textContent = JSON.stringify(unifiedResults);
     //     loadPageN(1, null, true, true, true);
     // });
-}
-
-/**
- * This function creates a query for the exact match and send it.
- *
- * @todo remove
- * */
-function constructExactMatch() {
-    let containsAlterations = false;
-    let query = 'MATCH';
-
-    for(let i = 1; i < melody.length + 1; i++) {
-        let duration = melody[i - 1].dots > 0 ? melody[i - 1].duration + 'd' : melody[i - 1].duration;
-        query += '(event' + i + ':Event)-[:NEXT{duration:'+ durationNoteWithDots[duration] +'}]->'; 
-    }
-    query += '(eventanonymous)';
-
-    for(let j = 1; j < melody.length + 1; j++) {
-        let music_note;
-        if(String(melody[j-1].keys).slice(0,-2).endsWith("#") || String(melody[j-1].keys).slice(0,-2).endsWith("b")) {
-            music_note = String(melody[j-1].keys).slice(0,-3).toLowerCase();
-        } else {
-            music_note = String(melody[j-1].keys).slice(0,-2).toLowerCase();
-        }
-        query += ',(event' + j + ')-[:IS]->(fact' + j + '{pname:"'+ music_note +'",octave:'+ String(melody[j-1].keys).slice(String(melody[j-1].keys).length - 1) +'})';
-    }
-
-    //for loop to take care of the alterations (WHERE CLAUSE)
-    for(let k = 1; k < melody.length + 1; k++) {
-        if(String(melody[k-1].keys).slice(0,-2).endsWith("#")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="s" or left(fact'+ k +'.accid_ges,1)="s"'
-            }
-        } else if(String(melody[k-1].keys).slice(0,-2).endsWith("b")) {
-            if(!containsAlterations) {
-                query += ' WHERE (';
-                query += 'left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-                containsAlterations = true;
-            } else {
-                query += ' and left(fact'+ k +'.accid,1)="f" or left(fact'+ k +'.accid_ges,1)="f"'
-            }
-        }
-    }
-
-    if(containsAlterations) {
-        query += ')';
-    } 
-
-    if(selectedCollections.length != 0) {
-        // From here on we add the part of the query to handle the collections
-        query += ' WITH event1 as event1'
-        for(let k = 2; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' CALL { WITH event1 MATCH (event1)<-[:timeSeries|VOICE|NEXT*]-(s:Score) RETURN s LIMIT 1 }';
-
-        query += ' WITH s as s';
-
-        for(let k = 1; k < melody.length + 1; k++) {
-            query += ', event' + k + ' as event' + k;
-        }
-
-        query += ' WHERE s.collection CONTAINS "' + selectedCollections[0] + '"';
-        for(let k = 1; k < selectedCollections.length; k++) {
-            query += ' or s.collection CONTAINS "' + selectedCollections[k] + '"';
-        }
-
-    }
-
-    query += ' RETURN event1.source';
-
-    for(let k = 1; k < melody.length + 1; k++) {
-        query += ', event'+ k +'.id as mei_id_event'+ k;
-    }
-
-    console.log(query);
-
-    sendQuery(query);
 }
 
 
@@ -435,7 +357,7 @@ const searchButtonHandler = function() {
     results_container.empty();
     results_container.append($('<h3>').text('Loading...'));
 
-    createQuery(!pitch_cb.checked, !octave_cb.checked, !rhythm_cb.checked).then(fuzzyQuery => sendQuery(fuzzyQuery)); //TODO: add fuzzy params
+    createQuery(!pitch_cb.checked, !octave_cb.checked, !rhythm_cb.checked).then(fuzzyQuery => sendQuery(fuzzyQuery)); //TODO: add fuzzy params + collection
 }
 
 /**

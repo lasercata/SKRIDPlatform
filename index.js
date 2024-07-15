@@ -362,9 +362,11 @@ app.post('/compileFuzzy', (req, res) => {
  *         'duration_factor': float,
  *         'duration_gap': float,
  *         'alpha': float,
- *         'allow_transposition': bool
+ *         'allow_transposition': bool,
+ *         'collections': '"col 1","col 2",...'
  *     }
  *     ```
+ * If some parameters (apart `notes`) are not specified, they will take their default values.
  * 
  * Returns a fuzzy query, in the following form: `{'query': string}`
  *
@@ -380,6 +382,7 @@ app.post('/formulateQuery', (req, res) => {
     let duration_gap = req.body.duration_gap;
     let alpha = req.body.alpha;
     let allow_transposition = req.body.allow_transposition;
+    let collections = req.body.collections;
 
     // Set default values if some params are null
     if (pitch_distance == null)
@@ -409,6 +412,11 @@ app.post('/formulateQuery', (req, res) => {
 
     if (allow_transposition == 'true') //TODO: check the type of allow_transposition !
         args.push('-t');
+
+    if (collections != null) {
+        args.push('-c');
+        args.push(collections);
+    }
 
     let pyParserWrite = spawn('python3', args);
 
