@@ -148,29 +148,44 @@
       <ol id="selected-collections"></ol>
 
       <div class="options-row">
-        <!-- <input type="radio" id="check1" name="check1"> -->
-        <!-- <label for="check1">Correspondance exacte (rythme et hauteurs des notes)</label> -->
-        <!-- <input type="radio" id="check2" name="check2" checked> -->
-        <!-- <label for="check2">Correspondance des hauteurs de notes seulement (sans tenir compte du rythme ni de l'octave)</label> -->
-        <!-- <input type="radio" id="check3" name="check3"> -->
-        <!-- <label for="check3">Correspondance du rythme seulement (sans tenir compte de la mélodie)</label> -->
-        <!-- <input type="radio" id="check4" name="check4"> -->
-        <!-- <label for="check4">Correspondance exacte sans tenir compte de l'octave</label> -->
-        <!--<input type="radio" id="check5" name="check5">
-        <label for="check5">Correspondance approximative (proportion rythmique)</label> -->
+        <div class='options-stack'>
+          <div class='general-options'>
+            <label>
+              <input id='pitch-cb' type='checkbox' checked>
+              Hauteur des notes
+            </label>
+            <label>
+              <input id='octave-cb' type='checkbox' checked>
+              Octave
+            </label>
+            <label>
+              <input id='rhythm-cb' type='checkbox'>
+              Rythme
+            </label>
+          </div>
 
-        <label>
-          <input id='pitch-cb' type='checkbox' checked>
-          Hauteur des notes
-        </label>
-        <label>
-          <input id='octave-cb' type='checkbox' checked>
-          Octave
-        </label>
-        <label>
-          <input id='rhythm-cb' type='checkbox'>
-          Rythme
-        </label>
+          <div class='fuzzy-options'>
+            <label>
+              Tolérance de hauteur
+              <input type=number min=0 value=0 step=0.5 id='pitch-dist-select' class='nb-select'>
+            </label>
+
+            <label>
+              Facteur de durée
+              <input type=number min=0 value=1 step=0.125 id='duration-factor-select' class='nb-select-large'>
+            </label>
+
+            <label>
+              Écart de durée
+              <input type=number min=0 value=0 step=0.125 id='duration-gap-select' class='nb-select-large'>
+            </label>
+
+            <label>
+              Alpha
+              <input type=number min=0 max=1 value=0 step=0.05 id='alpha-select' class='nb-select'>
+            </label>
+          </div>
+        </div>
 
         <button id="send-button">Recherche</button>
       </div>

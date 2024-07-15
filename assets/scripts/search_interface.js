@@ -342,6 +342,11 @@ const searchButtonHandler = function() {
     const octave_cb = document.getElementById('octave-cb');
     const rhythm_cb = document.getElementById('rhythm-cb');
 
+    const pitch_dist_select = document.getElementById('pitch-dist-select');
+    const duration_factor_select = document.getElementById('duration-factor-select');
+    const duration_gap_select = document.getElementById('duration-gap-select');
+    const alpha_select = document.getElementById('alpha-select');
+
     // Check that melody is not empty
     if (melody.length == 0) {
         alert('Stave is empty !\nPlease enter some notes to search for.');
@@ -357,7 +362,17 @@ const searchButtonHandler = function() {
     results_container.empty();
     results_container.append($('<h3>').text('Loading...'));
 
-    createQuery(!pitch_cb.checked, !octave_cb.checked, !rhythm_cb.checked).then(fuzzyQuery => sendQuery(fuzzyQuery)); //TODO: add fuzzy params + collection
+    createQuery(
+        !pitch_cb.checked,
+        !octave_cb.checked,
+        !rhythm_cb.checked,
+        pitch_dist_select.value,
+        duration_factor_select.value,
+        duration_gap_select.value,
+        alpha_select.value
+    ).then(
+        fuzzyQuery => sendQuery(fuzzyQuery)
+    );
 }
 
 /**
