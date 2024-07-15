@@ -163,6 +163,8 @@ function showNav() {
  *
  * @param {json} data - the data to convert
  * @returns {string} the CSV representation of `data`.
+ *
+ * @todo give the CSV header here in the doc !
  */
 function dataToCSV(data) {
     // Calculate max notes_id length

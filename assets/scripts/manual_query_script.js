@@ -45,13 +45,18 @@ function postAndDisplayQuery(query) {
         let dataDiv = document.getElementById('data');
 
         if ('results' in data) {
+            let unifiedResults = unifyResults(data);
+
             //---Show results in the text field
             formatted_out = JSON.stringify(data.results, null, '  ');
             formatted_out = `Number of results : ${data.results.length}\n\n` + formatted_out;
 
+            //---Log the results
+            console.log('raw results:', data);
+            console.log('unified results:', unifiedResults);
+
             //---Display results with pagination
-            // dataDiv.textContent = JSON.stringify(data.results);
-            dataDiv.textContent = JSON.stringify(unifyResults(data));
+            dataDiv.textContent = JSON.stringify(unifiedResults);
             try {
                 loadPageN(1, null, true, true);
             }
@@ -137,12 +142,15 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
         let dataDiv = document.getElementById('data');
 
         if ('results' in data) {
+            let unifiedResults = unifyResults({results: JSON.parse(data.results)})
+
             //---Log the results
             console.log('raw results:', JSON.parse(data.results));
+            console.log('unified results:', unifiedResults);
 
             //---Load the first page
             // dataDiv.textContent = data.results;
-            dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
+            dataDiv.textContent = JSON.stringify(unifiedResults);
             try {
                 loadPageN(1, null, true, true, true);
             }

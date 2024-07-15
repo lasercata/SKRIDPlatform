@@ -339,13 +339,14 @@ const searchButtonHandler = function() {
     const radioButtons = document.querySelectorAll('input[type="radio"]');
 
     const pitch_cb = document.getElementById('pitch-cb');
-    const octave_cb = document.getElementById('octave-cb');
+    // const octave_cb = document.getElementById('octave-cb');
     const rhythm_cb = document.getElementById('rhythm-cb');
 
     const pitch_dist_select = document.getElementById('pitch-dist-select');
     const duration_factor_select = document.getElementById('duration-factor-select');
     const duration_gap_select = document.getElementById('duration-gap-select');
     const alpha_select = document.getElementById('alpha-select');
+    const transposition_cb = document.getElementById('transpose-cb');
 
     // Check that melody is not empty
     if (melody.length == 0) {
@@ -353,8 +354,8 @@ const searchButtonHandler = function() {
         return;
     }
 
-    if (!pitch_cb.checked && !octave_cb.checked && !rhythm_cb.checked) {
-        alert('You have ignored all settings (pitch, octave and rhythm).\nPlease deselect one.\nIf you want to browse the scores, check the collection page.')
+    if (!pitch_cb.checked && !rhythm_cb.checked) {
+        alert('You have ignored all settings (pitch and rhythm).\nPlease select at least one.\nIf you want to browse the scores, check the collection page.')
         return;
     }
 
@@ -364,12 +365,13 @@ const searchButtonHandler = function() {
 
     createQuery(
         !pitch_cb.checked,
-        !octave_cb.checked,
+        !pitch_cb.checked, // dissociating octave from note class is not pertinent, so it is ignored.
         !rhythm_cb.checked,
         pitch_dist_select.value,
         duration_factor_select.value,
         duration_gap_select.value,
-        alpha_select.value
+        alpha_select.value,
+        transposition_cb.checked
     ).then(
         fuzzyQuery => sendQuery(fuzzyQuery)
     );
@@ -451,6 +453,19 @@ const stopTune = (note, audio=null) => {
             audio.pause();
         }
     }, 50);
+}
+
+/**
+ * Enable or disable "autoriser les transpositions" checkbox whether "Hauteur des notes" is checked
+ */
+const matchPicthCbHandler = () => {
+    const pitch_cb = document.getElementById('pitch-cb');
+    const transposition_cb = document.getElementById('transpose-cb');
+
+    transposition_cb.disabled = !pitch_cb.checked;
+
+    if (!pitch_cb.checked)
+        transposition_cb.checked = false;
 }
 
 /**
@@ -698,6 +713,7 @@ function manageOptions() {
     const clearAllButton = document.getElementById("clear_all");
     const clearLastNoteButton = document.getElementById("clear_last_note");
     const playBt = document.getElementById('play_melody');
+    const pitch_cb = document.getElementById('pitch-cb');
 
     // Add an event listener for the clear-buttons to call the corresponding method
     clearAllButton.addEventListener("click", clear_all_pattern);
@@ -706,6 +722,9 @@ function manageOptions() {
 
     // Add an event listener for the 'search' button
     searchButton.addEventListener("click", searchButtonHandler);
+
+    // Add event listener to 'Hauteur des notes' checkbox
+    pitch_cb.addEventListener("click", matchPicthCbHandler);
 }
 
 /**

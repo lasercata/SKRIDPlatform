@@ -410,7 +410,7 @@ app.post('/formulateQuery', (req, res) => {
         notes
     ];
 
-    if (allow_transposition == 'true') //TODO: check the type of allow_transposition !
+    if (allow_transposition)
         args.push('-t');
 
     if (collections != null) {

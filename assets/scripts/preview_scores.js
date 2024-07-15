@@ -12,6 +12,9 @@
  * @param {*} queryResults.result - the content of the result.
  *
  * @returns an array of results correctly filtered, in the following format : `[\{source, number_of_occurrences: <nb>, notes_id: \{id: degree, ...\}\}, ...]`
+ *
+ * @todo update the format
+ * @todo there is too much complexity in this function, as it was needed to handle all the cases of different json results formats. It should not be the case now (unless for manual queries pages).
  */
 function unifyResults(queryResults) {
     let results = []; // the array that will be returned ;
@@ -72,7 +75,9 @@ function unifyResults(queryResults) {
                 }
             }
 
-            if ('overall_degree' in result)
+            if ('notes' in result)
+                results.push({ name, number_of_occurrences: 1, overall_degree: result.overall_degree, notes: result.notes, notes_id: notes_temp});
+            else if ('overall_degree' in result)
                 results.push({ name, number_of_occurrences: 1, overall_degree: result.overall_degree, notes_id: notes_temp});
             else
                 results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
@@ -83,6 +88,10 @@ function unifyResults(queryResults) {
 
             const index = results.findIndex(item => item.name === name);
             results[index].number_of_occurrences = occurrences[name];
+
+            if ('notes' in results[index]) {
+                results[index].notes = results[index].notes.concat(notes_arr);
+            }
 
             //-Adding the IDs to the id array
             for(let k = 0; k < notes_arr.length; k++) {
