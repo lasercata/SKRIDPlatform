@@ -370,7 +370,7 @@ const searchButtonHandler = function() {
         pitch_dist_select.value,
         duration_factor_select.value,
         duration_gap_select.value,
-        alpha_select.value,
+        alpha_select.value / 100,
         transposition_cb.checked
     ).then(
         fuzzyQuery => sendQuery(fuzzyQuery)

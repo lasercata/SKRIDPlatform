@@ -167,13 +167,14 @@ function makeUrl(collection, source, red_notes=null) {
 /**
  * Create html <a> for the given score.
  *
- * @param {string} url        - the link that will be used when the user clicks on the preview ;
- * @param {string} source     - the filename of the score ;
- * @param {int} [nb_occ=null] - if not `null`, display the number of occurrences below the score name.
+ * @param {string} url                 - the link that will be used when the user clicks on the preview ;
+ * @param {string} source              - the filename of the score ;
+ * @param {int} [nb_occ=null]          - if not `null`, display the number of occurrences below the score name ;
+ * @param {null} [overall_degree=null] - if not `null`, display the overall degree of the match below the score name (or nb of occurrences).
  *
  * @returns a html \<a\> element containing all the above information.
  */
-function createPreview(url, source, nb_occ=null) {
+function createPreview(url, source, nb_occ=null, overall_degree=null) {
     // Main element (link)
     const a = document.createElement('a');
     a.className = 'score-preview';
@@ -198,6 +199,14 @@ function createPreview(url, source, nb_occ=null) {
         occurrences.className = "score_author";
         occurrences.textContent = 'Pattern occurrences: ' + nb_occ;
         a.append(occurrences);
+    }
+
+    // Overall degree
+    if (overall_degree != null) {
+        const overall_degree_p = document.createElement('p');
+        overall_degree_p.className = "score_author";
+        overall_degree_p.textContent = `Overall degree: ${Math.floor(100 * overall_degree)}%`;
+        a.append(overall_degree_p);
     }
 
     a.append(h3);
@@ -386,7 +395,7 @@ async function createPreviews_2(results_container, tk, results) {
             let collection = data_auth.results[0]._fields[0]
 
             let url = makeUrl(collection, source, result.notes_id);
-            results_container.append(createPreview(url, source, result.number_of_occurrences));
+            results_container.append(createPreview(url, source, result.number_of_occurrences, result.overall_degree));
 
             let score_div = document.getElementById(source);
             let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + source;
