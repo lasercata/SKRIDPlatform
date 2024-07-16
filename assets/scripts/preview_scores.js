@@ -82,7 +82,7 @@ function unifyResults(queryResults) {
             else
                 results.push({ name, number_of_occurrences: 1, notes_id: notes_temp});
         }
-        else { // The source element has already been seen
+        else { // The source element has already been seen. Note that we do not update overall_degree here as we want to keep the max one, and the elements are ordered.
             //-Find the source in results and increase number of occurrences
             occurrences[name]++;
 

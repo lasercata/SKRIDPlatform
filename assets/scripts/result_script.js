@@ -85,10 +85,9 @@ function init() {
 
             // Then, for each id in the noteIds array, find the note and set the color to red
             for(let i = 0; i < noteIds.length; i++) {
-                note = document.getElementById(noteIds[i]);
+                note = document.getElementById(noteIds[i]).firstElementChild;
 
                 if(note != null) {
-                    // note.setAttribute('fill', 'red');
                     note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
                 }
             }
@@ -275,7 +274,7 @@ const nextPageHandler = function() {
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
 
     for(let i = 0; i < noteIds.length; i++) {
-        note = document.getElementById(noteIds[i]);
+        note = document.getElementById(noteIds[i]).firstElementChild;
 
         if(note != null) {
             note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
@@ -295,10 +294,9 @@ const prevPageHandler = function() {
     //---Render previous page
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
     for(let i = 0; i < noteIds.length; i++) {
-        note = document.getElementById(noteIds[i]);
+        note = document.getElementById(noteIds[i]).firstElementChild;
 
         if(note != null) {
-            // note.setAttribute('fill', 'red');
             note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
         }
     }
