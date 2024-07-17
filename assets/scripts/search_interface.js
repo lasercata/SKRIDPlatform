@@ -456,16 +456,32 @@ const stopTune = (note, audio=null) => {
 }
 
 /**
- * Enable or disable "autoriser les transpositions" checkbox whether "Hauteur des notes" is checked
+ * Called when "Hauteur des notes" checkbutton is clicked.
+ * Enable or disable options that become irrelevant when unchecked.
  */
 const matchPicthCbHandler = () => {
     const pitch_cb = document.getElementById('pitch-cb');
     const transposition_cb = document.getElementById('transpose-cb');
+    const pitch_dist_select = document.getElementById('pitch-dist-select');
 
     transposition_cb.disabled = !pitch_cb.checked;
+    pitch_dist_select.disabled = !pitch_cb.checked;
 
     if (!pitch_cb.checked)
         transposition_cb.checked = false;
+}
+
+/**
+ * Called when "Rythme" checkbutton is clicked.
+ * Enable or disable options that become irrelevant when unchecked.
+ */
+const matchRhythmCbHandler = () => {
+    const rhythm_cb = document.getElementById('rhythm-cb');
+    const duration_factor_select = document.getElementById('duration-factor-select');
+    const duration_gap_select = document.getElementById('duration-gap-select');
+
+    duration_factor_select.disabled = !rhythm_cb.checked;
+    duration_gap_select.disabled = !rhythm_cb.checked;
 }
 
 /**
@@ -714,6 +730,7 @@ function manageOptions() {
     const clearLastNoteButton = document.getElementById("clear_last_note");
     const playBt = document.getElementById('play_melody');
     const pitch_cb = document.getElementById('pitch-cb');
+    const rhythm_cb = document.getElementById('rhythm-cb');
 
     // Add an event listener for the clear-buttons to call the corresponding method
     clearAllButton.addEventListener("click", clear_all_pattern);
@@ -725,6 +742,7 @@ function manageOptions() {
 
     // Add event listener to 'Hauteur des notes' checkbox
     pitch_cb.addEventListener("click", matchPicthCbHandler);
+    rhythm_cb.addEventListener("click", matchRhythmCbHandler );
 }
 
 /**
