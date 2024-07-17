@@ -481,7 +481,7 @@ const matchRhythmCbHandler = () => {
     const duration_gap_select = document.getElementById('duration-gap-select');
 
     duration_factor_select.disabled = !rhythm_cb.checked;
-    duration_gap_select.disabled = !rhythm_cb.checked;
+    // duration_gap_select.disabled = !rhythm_cb.checked;
 }
 
 /**
@@ -993,6 +993,9 @@ function init() {
         manageOptions();
         manageStaveAndMelody();
         manageCollections();
+
+        matchPicthCbHandler(); // Disable options that should be
+        matchRhythmCbHandler();
 
         let tk = new verovio.toolkit();
         setTk(tk);

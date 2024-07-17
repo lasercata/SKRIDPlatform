@@ -10,8 +10,12 @@ document.addEventListener("DOMContentLoaded", init);
 let datadir;
 let score_name;
 let note;
+
 let noteIds;
 let noteDegs;
+
+let matches;
+
 // The current page, which will change when playing through the piece
 let currentPage;
 // Verovio toolkit variable
@@ -58,6 +62,7 @@ function init() {
         document.getElementById("stopMIDI").addEventListener("click", stopMIDIHandler);
         document.getElementById("nextPage").addEventListener("click", nextPageHandler);
         document.getElementById("prevPage").addEventListener("click", prevPageHandler);
+        document.getElementById(`toggle-all-cb`).addEventListener('change', matchAllToggleHandler);
 
         // Set the function as message callback
         MIDIjs.player_callback = midiHightlightingHandler;
@@ -67,6 +72,7 @@ function init() {
 
         // Get the note IDs from the url
         readNoteIds();
+        makeMatches();
 
         // Get the author from the url and use it to find the folder in which the .mei file is contained
         let author = readFromUrl('author').replace(/\s+/g, "-");
@@ -82,15 +88,6 @@ function init() {
             // Finally, get the <div> element with the specified ID, 
             // and set the content (innerHTML) to the SVG that we just generated.
             document.getElementById("notation").innerHTML = svg;
-
-            // Then, for each id in the noteIds array, find the note and set the color to red
-            for(let i = 0; i < noteIds.length; i++) {
-                note = document.getElementById(noteIds[i]).firstElementChild;
-
-                if(note != null) {
-                    note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
-                }
-            }
 
             // Set the author in the information box
             const author_p = document.getElementById('author');
@@ -154,6 +151,7 @@ function init() {
             link_svg.innerHTML = filename+'.svg';
             document.getElementById('fichier_svg').appendChild(link_svg);
 
+            //TODO: put the following part in a separate function ?
             // Add gradient legend
             const grad_div = document.getElementById('gradient-legend');
 
@@ -174,9 +172,16 @@ function init() {
                     grad_div.append(grad_color);
                 }
             }
-            else {
+            else { // If no note to highlight, then hide the corresponding irrelevent parts
                 grad_div.style = 'display: none';
+                document.getElementById('match-toggle').style = 'display: none;';
             }
+
+            // Add the match toggles
+            createMatchesHighlightToggles();
+
+            // Color all matches
+            matchAllToggleHandler();
 
             refreshPagination(currentPage, tk.getPageCount());
         });
@@ -214,9 +219,160 @@ function readNoteIds() {
 }
 
 /**
+ * Fills the `matches` array, which is an array of matches. A match is an array of `{id: '<id>', deg: '<deg>'}`.
+ */
+function makeMatches() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    matches = [];
+    let matches_json = {};
+
+    //---Add all into `matches_json`
+    for (const [key, value] of urlParams.entries()) {
+        let indexes = key.split('_').slice(-2); // [i, j]
+        let i = parseInt(indexes[0]);
+        let j = parseInt(indexes[1]);
+
+        if (key.startsWith('note_id')) { // note_id_{i}_{j}={value}
+            if (i in matches_json) {
+                if (j in matches_json[i])
+                    matches_json[i][j].id = value;
+                else
+                    matches_json[i][j] = {'id': value};
+            }
+            else {
+                let tmp = {};
+                tmp[j] = {'id': value}
+
+                matches_json[i] = tmp;
+            }
+        }
+
+        if (key.startsWith('note_deg')) { // note_deg_{i}_{j}={value}
+            if (i in matches_json) {
+                if (j in matches_json[i])
+                    matches_json[i][j].deg = value;
+                else
+                    matches_json[i][j] = {'deg': value};
+            }
+            else {
+                let tmp = {};
+                tmp[j] = {'deg': value}
+
+                matches_json[i] = tmp;
+            }
+        }
+    }
+
+    //---Convert `matches_json` to array of arrays `matches`
+    for (const i in matches_json) {
+        let tmp = []
+
+        for (const j in matches_json[i]) {
+            tmp.push(matches_json[i][j]);
+        }
+
+        matches.push(tmp);
+    }
+}
+
+/**
+ * Makes a match toggle for {@linkcode createMatchesHighlightToggles}.
+ * The checkbutton has the id 'toggle-match-`nb`-cb'.
+ *
+ * @param {number} nb - the number of the match
+ *
+ * @returns {HTMLElement} a label containing the checkbutton and the text.
+ */
+function makeAMatchToggle(nb) {
+    const lb = document.createElement('label');
+    const cb = document.createElement('input');
+
+    cb.id = `toggle-match-${nb}-cb`;
+    cb.type = 'checkbox';
+    cb.checked = true;
+
+    lb.id = `toggle-match-${nb}-lb`;
+    lb.appendChild(cb);
+    lb.append(` Match ${nb + 1}`);
+
+    return lb;
+}
+
+/**
+ * Creates the html toggle buttons that allow to turn on / off the highlight of a specific match.
+ */
+function createMatchesHighlightToggles() {
+    // const toggle_div = document.getElementById('match-toggle');
+    const toggle_div = document.getElementById('match-toggle-checkboxes');
+
+    for (let k = 0 ; k < matches.length ; ++k) {
+        toggle_div.appendChild(makeAMatchToggle(k));
+
+        // document.getElementById(`toggle-match-${k}-cb`).addEventListener('change', () => matchToggleHandler(k));
+        document.getElementById(`toggle-match-${k}-cb`).addEventListener('change', refreshHighlight);
+    }
+}
+
+/**
+ * Called when "Highlight all" checkbox is clicked.
+ * Changes the state of all the checkboxes to repeat the same.
+ */
+const matchAllToggleHandler = function() {
+    const toggle_all_cb = document.getElementById(`toggle-all-cb`);
+
+    for (let k = 0 ; k < matches.length ; ++k) {
+        document.getElementById(`toggle-match-${k}-cb`).checked = toggle_all_cb.checked;
+        highlightMatch(k);
+    }
+}
+
+/**
+ * Highlight only the selected matches.
+ * In order to do this, it hides all the matches that are unchecked, and then color the ones that are checked.
+ */
+function refreshHighlight() {
+    for (let k = 0 ; k < matches.length ; ++k) {
+        const toggle_cb = document.getElementById(`toggle-match-${k}-cb`);
+
+        if (!toggle_cb.checked)
+            highlightMatch(k);
+    }
+
+    for (let k = 0 ; k < matches.length ; ++k) {
+        const toggle_cb = document.getElementById(`toggle-match-${k}-cb`);
+
+        if (toggle_cb.checked)
+            highlightMatch(k);
+    }
+}
+
+/**
+ * Applies or disable highlight for the given match, according to the checkbox state.
+ *
+ * @param {number} match_nb - the number of the match that was toggled.
+ */
+function highlightMatch(match_nb) {
+    const toggle_cb = document.getElementById(`toggle-match-${match_nb}-cb`);
+
+    // Highlight each note in the match `match_nb`
+    for (let k = 0 ; k < matches[match_nb].length ; ++k) {
+        let col;
+        if (toggle_cb.checked)
+            col = getGradientColor(matches[match_nb][k].deg / 100);
+        else
+            col = null;
+
+        const note = document.getElementById(matches[match_nb][k].id).firstElementChild;
+        note.setAttribute('fill', col);
+    }
+}
+
+/**
     The handler to start playing the file
  **/
-const playMIDIHandler = function () {
+const playMIDIHandler = function() {
     // Get the MIDI file from the Verovio toolkit
     let base64midi = tk.renderToMIDI();
     // Add the data URL prefixes describing the content

@@ -16,7 +16,6 @@
  *
  * If the query was not fuzzy, then the field `matches` will not be set.
  *
- * @todo update the format
  * @todo there is too much complexity in this function, as it was needed to handle all the cases of different json results formats. It should not be the case now (unless for manual queries pages).
  */
 function unifyResults(queryResults) {
@@ -151,17 +150,17 @@ function getSourceAndCollection(result) {
  *
  * @param {string} collection - the name of the collection to which the score belongs ;
  * @param {string} source - the filename of the score ;
- * @param {int[]} [red_notes=null] - an array of notes IDs to highlight in red.
+ * @param {json[][]} [matches=null] - an array of matches. A Match is an array of json elements.
  */
-function makeUrl(collection, source, red_notes=null) {
+function makeUrl(collection, source, matches=null) {
     let url = '/result?author='+ collection +'&score_name=' + source;
 
-    if (red_notes != null) {
-        let i = 0;
-        for (let id in red_notes) {
-            url += '&note_id'+ i + '=' + id;
-            url += '&note_deg'+ i + '=' + Math.floor(100 * red_notes[id]);
-            i++;
+    if (matches != null) {
+        for (let i = 0 ; i < matches.length ; ++i) {
+            for (let j = 0 ; j < matches[i].length ; ++j) {
+                url += `&note_id_${i}_${j}=${matches[i][j].note.id}`;
+                url += `&note_deg_${i}_${j}=${Math.floor(100 * matches[i][j].note_deg)}`;
+            }
         }
     }
 
@@ -349,7 +348,8 @@ function loadPreviews(results_container, tk, results) {
 function createPreviews_1(results_container, results) {
     results.forEach(result => {
         let prop = getSourceAndCollection(result);
-        let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('notes_id') ? result.notes_id : null);
+        // let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('notes_id') ? result.notes_id : null);
+        let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('matches') ? result.matches : null);
 
         const a = createPreview(url, prop.source);
         results_container.append(a);
@@ -398,7 +398,7 @@ async function createPreviews_2(results_container, tk, results) {
         .then(data_auth => {
             let collection = data_auth.results[0]._fields[0]
 
-            let url = makeUrl(collection, source, result.notes_id);
+            let url = makeUrl(collection, source, result.matches);
             results_container.append(createPreview(url, source, result.number_of_occurrences, result.overall_degree));
 
             let score_div = document.getElementById(source);

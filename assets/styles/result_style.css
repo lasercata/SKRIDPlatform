@@ -8,6 +8,10 @@ body {
     width: 300px;
 }
 
+.box-right {
+    display: flex;
+}
+
 #gradient-legend {
     margin: 20px;
 }
@@ -15,6 +19,22 @@ body {
     width: 100px;
     padding: 8px;
     text-align: center;
+}
+
+#match-toggle {
+    display: grid;
+    padding: 20px;
+    /* height: 428px; */
+    /* overflow-x: hidden; */
+    /* overflow-y: auto; */
+}
+
+#match-toggle-checkboxes {
+    display: grid;
+    padding-right: 10px;
+    height: 380px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
     #notation {
