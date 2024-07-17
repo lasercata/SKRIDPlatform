@@ -159,47 +159,87 @@ function showNav() {
 }
 
 /**
- * Converts `data` to a CSV string
+ * Converts `data` to a CSV string.
+ *
+ * Header format :
+ * ```
+ * source, number of occurrences, [overall_degree], [note (#x_#y)], note id (#x_#y), match % (#x_#y), [pitch match % (#x_#y)], [duration match % (#x_#y)], [sequencing match % (#x_#y)]
+ * ```
+ *
+ * Things in `[]` will not be set if the query was not fuzzy.
+ *
+ * `#x_#y` (will translate to `0_1` if `x = 0` and `y = 1` for example) means the note `#y` of the match `#x` in the file `source`.
  *
  * @param {json} data - the data to convert
  * @returns {string} the CSV representation of `data`.
- *
- * @todo give the CSV header here in the doc !
  */
 function dataToCSV(data) {
-    // Calculate max notes_id length
+    // Calculate max notes_id length and max matches length
     let max_notes_id_len = 0; // The maximum of data[k].notes_id.length for k in range 0 data.length - 1.
+    let max_matches_len = 0; // The maximum of data[k].matches.length for k in range 0 data.length - 1.
 
     data.forEach(score => {
-        let len = Object.keys(score.notes_id).length;
+        let len_id = Object.keys(score.notes_id).length;
 
-        if (len > max_notes_id_len)
-            max_notes_id_len = len;
+        if (len_id > max_notes_id_len)
+            max_notes_id_len = len_id;
+
+        let len_matches = 0
+        if ('matches' in score)
+            len_matches = score.matches.length;
+
+        if ('matches' in score && len_matches > max_matches_len)
+            max_matches_len = len_matches;
     });
 
     // Construct CSV header
-    let csv_string = 'source, number of occurrences';
+    let csv_string = 'source,number of occurrences';
 
     if ('overall_degree' in data[0])
-        csv_string += ', overall degree';
+        csv_string += ',overall degree (%)';
 
-    for (let k = 0 ; k < max_notes_id_len ; ++k) {
-        csv_string += `, note id (${k + 1}), match % (${k + 1})`;
+    if ('matches' in data[0]) {
+        for (let i = 0 ; i < max_matches_len ; ++i) {
+            for (let j = 0 ; j < data[0].matches.length ; ++j) { // We suppose that all matches have the same length
+                let index = `${i + 1}_${j + 1}`;
+                csv_string += `,note (${index}),note id (${index}),match % (${index}),pitch match % (${index}),duration match % (${index}),sequencing match % (${index})`;
+            }
+        }
+    }
+    else {
+        for (let k = 0 ; k < max_notes_id_len ; ++k) {
+            csv_string += `,note id (${k + 1}),match % (${k + 1})`;
+        }
     }
 
     // Add each score on its line
     data.forEach(score => {
-        csv_string += `\n${score.name}, ${score.number_of_occurrences}`;
+        csv_string += `\n${score.name},${score.number_of_occurrences}`;
 
         if ('overall_degree' in data[0]) {
             if ('overall_degree' in score)
-                csv_string += ', ' + score.overall_degree;
+                csv_string += `,${(100 * score.overall_degree).toFixed(2)}`;
             else
                 csv_string += ',';
         }
 
-        for (let id in score.notes_id) {
-            csv_string += `, ${id}, ${score.notes_id[id]}`;
+        if ('matches' in data[0]) {
+            for (let i = 0 ; i < score.matches.length ; ++i) {
+                for (let j = 0 ; j < score.matches[i].length ; ++j) {
+                    let note_obj = score.matches[i][j];
+                    csv_string += `,${note_obj.note.pitch}/${note_obj.note.octave} ${1 / note_obj.note.duration}`; // note
+                    csv_string += `,${note_obj.note.id}`; // note id
+                    csv_string += `,${(100 * note_obj.note_deg).toFixed(2)}`; // match %
+                    csv_string += `,${(100 * note_obj.pitch_deg).toFixed(2)}`; // pitch match %
+                    csv_string += `,${(100 * note_obj.duration_deg).toFixed(2)}`; // duration match %
+                    csv_string += `,${(100 * note_obj.sequencing_deg).toFixed(2)}`; // sequencing match %
+                }
+            }
+        }
+        else {
+            for (let id in score.notes_id) {
+                csv_string += `,${id},${score.notes_id[id]}`;
+            }
         }
     });
 

@@ -11,7 +11,10 @@
  * @param {*} queryResults - the result of the query ;
  * @param {*} queryResults.result - the content of the result.
  *
- * @returns an array of results correctly filtered, in the following format : `[\{source, number_of_occurrences: <nb>, notes_id: \{id: degree, ...\}\}, ...]`
+ * @returns an array of results correctly filtered, in the following format : `[\{source, number_of_occurrences: <nb>, notes_id: \{id: degree, ...\}, matches: m\}, ...]`,
+ * where `m` is a matrix of notes : `m[k]` is the `k`-th match in the source file, containing the notes `m[k][0]` to `m[k][n - 1]` (where `n` would be the number of notes in the search pattern).
+ *
+ * If the query was not fuzzy, then the field `matches` will not be set.
  *
  * @todo update the format
  * @todo there is too much complexity in this function, as it was needed to handle all the cases of different json results formats. It should not be the case now (unless for manual queries pages).
@@ -76,7 +79,7 @@ function unifyResults(queryResults) {
             }
 
             if ('notes' in result)
-                results.push({ name, number_of_occurrences: 1, overall_degree: result.overall_degree, notes: result.notes, notes_id: notes_temp});
+                results.push({ name, number_of_occurrences: 1, overall_degree: result.overall_degree, matches: [result.notes], notes_id: notes_temp});
             else if ('overall_degree' in result)
                 results.push({ name, number_of_occurrences: 1, overall_degree: result.overall_degree, notes_id: notes_temp});
             else
@@ -89,8 +92,9 @@ function unifyResults(queryResults) {
             const index = results.findIndex(item => item.name === name);
             results[index].number_of_occurrences = occurrences[name];
 
-            if ('notes' in results[index]) {
-                results[index].notes = results[index].notes.concat(notes_arr);
+            if ('matches' in results[index]) {
+                // results[index].notes = results[index].notes.concat(notes_arr);
+                results[index].matches.push(result.notes);
             }
 
             //-Adding the IDs to the id array
