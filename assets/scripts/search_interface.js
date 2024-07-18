@@ -452,7 +452,7 @@ const stopTune = (note, audio=null) => {
             clearInterval(fadeAudio);
             audio.pause();
         }
-    }, 50);
+    }, 30);
 }
 
 /**
