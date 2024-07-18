@@ -184,7 +184,7 @@ function makeUrl(collection, source, matches=null) {
  *
  * @param {string} url                 - the link that will be used when the user clicks on the preview ;
  * @param {string} source              - the filename of the score ;
- * @param {int} [nb_occ=null]          - if not `null`, display the number of occurrences below the score name ;
+ * @param {number} [nb_occ=null]       - if not `null`, display the number of occurrences below the score name ;
  * @param {null} [overall_degree=null] - if not `null`, display the overall degree of the match below the score name (or nb of occurrences).
  *
  * @returns a html \<a\> element containing all the above information.
@@ -231,13 +231,13 @@ function createPreview(url, source, nb_occ=null, overall_degree=null) {
 /**
  * Uses verovio to generate a svg preview of the score (first page) and set it into `score_div`.
  *
- * @param {HTMLElement} score_div  - the html element that will contain the svg preview ;
- * @param {string} score_path      - the (relative) path to the score (`./data/[collection name]/[score name]`) ;
- * @param {verovio.toolkit} tk     - the verovio toolkit ;
- * @param {int[]} [red_notes=[]]   - an array of mei IDs for notes to highlight in red.
- * @param {int} [parentWidth=180]  - the width of the parent (used to calculate the width of the svg) ;
- * @param {int} [parentHeight=250] - the height of the parent (used to calculate the height of the svg) ;
- * @param {int} [zoom=20]          - the zoom for the svg ;
+ * @param {HTMLElement} score_div     - the html element that will contain the svg preview ;
+ * @param {string} score_path         - the (relative) path to the score (`./data/[collection name]/[score name]`) ;
+ * @param {verovio.toolkit} tk        - the verovio toolkit ;
+ * @param {number[]} [red_notes=[]]   - an array of mei IDs for notes to highlight in red.
+ * @param {number} [parentWidth=180]  - the width of the parent (used to calculate the width of the svg) ;
+ * @param {number} [parentHeight=250] - the height of the parent (used to calculate the height of the svg) ;
+ * @param {number} [zoom=20]          - the zoom for the svg ;
  */
 function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, parentHeight=250, zoom=20) {
     let pageHeight = parentHeight * 100 / zoom;
@@ -276,7 +276,7 @@ function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, p
  *
  * @param {json} fromColor - the origin color (0%). Format : {r: [nb], g: [nb], b: [nb]}, with 0 <= nb < 256 ;
  * @param {json} toColor - the destination color (100%). Format : {r: [nb], g: [nb], b: [nb]} ;
- * @param {int} percent - the percentage.
+ * @param {number} percent - the percentage.
  *
  * @returns {string} an RGB string.
  */

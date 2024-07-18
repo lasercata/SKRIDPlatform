@@ -508,7 +508,7 @@ function playNoteWithRhythm(note, rhythm) {
 /**
  * Wait `ms` ms.
  *
- * @param {int} ms - the time to wait, in ms.
+ * @param {number} ms - the time to wait, in ms.
  */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -949,7 +949,7 @@ function changeLastNoteRhythm(newRhythm) {
 /**
  * Changes the current octave
  *
- * @param {int} diff - the number of octaves to change (e.g +1, -1, ...)
+ * @param {number} diff - the number of octaves to change (e.g +1, -1, ...)
  */
 function changeOctave(diff) {
     const octave_lb = document.getElementById('octave-lb');

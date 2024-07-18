@@ -11,9 +11,6 @@ let datadir;
 let score_name;
 let note;
 
-let noteIds;
-let noteDegs;
-
 let matches;
 
 // The current page, which will change when playing through the piece
@@ -26,8 +23,6 @@ let tk;
  */
 function init() {
     datadir = "./data/";
-    noteIds = [];
-    noteDegs = [];
     currentPage = 1;
 
     verovio.module.onRuntimeInitialized = () => {
@@ -67,14 +62,11 @@ function init() {
         // Set the function as message callback
         MIDIjs.player_callback = midiHightlightingHandler;
 
-        // Get the score name from the url
-        score_name = readFromUrl('score_name');
-
-        // Get the note IDs from the url
-        readNoteIds();
+        // Get the note IDs and degrees from the url
         makeMatches();
 
         // Get the author from the url and use it to find the folder in which the .mei file is contained
+        score_name = readFromUrl('score_name');
         let author = readFromUrl('author').replace(/\s+/g, "-");
         let folder = author + '/';
 
@@ -85,97 +77,15 @@ function init() {
             tk.loadData(meiXML);
             // And generate the SVG for the first page ...
             let svg = tk.renderToSVG(currentPage);
+
             // Finally, get the <div> element with the specified ID, 
             // and set the content (innerHTML) to the SVG that we just generated.
             document.getElementById("notation").innerHTML = svg;
 
-            // Set the author in the information box
-            const author_p = document.getElementById('author');
-            author_p.append(author);
+            setRightInfos(author);
 
-            // Set the composition date in the information box
-            // NOTE: we are going to retrieve it from the MEI file. Use the following code as an example
-            // on how to get information from the MEI file
-            const meiDoc = tk.getMEI();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(meiDoc, 'text/xml');
-
-            const persNameElem = xmlDoc.getElementsByTagName('persName')[0];
-            const persNameContent = persNameElem.textContent;
-
-            const filename = score_name.replace(/\.[^/.]+$/, "") 
-
-            // Actually extract the date
-            const regExpDate = /\d{4}/;
-            const matchDate = persNameContent.match(regExpDate);
-            const date = matchDate ? matchDate[0] : null;
-
-            const composition_date = document.getElementById('composition_date');
-            composition_date.append(date);
-
-            document.getElementById('searchbar_title').append(score_name);
-
-            var link_mei = document.createElement('a');
-            link_mei.setAttribute('href',datadir+folder+score_name);
-            link_mei.setAttribute('class', 'file-link');
-            link_mei.innerHTML = score_name;
-            document.getElementById('fichier_mei').appendChild(link_mei);
-
-            var link_ly = document.createElement('a');
-            link_ly.setAttribute('href',datadir+folder+filename+'.ly');
-            link_ly.setAttribute('class', 'file-link');
-            link_ly.innerHTML = filename+'.ly';
-            document.getElementById('fichier_ly').appendChild(link_ly);
-
-            var link_mid = document.createElement('a');
-            link_mid.setAttribute('href',datadir+folder+filename+'.mid');
-            link_mid.setAttribute('class', 'file-link');
-            link_mid.innerHTML = filename+'.mid';
-            document.getElementById('fichier_mid').appendChild(link_mid);
-
-            var link_musicxml = document.createElement('a');
-            link_musicxml.setAttribute('href',datadir+folder+filename+'.musicxml');
-            link_musicxml.setAttribute('class', 'file-link');
-            link_musicxml.innerHTML = filename+'.musicxml';
-            document.getElementById('fichier_musicxml').appendChild(link_musicxml);
-
-            var link_pdf = document.createElement('a');
-            link_pdf.setAttribute('href',datadir+folder+filename+'.pdf');
-            link_pdf.setAttribute('class', 'file-link');
-            link_pdf.innerHTML = filename+'.pdf';
-            document.getElementById('fichier_pdf').appendChild(link_pdf);
-
-            var link_svg = document.createElement('a');
-            link_svg.setAttribute('href',datadir+folder+filename+'.svg');
-            link_svg.setAttribute('class', 'file-link');
-            link_svg.innerHTML = filename+'.svg';
-            document.getElementById('fichier_svg').appendChild(link_svg);
-
-            //TODO: put the following part in a separate function ?
             // Add gradient legend
-            const grad_div = document.getElementById('gradient-legend');
-
-            if (noteIds.length > 0) {
-                for (let k = 100 ; k >= 0 ; k -= 10) {
-                    let grad_color = document.createElement('div');
-                    grad_color.setAttribute('class', 'grad-color');
-                    grad_color.innerText = k + '%';
-
-                    let style = `background-color: ${getGradientColor(k / 100)};`;
-                    if (k == 100)
-                        style += 'border-top-left-radius: 10px; border-top-right-radius: 10px;'
-                    else if (k == 0)
-                        style += 'border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;'
-
-                    grad_color.style = style;
-
-                    grad_div.append(grad_color);
-                }
-            }
-            else { // If no note to highlight, then hide the corresponding irrelevent parts
-                grad_div.style = 'display: none';
-                document.getElementById('match-toggle').style = 'display: none;';
-            }
+            makeGradientLegend();
 
             // Add the match toggles
             createMatchesHighlightToggles();
@@ -183,6 +93,7 @@ function init() {
             // Color all matches
             matchAllToggleHandler();
 
+            // Disable buttons according to pagination
             refreshPagination(currentPage, tk.getPageCount());
         });
     }
@@ -201,20 +112,100 @@ function readFromUrl(parameter) {
 }
 
 /**
- * Retrieve all the ids from the url and insert them into the noteIds array
+ * Set the informations from the file into the right box.
  */
-function readNoteIds() {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
+function setRightInfos(author) {
+    // Set the author in the information box
+    const author_p = document.getElementById('author');
+    author_p.append(author);
 
-    for (const [key, value] of urlParams.entries()) {
-        if (key.startsWith('note_id')) {
-            noteIds.push(value);
-        }
+    // Set the composition date in the information box
+    // NOTE: we are going to retrieve it from the MEI file. Use the following code as an example
+    // on how to get information from the MEI file
+    const meiDoc = tk.getMEI();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(meiDoc, 'text/xml');
 
-        if (key.startsWith('note_deg')) {
-            noteDegs.push(value);
+    const persNameElem = xmlDoc.getElementsByTagName('persName')[0];
+    const persNameContent = persNameElem.textContent;
+
+    const filename = score_name.replace(/\.[^/.]+$/, "") 
+
+    // Actually extract the date
+    const regExpDate = /\d{4}/;
+    const matchDate = persNameContent.match(regExpDate);
+    const date = matchDate ? matchDate[0] : null;
+
+    const composition_date = document.getElementById('composition_date');
+    composition_date.append(date);
+
+    document.getElementById('searchbar_title').append(score_name);
+
+    var link_mei = document.createElement('a');
+    link_mei.setAttribute('href',datadir+folder+score_name);
+    link_mei.setAttribute('class', 'file-link');
+    link_mei.innerHTML = score_name;
+    document.getElementById('fichier_mei').appendChild(link_mei);
+
+    var link_ly = document.createElement('a');
+    link_ly.setAttribute('href',datadir+folder+filename+'.ly');
+    link_ly.setAttribute('class', 'file-link');
+    link_ly.innerHTML = filename+'.ly';
+    document.getElementById('fichier_ly').appendChild(link_ly);
+
+    var link_mid = document.createElement('a');
+    link_mid.setAttribute('href',datadir+folder+filename+'.mid');
+    link_mid.setAttribute('class', 'file-link');
+    link_mid.innerHTML = filename+'.mid';
+    document.getElementById('fichier_mid').appendChild(link_mid);
+
+    var link_musicxml = document.createElement('a');
+    link_musicxml.setAttribute('href',datadir+folder+filename+'.musicxml');
+    link_musicxml.setAttribute('class', 'file-link');
+    link_musicxml.innerHTML = filename+'.musicxml';
+    document.getElementById('fichier_musicxml').appendChild(link_musicxml);
+
+    var link_pdf = document.createElement('a');
+    link_pdf.setAttribute('href',datadir+folder+filename+'.pdf');
+    link_pdf.setAttribute('class', 'file-link');
+    link_pdf.innerHTML = filename+'.pdf';
+    document.getElementById('fichier_pdf').appendChild(link_pdf);
+
+    var link_svg = document.createElement('a');
+    link_svg.setAttribute('href',datadir+folder+filename+'.svg');
+    link_svg.setAttribute('class', 'file-link');
+    link_svg.innerHTML = filename+'.svg';
+    document.getElementById('fichier_svg').appendChild(link_svg);
+}
+
+/**
+ * Creates the gradient color legend.
+ *
+ * If there is no colored note, it hides the div.
+ */
+function makeGradientLegend() {
+    const grad_div = document.getElementById('gradient-legend');
+
+    if (matches.length > 0) {
+        for (let k = 100 ; k >= 0 ; k -= 10) {
+            let grad_color = document.createElement('div');
+            grad_color.setAttribute('class', 'grad-color');
+            grad_color.innerText = k + '%';
+
+            let style = `background-color: ${getGradientColor(k / 100)};`;
+            if (k == 100)
+                style += 'border-top-left-radius: 10px; border-top-right-radius: 10px;'
+            else if (k == 0)
+                style += 'border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;'
+
+            grad_color.style = style;
+
+            grad_div.append(grad_color);
         }
+    }
+    else { // If no note to highlight, then hide the corresponding irrelevent parts
+        grad_div.style = 'display: none';
+        document.getElementById('match-toggle').style = 'display: none;';
     }
 }
 
@@ -450,8 +441,8 @@ const prevPageHandler = function() {
  * Disable next / previous buttons if necessary.
  * Also refresh page info label.
  *
- * @param {int} currentPage - the current page
- * @param {int} lastPage - the last page
+ * @param {number} currentPage - the current page
+ * @param {number} lastPage - the last page
  */
 function refreshPagination(currentPage, lastPage) {
     //---Init

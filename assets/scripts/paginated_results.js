@@ -36,8 +36,8 @@ function getPageData() {
  * Return the sub-array corresponding to the data from page `pageNb`.
  *
  * @param {*} data - the page data ;
- * @param {int} pageNb - the number of the page to get
- * @param {int | '*'} numberPerPage - the number of items per page. '*' for all.
+ * @param {number} pageNb - the number of the page to get
+ * @param {number | '*'} numberPerPage - the number of items per page. '*' for all.
  *
  * @return {json[]} data for the page `pageNb`.
  */
@@ -51,7 +51,7 @@ function getPageN(data, pageNb, numberPerPage) {
 /**
  * Refreshes the spin box max number and the total number of pages.
  *
- * @param {int} nb - the number of items in the collection for the current author (all pages included)
+ * @param {number} nb - the number of items in the collection for the current author (all pages included)
  * @param {null} [current_page=null] - current page value to display in the spin box (if null, it is unchanged)
  * @param {null} [numberPerPage=null] - if not null, change the value of the displayed value of the nb per page select.
  */
@@ -79,8 +79,8 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
 /**
  * Extract the right sub-array from `pageData` and display it using functions from `preview_scores.js`.
  *
- * @param {int} pageNb - the number of the page to load
- * @param {int} [numberPerPage=null] - the number of items per page. If null, use default global value.
+ * @param {number} pageNb - the number of the page to load
+ * @param {number} [numberPerPage=null] - the number of items per page. If null, use default global value.
  * @param {boolean} [refresh=false] - if true, refresh the spin box values.
  * @param {boolean} [range_change=false] - if true, and if pageNb > lastPage, set pageNb to lastPage.
  * @param {boolean} [show_no_res=false] - if true, display "no score found" when the data array is empty.
