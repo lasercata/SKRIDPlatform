@@ -3,6 +3,9 @@
  * @module preview_scores
  */
 
+/** The maximum length for urls. */
+const max_url_length = 16000;
+
 /**
  * Take the results sent by the server and merge duplicates.
  *
@@ -148,6 +151,9 @@ function getSourceAndCollection(result) {
 /**
  * Make the url for the previews.
  *
+ * It ensures that the url is not longer than `max_url_length` (and removes complete matches).
+ * As the matches are ordered, it removes the last ones, which are the less acurate ones.
+ *
  * @param {string} collection - the name of the collection to which the score belongs ;
  * @param {string} source - the filename of the score ;
  * @param {json[][]} [matches=null] - an array of matches. A Match is an array of json elements.
@@ -157,9 +163,15 @@ function makeUrl(collection, source, matches=null) {
 
     if (matches != null) {
         for (let i = 0 ; i < matches.length ; ++i) {
+            let url_match = '';
             for (let j = 0 ; j < matches[i].length ; ++j) {
-                url += `&note_id_${i}_${j}=${matches[i][j].note.id}`;
-                url += `&note_deg_${i}_${j}=${Math.floor(100 * matches[i][j].note_deg)}`;
+                url_match += `&note_id_${i}_${j}=${matches[i][j].note.id}`;
+                url_match += `&note_deg_${i}_${j}=${Math.floor(100 * matches[i][j].note_deg)}`;
+            }
+
+            // Add the match to the url only if it does not make it too long
+            if (url.length + url_match.length < max_url_length) {
+                url += url_match;
             }
         }
     }
