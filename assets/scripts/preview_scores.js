@@ -248,10 +248,9 @@ function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, p
 
         // Then, for each id in the noteIds array, find the note and set the color to red
         for (let id in red_notes) {
-            let note = document.getElementById(id).firstElementChild;
-
+            const note = document.getElementById(id);
             if(note != null) {
-                note.setAttribute('fill', getGradientColor(red_notes[id]));
+                note.firstElementChild.setAttribute('fill', getGradientColor(red_notes[id]));
             }
         }
     })

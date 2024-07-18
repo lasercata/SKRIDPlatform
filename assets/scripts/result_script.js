@@ -364,8 +364,9 @@ function highlightMatch(match_nb) {
         else
             col = null;
 
-        const note = document.getElementById(matches[match_nb][k].id).firstElementChild;
-        note.setAttribute('fill', col);
+        const note = document.getElementById(matches[match_nb][k].id);
+        if (note != null)
+            note.firstElementChild.setAttribute('fill', col);
     }
 }
 
@@ -428,14 +429,7 @@ const nextPageHandler = function() {
 
     //---Render next page
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
-
-    for(let i = 0; i < noteIds.length; i++) {
-        note = document.getElementById(noteIds[i]).firstElementChild;
-
-        if(note != null) {
-            note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
-        }
-    }
+    refreshHighlight();
 }
 
 /**
@@ -449,13 +443,7 @@ const prevPageHandler = function() {
 
     //---Render previous page
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
-    for(let i = 0; i < noteIds.length; i++) {
-        note = document.getElementById(noteIds[i]).firstElementChild;
-
-        if(note != null) {
-            note.setAttribute('fill', getGradientColor(noteDegs[i] / 100));
-        }
-    }
+    refreshHighlight();
 }
 
 /**
