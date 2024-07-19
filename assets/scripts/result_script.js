@@ -82,7 +82,7 @@ function init() {
             // and set the content (innerHTML) to the SVG that we just generated.
             document.getElementById("notation").innerHTML = svg;
 
-            setRightInfos(author);
+            setRightInfos(author, folder);
 
             // Add gradient legend
             makeGradientLegend();
@@ -114,7 +114,7 @@ function readFromUrl(parameter) {
 /**
  * Set the informations from the file into the right box.
  */
-function setRightInfos(author) {
+function setRightInfos(author, folder) {
     // Set the author in the information box
     const author_p = document.getElementById('author');
     author_p.append(author);

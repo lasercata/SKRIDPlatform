@@ -363,6 +363,7 @@ app.post('/compileFuzzy', (req, res) => {
  *         'duration_gap': float,
  *         'alpha': float,
  *         'allow_transposition': bool,
+ *         'contour_match': bool,
  *         'collections': '"col 1","col 2",...'
  *     }
  *     ```
@@ -382,6 +383,7 @@ app.post('/formulateQuery', (req, res) => {
     let duration_gap = req.body.duration_gap;
     let alpha = req.body.alpha;
     let allow_transposition = req.body.allow_transposition;
+    let contour_match = req.body.contour_match;
     let collections = req.body.collections;
 
     // Set default values if some params are null
@@ -395,6 +397,8 @@ app.post('/formulateQuery', (req, res) => {
         alpha = 0;
     if (allow_transposition == null)
         allow_transposition = false;
+    if (contour_match == null)
+        contour_match = false;
 
     // Create the connection
     log('info', `/formulateQuery: openning connection.`);
@@ -412,6 +416,9 @@ app.post('/formulateQuery', (req, res) => {
 
     if (allow_transposition)
         args.push('-t');
+
+    if (contour_match)
+        args.push('-C');
 
     if (collections != null) {
         args.push('-c');

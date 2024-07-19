@@ -149,13 +149,14 @@ const qwerty_us_to_azerty = {
  * @param {number}  [duration_gap=0]            - the duration gap (fuzzy param) ;
  * @param {number}  [alpha=0]                   - (in [0 ; 1]) will remove every result whose score is below `alpha` (fuzzy param) ;
  * @param {boolean} [allow_transposition=false] - allow transposition (fuzzy param) ;
+ * @param {boolean} [contour_match=false]       - match only contour (fuzzy param) ;
  *
  * @returns {promise} the fuzzy query corresponding to the parameters
  *
  * @example
  * createQuery().then(fuzzyQuery => sendQuery(fuzzyQuery));
  */
-async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false) {
+async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, contour_match=false) {
     //------Create the `notes` for the python script
     let notes = '[';
     for (let k = 0 ; k < melody.length ; ++k) {
@@ -209,6 +210,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         duration_gap: duration_gap,
         alpha: alpha,
         allow_transposition: allow_transposition,
+        contour_match: contour_match,
         collections: collections
     };
 
@@ -336,7 +338,6 @@ const remove_last_note = () => {
  */
 const searchButtonHandler = function() {
     const results_container = $('#results-container');
-    const radioButtons = document.querySelectorAll('input[type="radio"]');
 
     const pitch_cb = document.getElementById('pitch-cb');
     // const octave_cb = document.getElementById('octave-cb');
@@ -347,6 +348,7 @@ const searchButtonHandler = function() {
     const duration_gap_select = document.getElementById('duration-gap-select');
     const alpha_select = document.getElementById('alpha-select');
     const transposition_cb = document.getElementById('transpose-cb');
+    const contour_cb = document.getElementById('contour-cb');
 
     // Check that melody is not empty
     if (melody.length == 0) {
@@ -354,8 +356,8 @@ const searchButtonHandler = function() {
         return;
     }
 
-    if (!pitch_cb.checked && !rhythm_cb.checked) {
-        alert('You have ignored all settings (pitch and rhythm).\nPlease select at least one.\nIf you want to browse the scores, check the collection page.')
+    if (!pitch_cb.checked && !rhythm_cb.checked && !contour_cb.checked) {
+        alert('You have ignored all settings (pitch, rhythm and contour).\nPlease select at least one.\nIf you want to browse the scores, check the collection page.')
         return;
     }
 
@@ -371,7 +373,8 @@ const searchButtonHandler = function() {
         duration_factor_select.value,
         duration_gap_select.value,
         alpha_select.value / 100,
-        transposition_cb.checked
+        transposition_cb.checked,
+        contour_cb.checked
     ).then(
         fuzzyQuery => sendQuery(fuzzyQuery)
     );
@@ -482,6 +485,38 @@ const matchRhythmCbHandler = () => {
 
     duration_factor_select.disabled = !rhythm_cb.checked;
     // duration_gap_select.disabled = !rhythm_cb.checked;
+}
+
+/**
+ * Called when "Autoriser les transposition" or "Correspondance du contour seulement" checkbox is clicked.
+ * It set the other one as unchecked, and disable other options if needed.
+ */
+const contourAndTranspositionHandler = (sender_id) => {
+    const transpose_cb = document.getElementById('transpose-cb');
+    const contour_cb = document.getElementById('contour-cb');
+    const pitch_cb = document.getElementById('pitch-cb');
+    const pitch_dist_cb = document.getElementById('pitch-dist-select');
+
+    // Uncheck the other checkbox
+    // if (event.srcElement.id == 'transpose-cb' && transpose_cb.checked) {
+    if (sender_id == 'transpose-cb' && transpose_cb.checked) {
+        contour_cb.checked = false;
+    }
+    // if (event.srcElement.id == 'contour-cb' && contour_cb.checked) {
+    if (sender_id == 'contour-cb' && contour_cb.checked) {
+        transpose_cb.checked = false;
+    }
+
+    // If contour is checked, disable pitch param
+    if (contour_cb.checked) {
+        pitch_cb.disabled = true;
+        pitch_dist_cb.disabled = true;
+    }
+    else {
+        pitch_cb.disabled = false;
+        matchPicthCbHandler();
+        // pitch_dist_cb.disabled = false;
+    }
 }
 
 /**
@@ -731,18 +766,23 @@ function manageOptions() {
     const playBt = document.getElementById('play_melody');
     const pitch_cb = document.getElementById('pitch-cb');
     const rhythm_cb = document.getElementById('rhythm-cb');
+    const transpose_cb = document.getElementById('transpose-cb');
+    const contour_cb = document.getElementById('contour-cb');
 
     // Add an event listener for the clear-buttons to call the corresponding method
-    clearAllButton.addEventListener("click", clear_all_pattern);
-    clearLastNoteButton.addEventListener("click", remove_last_note);
-    playBt.addEventListener("click", playMelodyBtHandler);
+    clearAllButton.addEventListener('click', clear_all_pattern);
+    clearLastNoteButton.addEventListener('click', remove_last_note);
+    playBt.addEventListener('click', playMelodyBtHandler);
 
     // Add an event listener for the 'search' button
-    searchButton.addEventListener("click", searchButtonHandler);
+    searchButton.addEventListener('click', searchButtonHandler);
 
     // Add event listener to 'Hauteur des notes' checkbox
-    pitch_cb.addEventListener("click", matchPicthCbHandler);
-    rhythm_cb.addEventListener("click", matchRhythmCbHandler );
+    pitch_cb.addEventListener('click', matchPicthCbHandler);
+    rhythm_cb.addEventListener('click', matchRhythmCbHandler );
+
+    transpose_cb.addEventListener('click', () => contourAndTranspositionHandler('transpose-cb'));
+    contour_cb.addEventListener('click', () => contourAndTranspositionHandler('contour-cb'));
 }
 
 /**
@@ -996,6 +1036,7 @@ function init() {
 
         matchPicthCbHandler(); // Disable options that should be
         matchRhythmCbHandler();
+        contourAndTranspositionHandler(null);
 
         let tk = new verovio.toolkit();
         setTk(tk);
