@@ -7,14 +7,17 @@ SKRID Platform is an interface to a graph database designed to explore musical p
 ```
 .
 ├── assets/
+│   ├── acoustic_gra.../        Sounds for the piano keys
 │   ├── data/                   Data for the app
+│   ├── public/                 Contain images for the piano interface
 │   ├── scripts/                Client-side javascript
-│   └── tunes/                  Sounds for the piano keys
-├── docs/                       Contain the documentation (when made)
+│   └── styles/                 CSS files
+│
+├── docs/                       Contain the documentation (when generated)
 ├── config/                     Neo4j configurations
 ├── views/                      HTML pages
 │
-├── compilation_requete_fuzzy/  git submodule from https://github.com/aa196883/compilation_requete_fuzzy
+├── compilation_requete_fuzzy/  git submodule from https://github.com/aa196883/compilation_requete_fuzzy (python backend)
 │
 ├── index.js                    Server-side main file
 │
@@ -24,6 +27,7 @@ SKRID Platform is an interface to a graph database designed to explore musical p
 ├── loadAllDB.sh                Load data to neo4j database
 ├── post_a_query.sh             Send a query from a .cypher file using curl
 │
+├── TODO.md
 └── README.md
 ```
 
@@ -33,6 +37,7 @@ Download [neo4j-desktop](https://neo4j.com/download/) (keep the activation code 
 
 In the application, create a new project, and add a database (`add` button, then `local DBMS`).
 Choose a name corresponding to the database, use the password `12345678` (or change the `const password` in `index.js`), and select the version `4.2.1`.
+<!-- TODO: change password information -->
 
 When this is done, click on the name, then on the right click on `Plugins`. Install `APOC`.
 
@@ -88,7 +93,7 @@ And then open the following url in your browser : `localhost:3000` (change the p
 Make sure to have the neo4j database running when testing.
 
 
-### Make documentation
+## Documentation
 To generate the documentation, run :
 ```
 npm run generate-docs
@@ -96,10 +101,14 @@ npm run generate-docs
 
 Then open `docs/index.html` with your browser.
 
-## Notes for local tests
+## Notes
+### TODO
+See [TODO](TODO.md).
+
+### Notes for local tests
 If `index.js` has been modified, it is needed to restart `node index.js`. Otherwise it is just needed to refresh the web page.
 
-## Notes for submodule usage
+### Notes for submodule usage
 Inside the submodule, it is the same as in a normal git repository.
 
 From the main repository, the submodule folder is seen as a file.
