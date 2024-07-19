@@ -296,6 +296,29 @@ header input {
     float: right;
 }
 
+.tooltip-lb {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+.tooltip-lb .tooltiptext {
+    visibility: hidden;
+    width: 150px;
+    /* background: #62aaddd0; */
+    background: #18767ed0;
+    /* color: #000; */
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+
+    position: absolute;
+    z-index: 1;
+}
+.tooltip-lb:hover .tooltiptext {
+    visibility: visible;
+}
+
 @media screen and (max-width: 815px) {
   .wrapper {
     padding: 25px;

@@ -150,51 +150,55 @@
       <div class="options-row">
         <div class='options-stack'>
           <div class='general-options'>
-            <label>
+            <label class='tooltip-lb'>
               <input id='pitch-cb' type='checkbox' checked>
               Hauteur des notes
+              <span class='tooltiptext'>Permet de prendre en compte / ignorer la hauteur des notes</span>
             </label>
-            <!-- <label> -->
-            <!--   <input id='octave-cb' type='checkbox' checked> -->
-            <!--   Octave -->
-            <!-- </label> -->
-            <label>
+            <label class='tooltip-lb'>
               <input id='rhythm-cb' type='checkbox'>
               Rythme
+              <span class='tooltiptext'>Permet de prendre en compte / ignorer le rythme (la durée) des notes</span>
             </label>
 
             <div class='intervals-cb'>
-              <label id='transpose-lb'>
+              <label id='transpose-lb' class='tooltip-lb'>
                 <input id='transpose-cb' type='checkbox'>
                 Autoriser les transpositions
+                <span class='tooltiptext'>Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée</span>
               </label>
-              <label id='contour-lb'>
+              <label id='contour-lb' class='tooltip-lb'>
                 <input id='contour-cb' type='checkbox'>
                 Correspondance du contour seulement
+                <span class='tooltiptext'>Garde seulement le signe des intervalles entres les notes (haut, bas, égal).</span>
               </label>
             </div>
           </div>
 
           <div class='fuzzy-options'>
-            <label>
+            <label class='tooltip-lb'>
               Tolérance de hauteur
               <input type=number min=0 value=0 step=0.5 id='pitch-dist-select' class='nb-select'>
+              <span class='tooltiptext'>Permet d'augmenter la tolérance sur la hauteur de note (en tons)</span>
             </label>
 
-            <label>
+            <label class='tooltip-lb'>
               Facteur de durée
               <input type=number min=0 value=1 step=0.125 id='duration-factor-select' class='nb-select-large'>
+              <span class='tooltiptext'>Permet d'augmenter la tolérance sur la durée des notes, dans un seul sens (coefficient multiplicateur).</span>
             </label>
 
-            <label>
+            <label class='tooltip-lb'>
               Écart de durée
               <input type=number min=0 value=0 step=0.125 id='duration-gap-select' class='nb-select-large'>
+              <span class='tooltiptext'>Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)</span>
             </label>
 
-            <label>
+            <label class='tooltip-lb'>
               Alpha
               <input type=number min=0 max=100 value=0 step=5 id='alpha-select' class='nb-select'>
               %
+              <span class='tooltiptext'>Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.</span>
             </label>
           </div>
         </div>
