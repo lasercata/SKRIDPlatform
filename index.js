@@ -14,8 +14,20 @@ const port = 3000;
 const uri = 'neo4j://localhost:7687'; // default dor cypher-shell neo4j://localhost:7687
 // cypher-shell -u neo4j -p root -a neo4j://localhost:7687
 const user = 'neo4j'
-const password = '12345678';
-// const password = 'root';
+// const password = '12345678';
+
+// Read passowrd for file
+var password;
+const fs = require('node:fs');
+try {
+    log('info', 'Reading password from file (`.database_password`) ...');
+    password = fs.readFileSync('.database_password', 'utf8');
+    password = password.replace('\n', '');
+    log('info', 'Password has been read.');
+} catch (err) {
+    password = '12345678';
+    log('warn', `Error when reading password from file: ${err}\nUsing default password (12345678) instead.`);
+}
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password)); 
 const session = driver.session();
@@ -325,7 +337,7 @@ app.post('/query', (req, res) => {
 /**
  * This endpoint calls the python parser to convert a fuzzy query to a cypher one.
  *
- * Data to post : {'query': some_fuzzy_query}
+ * Data to post : `{'query': some_fuzzy_query}`
  *
  * POST
  *
@@ -406,6 +418,7 @@ app.post('/formulateQuery', (req, res) => {
 
     let args = [
         'compilation_requete_fuzzy/main_parser.py',
+        // '-U', uri, '-u', user, '-p', password, // write mode do not interract with the database
         'write',
         '-p', pitch_distance,
         '-f', duration_factor,
@@ -469,19 +482,26 @@ app.post('/queryFuzzy', (req, res) => {
     }
     else {
         // Create the connection
-        log('info', `/queryFuzzy: openning connection (format='${format}').`);
+        log('info', `/queryFuzzy (format='${format}'): openning connection.`);
         const { spawn } = require('child_process');
 
-        let pyParserSend;
+        let args = [
+            'compilation_requete_fuzzy/main_parser.py',
+            '-U', uri, '-u', user, '-p', password,
+            'send',
+            '-f',
+            query
+        ];
+
         if (format == 'json')
-            pyParserSend = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'send', '-f', '-j', query]);
-        else
-            pyParserSend = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'send', '-f', query]);
+            args.push('-j');
+        
+        let pyParserSend = spawn('python3', args);
 
         // Get the data
         let allData = '';
         pyParserSend.stdout.on('data', data => {
-            log('info', `/queryFuzzy (format='${format}') received data (${data.length} bytes) from python script.`);
+            log('info', `/queryFuzzy (format='${format}'): received data (${data.length} bytes) from python script.`);
 
             allData += data.toString();
         });
@@ -489,12 +509,12 @@ app.post('/queryFuzzy', (req, res) => {
         // log stderr
         pyParserSend.stderr.on('data', data => {
             if (!(data.toString().includes('site-packages/pydub/utils.py:') && data.toString().includes(' SyntaxWarning: invalid escape sequence')))
-                log('error', `/queryFuzzy (format='${format}') received data on stderr from python script: "${data}"`);
+                log('error', `/queryFuzzy (format='${format}'): received data on stderr from python script: "${data}"`);
         });
 
         // Send the data to the client
         pyParserSend.stdout.on('close', () => {
-            log('info', `/queryFuzzy: connection closed (format='${format}').`);
+            log('info', `/queryFuzzy (format='${format}'): connection closed.`);
             return res.json({ results: allData });
         });
     }

@@ -36,8 +36,8 @@ SKRID Platform is an interface to a graph database designed to explore musical p
 Download [neo4j-desktop](https://neo4j.com/download/) (keep the activation code and paste it when launching the application).
 
 In the application, create a new project, and add a database (`add` button, then `local DBMS`).
-Choose a name corresponding to the database, use the password `12345678` (or change the `const password` in `index.js`), and select the version `4.2.1`.
-<!-- TODO: change password information -->
+Choose a name, and a password (at least 8 characters). You will have to create a file `.database_password` and write this password in it (in order for the application to interact with the database).
+Then select the version `4.2.1`.
 
 When this is done, click on the name, then on the right click on `Plugins`. Install `APOC`.
 
@@ -103,7 +103,7 @@ Then open `docs/index.html` with your browser.
 
 ## Notes
 ### TODO
-See [TODO](TODO.md).
+For known bugs and uncovered parts, see [TODO](TODO.md).
 
 ### Notes for local tests
 If `index.js` has been modified, it is needed to restart `node index.js`. Otherwise it is just needed to refresh the web page.
