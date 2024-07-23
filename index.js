@@ -505,10 +505,7 @@ app.post('/formulateQuery', (req, res) => {
         if (errors.length > 0)
             return res.json({ error: errors.slice(-1)[0] });
 
-        else if (allData == '')
-            return res.json({ results: '[]'});
-
-        return res.json({ results: allData });
+        return res.json({ query: allData });
     });
 });
 

@@ -163,7 +163,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         let note = melody[k].keys[0]; //TODO: chord are ignored (taking only the first note) for the moment.
 
         //---Add note class ('a', 'gs', ...)
-        if (ignore_pitch)
+        if (ignore_pitch && !contour_match)
             notes += '(None, ';
         else if (melody[k].noteType == 'r') // rest
             notes += "('r', ";
@@ -174,7 +174,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         }
 
         //---Add octave
-        if (ignore_octave)
+        if (ignore_octave && !contour_match)
             notes += 'None, ';
         else {
             let octave = note.split('/')[1];
