@@ -73,6 +73,29 @@ function queryEditsDB(query) {
     return false;
 }
 
+/**
+ * Logs the error and return a string corresponding to the problem (string that will be shown to the client).
+ *
+ * @param {string} caller - the caller name (e.g '/formulateQuery'). Used for logs ;
+ * @param {*} data - the error data.
+ */
+function handlePythonStdErr(caller, data) {
+    let errorString = data.toString();
+
+    if (!(errorString.includes('site-packages/pydub/utils.py:') && errorString.includes(' SyntaxWarning: invalid escape sequence'))) {
+        log('error', `${caller}: received data on stderr from python script: "${data}"`);
+
+        // Database not turned on
+        if (errorString.includes('neo4j.exceptions.ServiceUnavailable: Unable to retrieve routing information'))
+            return 'Not connected to the database !\nPlease contact the administrator.';
+
+        if (errorString.includes('neo4j.exceptions.AuthError') && errorString.includes('Neo.ClientError.Security.Unauthorized'))
+            return 'Wrong database password !\nPlease contact the administrator.';
+
+        return errorString;
+    }
+}
+
 //============================= Images =============================//
 app.use(express.static('assets/public/')); // Everything in this folder will be available through the web
 
@@ -350,6 +373,7 @@ app.post('/compileFuzzy', (req, res) => {
     const { spawn } = require('child_process');
     const pyParserCompile = spawn('python3', ['compilation_requete_fuzzy/main_parser.py', 'compile', query]);
 
+    // Get the data
     let allData = '';
     pyParserCompile.stdout.on('data', data => {
         log('info', `/compileFuzzy: received data (${data.length} bytes) from python script.`);
@@ -357,9 +381,26 @@ app.post('/compileFuzzy', (req, res) => {
         allData += data.toString();
     });
 
+    // log stderr
+    let errors = [];
+    pyParserCompile.stderr.on('data', data => {
+        let e = handlePythonStdErr('/formulateQuery', data);
+
+        if (e != null)
+            errors.push(e);
+    });
+
+    // Send the data to the client
     pyParserCompile.stdout.on('close', () => {
         log('info', '/compileFuzzy: Connection closed.');
-        return res.json(allData);
+
+        if (errors.length > 0)
+            return res.json({ error: errors.slice(-1)[0] });
+
+        else if (allData == '')
+            return res.json({ results: '[]'});
+
+        return res.json({ results: allData });
     });
 });
 
@@ -443,21 +484,31 @@ app.post('/formulateQuery', (req, res) => {
     // Get the data
     let allData = '';
     pyParserWrite.stdout.on('data', data => {
-        log('info', `/formulateQuery received data (${data.length} bytes) from python script.`);
+        log('info', `/formulateQuery: received data (${data.length} bytes) from python script.`);
 
         allData += data.toString();
     });
 
     // log stderr
+    let errors = [];
     pyParserWrite.stderr.on('data', data => {
-        if (!(data.toString().includes('site-packages/pydub/utils.py:') && data.toString().includes(' SyntaxWarning: invalid escape sequence')))
-            log('error', `/formulateQuery received data on stderr from python script: "${data}"`);
+        let e = handlePythonStdErr('/formulateQuery', data);
+
+        if (e != null)
+            errors.push(e);
     });
 
     // Send the data to the client
     pyParserWrite.stdout.on('close', () => {
         log('info', `/formulateQuery: connection closed.`);
-        return res.json({ query: allData });
+
+        if (errors.length > 0)
+            return res.json({ error: errors.slice(-1)[0] });
+
+        else if (allData == '')
+            return res.json({ results: '[]'});
+
+        return res.json({ results: allData });
     });
 });
 
@@ -507,14 +558,24 @@ app.post('/queryFuzzy', (req, res) => {
         });
 
         // log stderr
+        let errors = [];
         pyParserSend.stderr.on('data', data => {
-            if (!(data.toString().includes('site-packages/pydub/utils.py:') && data.toString().includes(' SyntaxWarning: invalid escape sequence')))
-                log('error', `/queryFuzzy (format='${format}'): received data on stderr from python script: "${data}"`);
+            let e = handlePythonStdErr(`/queryFuzzy (format='${format}')`, data);
+
+            if (e != null)
+                errors.push(e);
         });
 
         // Send the data to the client
         pyParserSend.stdout.on('close', () => {
             log('info', `/queryFuzzy (format='${format}'): connection closed.`);
+
+            if (errors.length > 0)
+                return res.json({ error: errors.slice(-1)[0] });
+
+            else if (allData == '')
+                return res.json({ results: '[]'});
+
             return res.json({ results: allData });
         });
     }

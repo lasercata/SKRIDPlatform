@@ -126,6 +126,7 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
         }
         else if ('error' in data) {
             formatted_out = data.error;
+            alert(formatted_out);
         }
         else {
             formatted_out = JSON.stringify(data, null, '  ');
@@ -196,7 +197,20 @@ const submitHandler = function() {
         .then(response => {
             return response.json();
         })
-        .then(crisp_query => {
+        .then(data => {
+            if ('error' in data) {
+                let dataDiv = document.getElementById('data');
+                dataDiv.textContent = '[]';
+                loadPageN(1, null, true, true);
+
+                crisp_field.value = data.error;
+                alert(data.error);
+
+                return;
+            }
+
+            let crisp_query = data.results;
+
             if (crisp_query == malformatted_compiled_query) {
                 let dataDiv = document.getElementById('data');
                 dataDiv.textContent = '[]';
