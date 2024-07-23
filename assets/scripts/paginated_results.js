@@ -171,9 +171,12 @@ function showNav() {
  * `#x_#y` (will translate to `0_1` if `x = 0` and `y = 1` for example) means the note `#y` of the match `#x` in the file `source`.
  *
  * @param {json} data - the data to convert
- * @returns {string} the CSV representation of `data`.
+ * @returns {Promise} the CSV representation of `data`.
+ *
+ * @example
+ * dataToCSV(getPageData()).then(csv_content => console.log(csv_content));
  */
-function dataToCSV(data) {
+async function dataToCSV(data) {
     // Calculate max notes_id length and max matches length
     let max_notes_id_len = 0; // The maximum of data[k].notes_id.length for k in range 0 data.length - 1.
     let max_matches_len = 0; // The maximum of data[k].matches.length for k in range 0 data.length - 1.
@@ -193,7 +196,9 @@ function dataToCSV(data) {
     });
 
     // Construct CSV header
-    let csv_string = 'source,number of occurrences';
+    let csv_string = 'source,collection,number of occurrences';
+    //TODO: add collection.
+    //For this, inspire from this function : createPreviews_2
 
     if ('overall_degree' in data[0])
         csv_string += ',overall degree (%)';
@@ -213,35 +218,53 @@ function dataToCSV(data) {
     }
 
     // Add each score on its line
-    data.forEach(score => {
-        csv_string += `\n${score.name},${score.number_of_occurrences}`;
+    // data.forEach(score => {
+    for (let k = 0 ; k < data.length ; ++k) {
+        let score = data[k];
 
-        if ('overall_degree' in data[0]) {
-            if ('overall_degree' in score)
-                csv_string += `,${(100 * score.overall_degree).toFixed(2)}`;
-            else
-                csv_string += ',';
-        }
+        // Get the collection (needs a fetch since it is not in the result)
+        await fetch('/findAuthor', { // await is needed here to keep the order of the results
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({string: score.name})
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(data_auth => {
+            let collection_name = data_auth.results[0]._fields[0]
+            csv_string += `\n${score.name},${collection_name},${score.number_of_occurrences}`;
 
-        if ('matches' in data[0]) {
-            for (let i = 0 ; i < score.matches.length ; ++i) {
-                for (let j = 0 ; j < score.matches[i].length ; ++j) {
-                    let note_obj = score.matches[i][j];
-                    csv_string += `,${note_obj.note.pitch}/${note_obj.note.octave} ${1 / note_obj.note.duration}`; // note
-                    csv_string += `,${note_obj.note.id}`; // note id
-                    csv_string += `,${(100 * note_obj.note_deg).toFixed(2)}`; // match %
-                    csv_string += `,${(100 * note_obj.pitch_deg).toFixed(2)}`; // pitch match %
-                    csv_string += `,${(100 * note_obj.duration_deg).toFixed(2)}`; // duration match %
-                    csv_string += `,${(100 * note_obj.sequencing_deg).toFixed(2)}`; // sequencing match %
+            if ('overall_degree' in data[0]) {
+                if ('overall_degree' in score)
+                    csv_string += `,${(100 * score.overall_degree).toFixed(2)}`;
+                else
+                    csv_string += ',';
+            }
+
+            if ('matches' in data[0]) {
+                for (let i = 0 ; i < score.matches.length ; ++i) {
+                    for (let j = 0 ; j < score.matches[i].length ; ++j) {
+                        let note_obj = score.matches[i][j];
+                        csv_string += `,${note_obj.note.pitch}/${note_obj.note.octave} ${1 / note_obj.note.duration}`; // note
+                        csv_string += `,${note_obj.note.id}`; // note id
+                        csv_string += `,${(100 * note_obj.note_deg).toFixed(2)}`; // match %
+                        csv_string += `,${(100 * note_obj.pitch_deg).toFixed(2)}`; // pitch match %
+                        csv_string += `,${(100 * note_obj.duration_deg).toFixed(2)}`; // duration match %
+                        csv_string += `,${(100 * note_obj.sequencing_deg).toFixed(2)}`; // sequencing match %
+                    }
                 }
             }
-        }
-        else {
-            for (let id in score.notes_id) {
-                csv_string += `,${id},${score.notes_id[id]}`;
+            else {
+                for (let id in score.notes_id) {
+                    csv_string += `,${id},${score.notes_id[id]}`;
+                }
             }
-        }
-    });
+        });
+    }
+    // });
 
     console.log(csv_string);
 
@@ -307,16 +330,21 @@ const nbPerPageHandler = function(change) {
  * Handler of the 'Download results as CSV' button.
  */
 const csvBtHandler = function() {
-    // Get csv
-    const csv_string = dataToCSV(getPageData());
+    dataToCSV(getPageData()).then(csv_content => saveFile('results.csv', csv_content));
+}
 
-    // Download it as a file
-    const fn = 'results.csv';
+/**
+ * Save `content` to the file `filename` (clientside).
+ *
+ * @param {string} filename - the filename ;
+ * @param {string} content - the content to save in a file.
+ */
+function saveFile(filename, content) {
     const a = document.createElement('a');
-    const file = new Blob([csv_string], {type: 'text/csv'});
+    const file = new Blob([content], {type: 'text/csv'});
 
     a.href = URL.createObjectURL(file);
-    a.download = fn;
+    a.download = filename;
     a.click();
 
     URL.revokeObjectURL(a.href);
