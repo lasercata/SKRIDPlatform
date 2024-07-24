@@ -17,6 +17,9 @@ let pattern = [];
 /** The matches of in the current file (see {@linkcode makeMatches} for more details) */
 let matches = [];
 
+/** Format: `{'<id>': [match_index_1, match_index_2, ...], ...}`. Used by {@linkcode showNoteInfo} in order to display only the info box corresponding to the match having the minimal index. */
+let match_indexes_by_id = {};
+
 // The current page, which will change when playing through the piece
 let currentPage;
 // Verovio toolkit variable
@@ -69,8 +72,6 @@ function init() {
         makePattern(); // Get the search pattern from the url
         makeMatches(); // Get the note IDs and degrees from the url
 
-        console.log(pattern);
-
         // Get the author from the url and use it to find the folder in which the .mei file is contained
         score_name = readFromUrl('score_name');
         let author = readFromUrl('author').replace(/\s+/g, "-");
@@ -98,6 +99,9 @@ function init() {
 
             // Color all matches
             matchAllToggleHandler();
+
+            // Add the hover infos
+            makePatternHoverBoxes();
 
             // Disable buttons according to pagination
             refreshPagination(currentPage, tk.getPageCount());
@@ -216,6 +220,165 @@ function makeGradientLegend() {
 }
 
 /**
+ * Fills the global array `pattern`, which is an array of notes, in the following format:
+ * ```
+ * [{class_: '<class>', octave: '<octave>', duration: '<duration>'}, ...]
+ * ```
+ *
+ * Note that some attributes might be 'None'.
+ */
+function makePattern() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    pattern = [];
+
+    const encoded_pattern = urlParams.get('pattern');
+    if (encoded_pattern == null) // Do not do anything if there is no pattern.
+        return;
+
+    encoded_pattern.split(',').forEach(encoded_note => { // notes are in the format cs/5_8
+        try {
+            let tmp1 = encoded_note.split('_');
+            let tmp2 = tmp1[0].split('/');
+
+            let class_ = tmp2[0];
+            let octave = tmp2[1] == 'None' ? 'None' : parseInt(tmp2[1]);
+            let duration = tmp1[1] == 'None' ? 'None' : parseInt(tmp1[1]);
+
+            let tmp_json = {class_: class_, octave: octave, duration: duration};
+
+            pattern.push(tmp_json);
+        }
+        catch (err) {
+            console.err('Error when parsing `pattern` from url: ' + err);
+        }
+    });
+}
+
+/**
+ * Create an info box for the given note.
+ *
+ * @param {string} id - the note id ;
+ * @param {number} match_x - the x coordinate of the note (match number) ;
+ * @param {number} match_y - the y coordinate of the note (note number in the current match) ;
+ * @param {number} deg - the note degree for the current match ;
+ * @param {number} pitch_deg - the note pitch degree for the current match ;
+ * @param {number} duration_deg - the note duration degree for the current match ;
+ * @param {number} sequencing_deg - the note sequencing_deg for the current match.
+ */
+function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg, sequencing_deg) {
+    //---Ini
+    const expected_note = pattern[match_y];
+
+    //---Creating the box
+    const info_box = document.createElement('div');
+    info_box.className = 'info-note';
+    info_box.style.display = 'none';
+
+    //---Filling the box
+    //-Info from expected note
+    let dur = '';
+    if (expected_note != null && expected_note.duration != 'None')
+        dur = `<img src="public/notes_pics/${expected_note.duration}.png" height="40px">`;
+
+    let note = '';
+    if (expected_note != null && expected_note.class_ != 'None' && expected_note.octave != 'None')
+        note = `(${expected_note.class_}/${expected_note.octave})`;
+    else if (expected_note != null && expected_note.class_ != 'None')
+        note = `(${expected_note.class_})`;
+    else if (expected_note != null && expected_note.octave != 'None')
+        note = `(octave : ${expected_note.octave})`;
+
+    let expected_infos = dur + '\n' + note;
+    if (dur != '' && note != '')
+        expected_infos = 'expected note: ' + expected_infos;
+
+    //-Infos from match degree
+    let deg_infos = `agregated degree: ${deg}%, pitch degree: ${pitch_deg}%, duration degree: ${duration_deg}%, sequencing degree: ${sequencing_deg}%`;
+
+    if (expected_infos != '\n')
+        expected_infos += '<br>';
+
+    info_box.innerHTML = expected_infos + deg_infos;
+
+    //---Adding the box in the DOM
+    document.getElementById('notation').append(info_box);
+    
+    //---Adding mouse events
+    const parent_note = document.getElementById(id);
+    parent_note.firstElementChild.addEventListener('mousemove', (e) => showNoteInfo(e, info_box, id, match_x));
+    parent_note.firstElementChild.addEventListener('mouseout', () => hideNoteInfo(info_box));
+
+    //---Adding match_x to `match_indexes_by_id`
+    if (!(id in match_indexes_by_id))
+        match_indexes_by_id[id] = [match_x];
+    else
+        match_indexes_by_id[id].push(match_x);
+}
+
+/**
+ * Handles when the note is hovered, and displays the div to the right place.
+ *
+ * If there are multiple matches over the same note, it only shows the one with the smaller `match_x` index (corresponding to the one with the better score, which will correspond to the color shown, as the better matches are shown in the first layer).
+ *
+ * @param {*} event - the send event ;
+ * @param {HTMLElement} info_box - the concerned div to show ;
+ * @param {string} id - the note id ;
+ * @param {number} match_x - the number of the match (used to show the box only if the current match is toggled on).
+ */
+const showNoteInfo = function(event, info_box, id, match_x) {
+    // Init
+    const toggle_cb = document.getElementById(`toggle-match-${match_x}-cb`);
+
+    // Show (only if match is visible and no other match with a smaller index is visible (to not overlap))
+    if (!toggle_cb.checked) // Do not show if match is not visible
+        return;
+
+    for (let k = 0 ; k < match_indexes_by_id[id].length ; ++k) {
+        const toggle_other_cb  = document.getElementById(`toggle-match-${match_indexes_by_id[id][k]}-cb`);
+
+        if (match_indexes_by_id[id][k] < match_x && toggle_other_cb.checked)
+            return;
+    }
+
+    // If still here, finally display the box
+    info_box.style.display = 'block';
+    info_box.style.left = event.pageX + 10 + 'px';
+    info_box.style.top = event.pageY + 10 + 'px';
+}
+/**
+ * Handles when the mouse quits the note hover (hides the info box).
+ *
+ * @param {HTMLElement} info_box - the concerned div to show.
+ */
+const hideNoteInfo = function(info_box) {
+    info_box.style.display = 'none';
+}
+
+/**
+ * Creates all the info boxes for the notes when hovering.
+ */
+function makePatternHoverBoxes() {
+    let ids = []; // will store the already viewed IDs.
+
+    for (let i = 0 ; i < matches.length ; ++i) {
+        for (let j = 0 ; j < matches[i].length ; ++j) {
+            ids.push(matches[i][j].id);
+
+            makeAPatternHoverBox(
+                matches[i][j].id,
+                i, j,
+                matches[i][j].deg,
+                matches[i][j].pitch_deg,
+                matches[i][j].duration_deg,
+                matches[i][j].sequencing_deg
+            );
+        }
+    }
+}
+
+/**
  * Fills the global `matches` array, which is an array of matches. A match is an array of `{id: '<id>', deg: '<deg>', pitch_deg: '<pitch_deg>', duration_deg: '<duration_deg>', sequencing_deg: '<sequencing_deg>'}`.
  *
  * Read the doc of {@linkcode makeUrl} (from {@linkcode preview_scores.js}) for the url format.
@@ -253,37 +416,6 @@ function makeMatches() {
         });
 
         matches.push(tmp_match);
-    });
-}
-
-/**
- * Fills the global array `pattern`, which is an array of notes, in the following format:
- * ```
- * [{class: '<class>', octave: '<octave>', duration: '<duration>'}, ...]
- * ```
- */
-function makePattern() {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-
-    pattern = [];
-
-    const encoded_pattern = urlParams.get('pattern');
-    if (encoded_pattern == null) // Do not do anything if there is no pattern.
-        return;
-
-    encoded_pattern.split(',').forEach(encoded_note => { // notes are in the format cs/5_8
-        try {
-            let tmp1 = encoded_note.split('_');
-            let tmp2 = tmp1[0].split('/');
-
-            let tmp_json = {class: tmp2[0], octave: parseInt(tmp2[1]), duration: parseInt(tmp1[1])};
-
-            pattern.push(tmp_json);
-        }
-        catch (err) {
-            console.err('Error when parsing `pattern` from url: ' + err);
-        }
     });
 }
 
@@ -332,7 +464,8 @@ function createMatchesHighlightToggles() {
 const matchAllToggleHandler = function() {
     const toggle_all_cb = document.getElementById(`toggle-all-cb`);
 
-    for (let k = 0 ; k < matches.length ; ++k) {
+    // for (let k = 0 ; k < matches.length ; ++k) {
+    for (let k = matches.length - 1 ; k >= 0 ; --k) { // Reverse order to get the best color in last 'layer'
         document.getElementById(`toggle-match-${k}-cb`).checked = toggle_all_cb.checked;
         highlightMatch(k);
     }
@@ -350,7 +483,7 @@ function refreshHighlight() {
             highlightMatch(k);
     }
 
-    for (let k = 0 ; k < matches.length ; ++k) {
+    for (let k = matches.length - 1 ; k >= 0 ; --k) { // Reverse order to get the best color in last 'layer'
         const toggle_cb = document.getElementById(`toggle-match-${k}-cb`);
 
         if (toggle_cb.checked)

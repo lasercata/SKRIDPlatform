@@ -203,7 +203,7 @@ function getSourceAndCollection(result) {
 function makeUrl(collection, source, pattern=null, matches=null) {
     let url = '/result?author='+ collection +'&score_name=' + source;
 
-    if (pattern != null) {
+    if (pattern != '') {
         url += `&pattern=${pattern}`;
     }
 
