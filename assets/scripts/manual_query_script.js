@@ -4,7 +4,7 @@
  */
 
 import { setTk, loadPageN } from './paginated_results.js';
-import { unifyResults } from './preview_scores.js';
+import { unifyResults, extractMelodyFromQuery } from './preview_scores.js';
 
 var input;
 var output;
@@ -43,6 +43,7 @@ function postAndDisplayQuery(query) {
     .then(data => {
         let formatted_out;
         let dataDiv = document.getElementById('data');
+        let patternDiv = document.getElementById('pattern');
 
         if ('results' in data) {
             let unifiedResults = unifyResults(data);
@@ -57,11 +58,13 @@ function postAndDisplayQuery(query) {
 
             //---Display results with pagination
             dataDiv.textContent = JSON.stringify(unifiedResults);
+            patternDiv.textContent = extractMelodyFromQuery(query);
             try {
                 loadPageN(1, null, true, true);
             }
             catch {
                 dataDiv.textContent = '[]';
+                patternDiv.textContent = '';
                 loadPageN(1, null, true, true);
                 alert('Cannot display previews !\nMaybe try to rename in RETURN clause (e.g RETURN s.source AS source).\nYou can also check the text output.')
             }
@@ -71,6 +74,7 @@ function postAndDisplayQuery(query) {
             alert(formatted_out);
 
             dataDiv.textContent = '[]';
+            patternDiv.textContent = '';
             loadPageN(1, null, true, true);
         }
         else {
@@ -141,6 +145,7 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
     //---Post the request again and get the json, to display the results in pagination.
     postFuzzy(fuzzyQuery, 'json').then(data => {
         let dataDiv = document.getElementById('data');
+        let patternDiv = document.getElementById('pattern');
 
         if ('results' in data) {
             let unifiedResults = unifyResults({results: JSON.parse(data.results)})
@@ -152,17 +157,20 @@ function postAndDisplayFuzzyQuery(fuzzyQuery) {
             //---Load the first page
             // dataDiv.textContent = data.results;
             dataDiv.textContent = JSON.stringify(unifiedResults);
+            patternDiv.textContent = extractMelodyFromQuery(fuzzyQuery);
             try {
                 loadPageN(1, null, true, true, true);
             }
             catch {
                 dataDiv.textContent = '[]';
+                patternDiv.textContent = '';
                 loadPageN(1, null, true, true);
                 alert('Cannot display previews !\nMaybe try to rename in RETURN clause (e.g RETURN s.source AS source).\nYou can also check the text output.')
             }
         }
         else if ('error' in data) {
             dataDiv.textContent = '[]';
+            patternDiv.textContent = '';
             loadPageN(1, null, true, true);
         }
     })
@@ -200,7 +208,9 @@ const submitHandler = function() {
         .then(data => {
             if ('error' in data) {
                 let dataDiv = document.getElementById('data');
+                let patternDiv = document.getElementById('pattern');
                 dataDiv.textContent = '[]';
+                patternDiv.textContent = '';
                 loadPageN(1, null, true, true);
 
                 crisp_field.value = data.error;
@@ -213,7 +223,9 @@ const submitHandler = function() {
 
             if (crisp_query == malformatted_compiled_query) {
                 let dataDiv = document.getElementById('data');
+                let patternDiv = document.getElementById('pattern');
                 dataDiv.textContent = '[]';
+                patternDiv.textContent = '';
                 loadPageN(1, null, true, true);
 
                 let err_txt = 'Fuzzy query is not correctly formatted.';

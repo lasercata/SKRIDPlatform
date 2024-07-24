@@ -7,7 +7,7 @@
 const max_url_length = 16000;
 
 /**
- * Take the results sent by the server and merge duplicates.
+ * The results are returned match by match. This functions group the matches by source.
  *
  * It count the number of occurrences, and add the note IDs when possible.
  *
@@ -19,7 +19,7 @@ const max_url_length = 16000;
  *
  * If the query was not fuzzy, then the field `matches` will not be set.
  *
- * @todo there is too much complexity in this function, as it was needed to handle all the cases of different json results formats. It should not be the case now (unless for manual queries pages).
+ * @todo there is too much complexity in this function, as it was needed to handle all the cases of different json results formats. It should not be the case now (unless for manual queries that are not fuzzy).
  */
 function unifyResults(queryResults) {
     let results = []; // the array that will be returned ;
@@ -120,6 +120,26 @@ function unifyResults(queryResults) {
 }
 
 /**
+ * Extract the notes from a query using regular expressions.
+ *
+ * @returns {string} the notes in the format described in {@linkcode makeUrl}
+ */
+function extractMelodyFromQuery(query) {
+    const re = /\{class:'(\w+|None)', octave:(\d+|None), dur:(\d+\.\d+|\d+|None)\}\)/g;
+    const re_matches = [...query.matchAll(re)];
+
+    let pattern = '';
+
+    re_matches.forEach(m => {
+        pattern += m[1] + '/' + m[2] + '_' + m[3] + ',';
+    });
+
+    pattern = pattern.slice(0, -1); // Remove trailing ','.
+
+    return pattern;
+}
+
+/**
  * Try to retreive `source` and `collection` from `result`
  *
  * @param {*} result - the json object.
@@ -154,26 +174,67 @@ function getSourceAndCollection(result) {
  * It ensures that the url is not longer than `max_url_length` (and removes complete matches).
  * As the matches are ordered, it removes the last ones, which are the less acurate ones.
  *
+ * Format of the url :
+ * ```
+ * /result?author=[collection]&score_name=[score name]
+ * &pattern=[searched pattern]
+ * &matches=[matches]
+ * ```
+ *
+ * The searched pattern is encoded in the following format: `[class]/[octave]_[duration],...`, e.g `c/5_4,b/4_8,bs/4_8,g/4_8,a/4_8`.
+ *
+ * The matches are encoded in the following format: `[match 1]:[match 2]:...:[match m]`,
+ * where `[match k]` is encoded in the following format: `[note 1];[note 2];...;[note n]`,
+ * where `[note i]` is encoded in the following format:
+ * ```
+ * [id],[overall degree],[pitch degree],[duration degree],[sequencing degree]
+ * ```
+ *
+ * e.g :
+ * ```
+ * abcdef,100,100,100,100;...;abcdeh,100,100,100,100:...
+ * ```
+ *
  * @param {string} collection - the name of the collection to which the score belongs ;
  * @param {string} source - the filename of the score ;
- * @param {json[][]} [matches=null] - an array of matches. A Match is an array of json elements.
+ * @param {string|null} [pattern=null] - the search pattern, given in the format described above ;
+ * @param {json[][]|null} [matches=null] - an array of matches. A Match is an array of json elements.
  */
-function makeUrl(collection, source, matches=null) {
+function makeUrl(collection, source, pattern=null, matches=null) {
     let url = '/result?author='+ collection +'&score_name=' + source;
 
+    if (pattern != null) {
+        url += `&pattern=${pattern}`;
+    }
+
     if (matches != null) {
+        url += '&matches=';
+
         for (let i = 0 ; i < matches.length ; ++i) {
             let url_match = '';
             for (let j = 0 ; j < matches[i].length ; ++j) {
-                url_match += `&note_id_${i}_${j}=${matches[i][j].note.id}`;
-                url_match += `&note_deg_${i}_${j}=${Math.floor(100 * matches[i][j].note_deg)}`;
+                // Get note data and convert to an int in [0 ; 100]
+                let deg = Math.floor(100 * matches[i][j].note_deg);
+                let pitch_deg = Math.floor(100 * matches[i][j].pitch_deg);
+                let duration_deg = Math.floor(100 * matches[i][j].duration_deg);
+                let sequencing_deg = Math.floor(100 * matches[i][j].sequencing_deg);
+
+                // Add note to `url_match`
+                url_match += `${matches[i][j].note.id},${deg},${pitch_deg},${duration_deg},${sequencing_deg}`;
+
+                // Separate notes with ';'
+                if (j < matches[i].length - 1)
+                    url_match += ';';
             }
 
             // Add the match to the url only if it does not make it too long
             if (url.length + url_match.length < max_url_length) {
-                url += url_match;
+                url += url_match + ':';
             }
         }
+
+        // Remove last ':'
+        url = url.slice(0, -1);
     }
 
     return url;
@@ -330,18 +391,19 @@ function getGradientColor(degree) {
  *
  * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
  * @param {*} tk - the verovio toolkit ;
- * @param {*} results - the query result containing all the scores.
+ * @param {*} results - the query result containing all the scores ;
+ * @param {string|null} [pattern=null] - the search pattern.
  */
-function loadPreviews(results_container, tk, results) {
+function loadPreviews(results_container, tk, results, pattern=null) {
     results_container.empty();
 
     if(results.length != 0) {
         if (results[0].hasOwnProperty('s') || (results[0].hasOwnProperty('_fields') && results[0]._fields[0].hasOwnProperty('properties'))) {
-            createPreviews_1(results_container, results);
+            createPreviews_1(results_container, results, pattern);
             fillPreviews(tk, results);
         }
         else
-            createPreviews_2(results_container, tk, results);
+            createPreviews_2(results_container, tk, results, pattern);
     }
     else {
         const default_text = $('<h2>').text('No music score found');
@@ -355,12 +417,13 @@ function loadPreviews(results_container, tk, results) {
  *
  * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
  * @param {*} results - the query result containing all the scores ;
+ * @param {string|null} [pattern=null] - the search pattern.
  */
-function createPreviews_1(results_container, results) {
+function createPreviews_1(results_container, results, pattern=null) {
     results.forEach(result => {
         let prop = getSourceAndCollection(result);
         // let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('notes_id') ? result.notes_id : null);
-        let url = makeUrl(prop.collection, prop.source, result.hasOwnProperty('matches') ? result.matches : null);
+        let url = makeUrl(prop.collection, prop.source, pattern, result.hasOwnProperty('matches') ? result.matches : null);
 
         const a = createPreview(url, prop.source);
         results_container.append(a);
@@ -374,8 +437,9 @@ function createPreviews_1(results_container, results) {
  * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
  * @param {*} tk - the verovio toolkit ;
  * @param {*} results - the query result containing all the scores ;
+ * @param {string|null} [pattern=null] - the search pattern.
  */
-async function createPreviews_2(results_container, tk, results) {
+async function createPreviews_2(results_container, tk, results, pattern=null) {
     // Get the collections associated with each result
     for (let k = 0 ; k < results.length ; ++k) {
         const result = results[k];
@@ -409,7 +473,7 @@ async function createPreviews_2(results_container, tk, results) {
         .then(data_auth => {
             let collection = data_auth.results[0]._fields[0]
 
-            let url = makeUrl(collection, source, result.matches);
+            let url = makeUrl(collection, source, pattern, result.matches);
             results_container.append(createPreview(url, source, result.number_of_occurrences, result.overall_degree));
 
             let score_div = document.getElementById(source);
@@ -437,4 +501,4 @@ function fillPreviews(tk, results) {
     }
 }
 
-export { loadPreviews, unifyResults, getGradientColor };
+export { loadPreviews, unifyResults, getGradientColor, extractMelodyFromQuery };

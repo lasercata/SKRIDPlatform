@@ -7,7 +7,7 @@
 
 //========= Imports =========//
 import { setTk, loadPageN } from './paginated_results.js';
-import { unifyResults } from './preview_scores.js';
+import { unifyResults, extractMelodyFromQuery } from './preview_scores.js';
 
 
 //============================= Init =============================//
@@ -251,44 +251,23 @@ function sendQuery(fuzzyQuery) {
     })
     .then(data => {
         let dataDiv = document.getElementById('data');
+        let patternDiv = document.getElementById('pattern');
 
         if ('results' in data) {
             // Load the first page
             dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
+            patternDiv.textContent = extractMelodyFromQuery(fuzzyQuery);
             loadPageN(1, null, true, true, true);
         }
         else if ('error' in data) {
             dataDiv.textContent = '[]';
+            patternDiv.textContent = '';
             loadPageN(1, null, true, true);
         }
     })
     .catch(err => {
         console.error('Error:', err);
     });
-
-    // fetch('/query', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify(data)
-    // })
-    // .then(response => {
-    //     return response.json();
-    // })
-    // .then(data => {
-    //     // First, call a function that converts the data
-    //     let unifiedResults = unifyResults(data);
-    //     console.log(data);
-    //
-    //     let results_container = $('#results-container');
-    //     results_container.empty();
-    //
-    //     //---Load the first page
-    //     let dataDiv = document.getElementById('data');
-    //     dataDiv.textContent = JSON.stringify(unifiedResults);
-    //     loadPageN(1, null, true, true, true);
-    // });
 }
 
 

@@ -11,7 +11,11 @@ let datadir;
 let score_name;
 let note;
 
-let matches;
+/** The search pattern (melody) (see {@linkcode makePattern} for more details) */
+let pattern = [];
+
+/** The matches of in the current file (see {@linkcode makeMatches} for more details) */
+let matches = [];
 
 // The current page, which will change when playing through the piece
 let currentPage;
@@ -62,8 +66,10 @@ function init() {
         // Set the function as message callback
         MIDIjs.player_callback = midiHightlightingHandler;
 
-        // Get the note IDs and degrees from the url
-        makeMatches();
+        makePattern(); // Get the search pattern from the url
+        makeMatches(); // Get the note IDs and degrees from the url
+
+        console.log(pattern);
 
         // Get the author from the url and use it to find the folder in which the .mei file is contained
         score_name = readFromUrl('score_name');
@@ -210,62 +216,75 @@ function makeGradientLegend() {
 }
 
 /**
- * Fills the `matches` array, which is an array of matches. A match is an array of `{id: '<id>', deg: '<deg>'}`.
+ * Fills the global `matches` array, which is an array of matches. A match is an array of `{id: '<id>', deg: '<deg>', pitch_deg: '<pitch_deg>', duration_deg: '<duration_deg>', sequencing_deg: '<sequencing_deg>'}`.
+ *
+ * Read the doc of {@linkcode makeUrl} (from {@linkcode preview_scores.js}) for the url format.
  */
 function makeMatches() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
 
     matches = [];
-    let matches_json = {};
 
-    //---Add all into `matches_json`
-    for (const [key, value] of urlParams.entries()) {
-        let indexes = key.split('_').slice(-2); // [i, j]
-        let i = parseInt(indexes[0]);
-        let j = parseInt(indexes[1]);
+    const encoded_matches = urlParams.get('matches');
+    if (encoded_matches == null) // Do not do anything if there are no matches.
+        return;
 
-        if (key.startsWith('note_id')) { // note_id_{i}_{j}={value}
-            if (i in matches_json) {
-                if (j in matches_json[i])
-                    matches_json[i][j].id = value;
-                else
-                    matches_json[i][j] = {'id': value};
+    encoded_matches.split(':').forEach(encoded_match => { // loop over matches
+        let tmp_match = []; // will store the notes of a match before adding it to matches.
+
+        encoded_match.split(';').forEach(encoded_note => { // loop over notes and fill `tmp_matches`
+            let tmp_note_json = {}; // will store the attributes of a note before adding it to tmp_match.
+
+            let attr = encoded_note.split(',');
+
+            try {
+                tmp_note_json['id'] = attr[0];
+                tmp_note_json['deg'] = parseInt(attr[1]);
+                tmp_note_json['pitch_deg'] = parseInt(attr[2]);
+                tmp_note_json['duration_deg'] = parseInt(attr[3]);
+                tmp_note_json['sequencing_deg'] = parseInt(attr[4]);
+
+                tmp_match.push(tmp_note_json);
             }
-            else {
-                let tmp = {};
-                tmp[j] = {'id': value}
-
-                matches_json[i] = tmp;
+            catch (err) {
+                console.err('Error when procesing matches notes from url: ' + err);
             }
+        });
+
+        matches.push(tmp_match);
+    });
+}
+
+/**
+ * Fills the global array `pattern`, which is an array of notes, in the following format:
+ * ```
+ * [{class: '<class>', octave: '<octave>', duration: '<duration>'}, ...]
+ * ```
+ */
+function makePattern() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    pattern = [];
+
+    const encoded_pattern = urlParams.get('pattern');
+    if (encoded_pattern == null) // Do not do anything if there is no pattern.
+        return;
+
+    encoded_pattern.split(',').forEach(encoded_note => { // notes are in the format cs/5_8
+        try {
+            let tmp1 = encoded_note.split('_');
+            let tmp2 = tmp1[0].split('/');
+
+            let tmp_json = {class: tmp2[0], octave: parseInt(tmp2[1]), duration: parseInt(tmp1[1])};
+
+            pattern.push(tmp_json);
         }
-
-        if (key.startsWith('note_deg')) { // note_deg_{i}_{j}={value}
-            if (i in matches_json) {
-                if (j in matches_json[i])
-                    matches_json[i][j].deg = value;
-                else
-                    matches_json[i][j] = {'deg': value};
-            }
-            else {
-                let tmp = {};
-                tmp[j] = {'deg': value}
-
-                matches_json[i] = tmp;
-            }
+        catch (err) {
+            console.err('Error when parsing `pattern` from url: ' + err);
         }
-    }
-
-    //---Convert `matches_json` to array of arrays `matches`
-    for (const i in matches_json) {
-        let tmp = []
-
-        for (const j in matches_json[i]) {
-            tmp.push(matches_json[i][j]);
-        }
-
-        matches.push(tmp);
-    }
+    });
 }
 
 /**

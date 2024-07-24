@@ -26,10 +26,21 @@ function setTk(verovioTk) {
 }
 
 /**
- * Returns `pageData` (data from the html)
+ * Gets `pageData` (data from the html)
+ *
+ * @returns {json} the scores data
  */
 function getPageData() {
     return JSON.parse(document.getElementById('data').textContent);
+}
+
+/**
+ * Gets the pattern string from the html.
+ *
+ * @returns {string} the search pattern
+ */
+function getPatternString() {
+    return document.getElementById('pattern').textContent;
 }
 
 /**
@@ -128,11 +139,12 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
 
     if (1 <= pageNb && pageNb <= nbPages) { // Ensure that the page exists
         //---Get the data of this page
-        let data = getPageN(pageData, pageNb, numberPerPage)
+        let data = getPageN(pageData, pageNb, numberPerPage);
+        let pattern = getPatternString();
 
         //---Display results
         let results_container = $('#results-container');
-        loadPreviews(results_container, tk, data);
+        loadPreviews(results_container, tk, data, pattern);
         // fillPreviews(tk, data);
 
         //---Disable button if we are on the first or last page
@@ -197,7 +209,6 @@ async function dataToCSV(data) {
 
     // Construct CSV header
     let csv_string = 'source,collection,number of occurrences';
-    //TODO: add collection.
     //For this, inspire from this function : createPreviews_2
 
     if ('overall_degree' in data[0])
@@ -218,7 +229,6 @@ async function dataToCSV(data) {
     }
 
     // Add each score on its line
-    // data.forEach(score => {
     for (let k = 0 ; k < data.length ; ++k) {
         let score = data[k];
 
@@ -264,7 +274,6 @@ async function dataToCSV(data) {
             }
         });
     }
-    // });
 
     console.log(csv_string);
 
