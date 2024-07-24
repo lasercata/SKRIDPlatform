@@ -499,6 +499,31 @@ const contourAndTranspositionHandler = (sender_id) => {
 }
 
 /**
+ * Used to turn the info box on.
+ *
+ * @param {*} event - the event send by 'mousemove' ;
+ * @param {string} text - the text to show.
+ */
+function showTooltip(event, text) {
+    let tooltip = document.getElementById('tooltip');
+
+    tooltip.innerHTML = text;
+    tooltip.style.display = 'block';
+    // tooltip.style.left = event.pageX + 10 + 'px';
+    // tooltip.style.top = event.pageY + 10 + 'px';
+    tooltip.style.left = event.pageX - 180 + 'px';
+    tooltip.style.top = event.pageY - 90 + 'px';
+}
+
+/**
+ * Turn the info box off (hides it).
+ */
+function hideTooltip() {
+    var tooltip = document.getElementById('tooltip');
+    tooltip.style.display = 'none';
+}
+
+/**
  * Plays a note and stop after the given rhythm.
  *
  * @param {string} note - the note (pitch) to play (e.g C#/4) ;
@@ -987,6 +1012,28 @@ function changeOctave(diff) {
 
 //========= Init =========//
 /**
+ * Initiate the tooltips (create event listeners).
+ */
+function initTooltips() {
+    const info_texts = { // html_id: 'info text'
+        'pitch-lb': "Permet de prendre en compte / ignorer la hauteur des notes",
+        'rhythm-lb': "Permet de prendre en compte / ignorer le rythme (la durée) des notes",
+        'transpose-lb': "Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée",
+        'contour-lb': "Garde seulement le signe des intervalles entres les notes (haut, bas, égal).",
+        'pitch-dist-lb': "Permet d'augmenter la tolérance sur la hauteur de note (en tons)",
+        'duration-dist-lb': "Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).",
+        'sequencing-dist-lb': "Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)",
+        'alpha-lb': "Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha."
+    };
+
+    Object.keys(info_texts).forEach(id => {
+        const elem = document.getElementById(id);
+        elem.addEventListener('mousemove', (e) => showTooltip(e, info_texts[id]));
+        elem.addEventListener('mouseout', () => hideTooltip());
+    });
+}
+
+/**
  * Initialize all the variables and the Vexflow pentagram
  * */
 function init() {
@@ -1007,6 +1054,9 @@ function init() {
 
     document.addEventListener('keydown', keyListener);
     document.addEventListener('keyup', keyListener);
+
+    //---Tooltips
+    initTooltips();
 
     verovio.module.onRuntimeInitialized = () => {
         manageOptions();

@@ -150,57 +150,58 @@
       <div class="options-row">
         <div class='options-stack'>
           <div class='general-options'>
-            <label class='tooltip-lb'>
+            <label class='tooltip-lb' id='pitch-lb'>
               <input id='pitch-cb' type='checkbox' checked>
               Hauteur des notes
-              <span class='tooltiptext'>Permet de prendre en compte / ignorer la hauteur des notes</span>
+              <!-- <span class='tooltiptext'>Permet de prendre en compte / ignorer la hauteur des notes</span> -->
             </label>
-            <label class='tooltip-lb'>
+            <label class='tooltip-lb' id='rhythm-lb'>
               <input id='rhythm-cb' type='checkbox'>
               Rythme
-              <span class='tooltiptext'>Permet de prendre en compte / ignorer le rythme (la durée) des notes</span>
+              <!-- <span class='tooltiptext'>Permet de prendre en compte / ignorer le rythme (la durée) des notes</span> -->
             </label>
 
             <div class='intervals-cb'>
               <label id='transpose-lb' class='tooltip-lb'>
                 <input id='transpose-cb' type='checkbox'>
                 Autoriser les transpositions
-                <span class='tooltiptext'>Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée</span>
+                <!-- <span class='tooltiptext'>Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée</span> -->
               </label>
               <label id='contour-lb' class='tooltip-lb'>
                 <input id='contour-cb' type='checkbox'>
                 Correspondance du contour seulement
-                <span class='tooltiptext'>Garde seulement le signe des intervalles entres les notes (haut, bas, égal).</span>
+                <!-- <span class='tooltiptext'>Garde seulement le signe des intervalles entres les notes (haut, bas, égal).</span> -->
               </label>
             </div>
           </div>
 
           <div class='fuzzy-options'>
-            <label class='tooltip-lb'>
+            <label class='tooltip-lb' id='pitch-dist-lb'>
               Tolérance de hauteur
               <input type=number min=0 value=0 step=0.5 id='pitch-dist-select' class='nb-select'>
-              <span class='tooltiptext'>Permet d'augmenter la tolérance sur la hauteur de note (en tons)</span>
+              <!-- <span class='tooltiptext'>Permet d'augmenter la tolérance sur la hauteur de note (en tons)</span> -->
             </label>
 
-            <label class='tooltip-lb'>
+            <label class='tooltip-lb' id='duration-dist-lb'>
               Facteur de durée
               <input type=number min=1 value=1 step=0.125 id='duration-factor-select' class='nb-select-large'>
-              <span class='tooltiptext'>Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).</span>
+              <!-- <span class='tooltiptext'>Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).</span> -->
             </label>
 
-            <label class='tooltip-lb'>
+            <label class='tooltip-lb' id='sequencing-dist-lb'>
               Écart de durée
               <input type=number min=0 value=0 step=0.125 id='duration-gap-select' class='nb-select-large'>
-              <span class='tooltiptext'>Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)</span>
+              <!-- <span class='tooltiptext'>Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)</span> -->
             </label>
 
-            <label class='tooltip-lb'>
+            <label class='tooltip-lb' id='alpha-lb'>
               Alpha
               <input type=number min=0 max=100 value=0 step=5 id='alpha-select' class='nb-select'>
               %
-              <span class='tooltiptext'>Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.</span>
+              <!-- <span class='tooltiptext'>Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.</span> -->
             </label>
           </div>
+          <div id='tooltip' class='info-note' style='display: none;'></div>
         </div>
 
         <button id="send-button">Recherche</button>
