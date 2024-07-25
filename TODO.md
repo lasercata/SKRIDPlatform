@@ -17,3 +17,5 @@ All the files have in common the pedal symbol.
 
 - Verovio: tempo (above key signature) is not displayed correctly (some sort of rectangle instead of a note) ;
 Other font were tried, but none changed anything.
+
+- Update the frontpage (there is no information on Albert-Poulain database) ;

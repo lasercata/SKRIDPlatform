@@ -291,11 +291,19 @@ function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg
         note = `(octave : ${expected_note.octave})`;
 
     let expected_infos = dur + '\n' + note;
-    if (dur != '' && note != '')
+    if (dur != '' || note != '')
         expected_infos = 'expected note: ' + expected_infos;
 
     //-Infos from match degree
-    let deg_infos = `agregated degree: ${deg}%, pitch degree: ${pitch_deg}%, duration degree: ${duration_deg}%, sequencing degree: ${sequencing_deg}%`;
+    // let deg_infos = `agregated degree: ${deg}%, pitch degree: ${pitch_deg}%, duration degree: ${duration_deg}%, sequencing degree: ${sequencing_deg}%`;
+    let deg_infos = `agregated degree: ${deg}%`;
+
+    if (expected_note != null && expected_note.class_ != 'None' && expected_note.octave != 'None')
+        deg_infos += `, pitch degree: ${pitch_deg}%`;
+    if (expected_note != null && expected_note.duration != 'None')
+        deg_infos += `, duration degree: ${duration_deg}%`;
+
+    deg_infos += `, sequencing degree: ${sequencing_deg}%`;
 
     if (expected_infos != '\n')
         expected_infos += '<br>';
