@@ -340,6 +340,11 @@ const searchButtonHandler = function() {
         return;
     }
 
+    if ((transposition_cb.checked || contour_cb.checked) && melody.length == 1) {
+        alert('For transposition and contour search, at least two notes are needed (because it is based on interval between notes).');
+        return;
+    }
+
     // Write that a search is performing
     results_container.empty();
     results_container.append($('<h3>').text('Loading...'));
