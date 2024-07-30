@@ -292,15 +292,15 @@ function createPreview(url, source, nb_occ=null, overall_degree=null) {
 /**
  * Uses verovio to generate a svg preview of the score (first page) and set it into `score_div`.
  *
- * @param {HTMLElement} score_div     - the html element that will contain the svg preview ;
- * @param {string} score_path         - the (relative) path to the score (`./data/[collection name]/[score name]`) ;
- * @param {verovio.toolkit} tk        - the verovio toolkit ;
- * @param {number[]} [red_notes=[]]   - an array of mei IDs for notes to highlight in red.
- * @param {number} [parentWidth=180]  - the width of the parent (used to calculate the width of the svg) ;
- * @param {number} [parentHeight=250] - the height of the parent (used to calculate the height of the svg) ;
- * @param {number} [zoom=20]          - the zoom for the svg ;
+ * @param {HTMLElement} score_div        - the html element that will contain the svg preview ;
+ * @param {string} score_path            - the (relative) path to the score (`./data/[collection name]/[score name]`) ;
+ * @param {verovio.toolkit} tk           - the verovio toolkit ;
+ * @param {json[][]|null} [matches=null] - an array of matches. A Match is an array of json elements.
+ * @param {number} [parentWidth=180]     - the width of the parent (used to calculate the width of the svg) ;
+ * @param {number} [parentHeight=250]    - the height of the parent (used to calculate the height of the svg) ;
+ * @param {number} [zoom=20]             - the zoom for the svg ;
  */
-function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, parentHeight=250, zoom=20) {
+function fillPreview(score_div, score_path, tk, matches=null, parentWidth=180, parentHeight=250, zoom=20) {
     let pageHeight = parentHeight * 100 / zoom;
     let pageWidth = parentWidth * 100 / zoom;
 
@@ -319,11 +319,19 @@ function fillPreview(score_div, score_path, tk, red_notes=[], parentWidth=180, p
         let svg = tk.renderToSVG(1); // render the first page
         score_div.innerHTML = svg;
 
-        // Then, for each id in the noteIds array, find the note and set the color to red
-        for (let id in red_notes) {
-            const note = document.getElementById(id);
-            if(note != null) {
-                note.firstElementChild.setAttribute('fill', getGradientColor(red_notes[id]));
+        // Then highlight each match
+        if (matches != null) {
+            for (let match_nb = matches.length - 1 ; match_nb >= 0 ; --match_nb) { // Reverse order to get the best color in last 'layer'
+                for (let k = 0 ; k < matches[match_nb].length ; ++k) {
+                    const id = matches[match_nb][k].note.id;
+                    const deg = Math.floor(100 * matches[match_nb][k].note_deg);
+
+                    const note = document.getElementById(id);
+                    let col = getGradientColor(deg / 100);
+
+                    if (note != null)
+                        note.firstElementChild.setAttribute('fill', col);
+                }
             }
         }
     })
@@ -478,7 +486,7 @@ async function createPreviews_2(results_container, tk, results, pattern=null) {
 
             let score_div = document.getElementById(source);
             let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + source;
-            fillPreview(score_div, score_path, tk, result.notes_id);
+            fillPreview(score_div, score_path, tk, result.matches);
         });
     }
 }
