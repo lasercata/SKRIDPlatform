@@ -280,10 +280,15 @@ function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg
     //-Info from expected note
     let dur = '';
     if (expected_note != null && expected_note.duration != 'None')
-        dur = `<img src="public/notes_pics/${expected_note.duration}.png" height="40px">`;
+        if (expected_note.class_ == 'r')
+            dur = `<img src="public/silences_pics/s${expected_note.duration}.png" height="40px">`; //TODO: dotted notes won't be previewed !
+        else
+            dur = `<img src="public/notes_pics/${expected_note.duration}.png" height="40px">`; //TODO: dotted notes won't be previewed !
 
     let note = '';
-    if (expected_note != null && expected_note.class_ != 'None' && expected_note.octave != 'None')
+    if (expected_note != null && expected_note.class_ == 'r')
+        note = '(rest)';
+    else if (expected_note != null && expected_note.class_ != 'None' && expected_note.octave != 'None')
         note = `(${expected_note.class_}/${expected_note.octave})`;
     else if (expected_note != null && expected_note.class_ != 'None')
         note = `(${expected_note.class_})`;
