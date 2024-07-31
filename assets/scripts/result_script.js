@@ -298,6 +298,8 @@ function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg
     let expected_infos = dur + '\n' + note;
     if (dur != '' || note != '')
         expected_infos = 'expected note: ' + expected_infos;
+    
+    //TODO: add info for the found note ? But this would need to get this information, so it would be needed to pass it through the url again, or read the mei file.
 
     //-Infos from match degree
     // let deg_infos = `agregated degree: ${deg}%, pitch degree: ${pitch_deg}%, duration degree: ${duration_deg}%, sequencing degree: ${sequencing_deg}%`;
@@ -320,8 +322,15 @@ function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg
     
     //---Adding mouse events
     const parent_note = document.getElementById(id);
-    parent_note.firstElementChild.addEventListener('mousemove', (e) => showNoteInfo(e, info_box, id, match_x));
-    parent_note.firstElementChild.addEventListener('mouseout', () => hideNoteInfo(info_box));
+
+    if (parent_note != null) {
+        const notes_nodes = parent_note.getElementsByClassName('notehead');
+
+        for (let k = 0 ; k < notes_nodes.length ; ++k) {
+            notes_nodes[k].addEventListener('mousemove', (e) => showNoteInfo(e, info_box, id, match_x));
+            notes_nodes[k].addEventListener('mouseout', () => hideNoteInfo(info_box));
+        }
+    }
 
     //---Adding match_x to `match_indexes_by_id`
     if (!(id in match_indexes_by_id))
@@ -520,9 +529,13 @@ function highlightMatch(match_nb) {
         else
             col = null;
 
-        const note = document.getElementById(matches[match_nb][k].id);
-        if (note != null)
-            note.firstElementChild.setAttribute('fill', col);
+        const parent_note = document.getElementById(matches[match_nb][k].id);
+        if (parent_note != null) {
+            const notes = parent_note.getElementsByClassName('notehead');
+
+            for (let k = 0 ; k < notes.length ; ++k)
+                notes[k].setAttribute('fill', col);
+        }
     }
 }
 
@@ -586,6 +599,7 @@ const nextPageHandler = function() {
     //---Render next page
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
     refreshHighlight();
+    makePatternHoverBoxes(); // Make the hover boxes for the current page
 }
 
 /**
@@ -600,6 +614,7 @@ const prevPageHandler = function() {
     //---Render previous page
     document.getElementById("notation").innerHTML = tk.renderToSVG(currentPage);
     refreshHighlight();
+    makePatternHoverBoxes(); // Make the hover boxes for the current page
 }
 
 /**

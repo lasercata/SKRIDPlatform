@@ -160,39 +160,45 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
     //------Create the `notes` for the python script
     let notes = '[';
     for (let k = 0 ; k < melody.length ; ++k) {
-        let note = melody[k].keys[0]; //TODO: chord are ignored (taking only the first note) for the moment.
+        notes += '[';
 
-        //---Add note class ('a', 'gs', ...)
-        if (ignore_pitch && !contour_match)
-            notes += '(None, ';
-        else if (melody[k].noteType == 'r') // rest
-            notes += "('r', ";
-        else {
-            let class_ = note.split('/')[0];
-            class_ = class_.toLowerCase().replace('#', 's');
-            notes += `('${class_}', `
-        }
+        for (let note_idx = 0 ; note_idx < melody[k].keys.length ; ++note_idx) {
+            let note = melody[k].keys[note_idx];
 
-        //---Add octave
-        if (ignore_octave && !contour_match)
-            notes += 'None, ';
-        else {
-            let octave = note.split('/')[1];
-            notes += `${octave}, `;
+            //---Add note class ('a', 'gs', ...)
+            if (ignore_pitch && !contour_match)
+                notes += '(None, ';
+            else if (melody[k].noteType == 'r') // rest
+                notes += "('r', ";
+            else {
+                let class_ = note.split('/')[0];
+                class_ = class_.toLowerCase().replace('#', 's');
+                notes += `('${class_}', `
+            }
+
+            //---Add octave
+            if ((ignore_octave || melody[k].noteType == 'r') && !contour_match)
+                notes += 'None), ';
+            else {
+                let octave = note.split('/')[1];
+                notes += `${octave}), `;
+            }
         }
 
         //---Add duration
         if (ignore_rhythm)
-            notes += 'None), ';
+            notes += 'None], ';
         else {
-            let duration_string = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration;
+            let duration_string = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration; //TODO: will not work for multi-dots
             let dur_inv = 1 / durationNoteWithDots[duration_string];
 
-            notes += `${dur_inv}), `;
+            notes += `${dur_inv}], `;
         }
     }
 
     notes = notes.slice(0, -2) + ']' // Remove trailing ', ' and add ']'.
+
+    console.log(notes);
 
     //------Create the 'collections' filter for the python script
     let collections = null;

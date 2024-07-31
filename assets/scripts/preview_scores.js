@@ -326,11 +326,15 @@ function fillPreview(score_div, score_path, tk, matches=null, parentWidth=180, p
                     const id = matches[match_nb][k].note.id;
                     const deg = Math.floor(100 * matches[match_nb][k].note_deg);
 
-                    const note = document.getElementById(id);
+                    const parent_note = document.getElementById(id);
                     let col = getGradientColor(deg / 100);
 
-                    if (note != null)
-                        note.firstElementChild.setAttribute('fill', col);
+                    if (parent_note != null) {
+                        const notes = parent_note.getElementsByClassName('notehead');
+
+                        for (let k = 0 ; k < notes.length ; ++k)
+                            notes[k].setAttribute('fill', col);
+                    }
                 }
             }
         }
