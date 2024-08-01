@@ -508,7 +508,7 @@ function fillPreviews(tk, results) {
         let score_name = prop.source;
 
         let score_div = document.getElementById(prop.source);
-        let score_path = './data/' + prop.collection.replace(/\s+/g, "-") + '/' + score_name;
+        let score_path = './data/' + prop.collection.replace(/\s+/g, "-") + '/mei/' + score_name;
         fillPreview(score_div, score_path, tk);
     }
 }

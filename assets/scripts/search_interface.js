@@ -1027,13 +1027,13 @@ function changeOctave(diff) {
  */
 function initTooltips() {
     const info_texts = { // html_id: 'info text'
-        'pitch-lb': "Permet de prendre en compte / ignorer la hauteur des notes",
-        'rhythm-lb': "Permet de prendre en compte / ignorer le rythme (la durée) des notes",
-        'transpose-lb': "Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée",
+        'pitch-lb': "Permet de prendre en compte / ignorer la hauteur des notes.",
+        'rhythm-lb': "Permet de prendre en compte / ignorer le rythme (la durée) des notes.",
+        'transpose-lb': "Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée.",
         'contour-lb': "Garde seulement le signe des intervalles entres les notes (haut, bas, égal).",
-        'pitch-dist-lb': "Permet d'augmenter la tolérance sur la hauteur de note (en tons)",
+        'pitch-dist-lb': "Permet d'augmenter la tolérance sur la hauteur de note (en tons), ou sur les intervalles (si transposition est coché).",
         'duration-dist-lb': "Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).",
-        'sequencing-dist-lb': "Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)",
+        'sequencing-dist-lb': "Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...).",
         'alpha-lb': "Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha."
     };
 

@@ -75,10 +75,10 @@ function init() {
         // Get the author from the url and use it to find the folder in which the .mei file is contained
         score_name = readFromUrl('score_name');
         let author = readFromUrl('author').replace(/\s+/g, "-");
-        let folder = author + '/';
+        let folder = author + '/mei/';
 
         // Search for the .mei file in the folder
-        fetch(datadir+folder+score_name)
+        fetch(datadir + folder + score_name)
         .then( (response) => response.text() )
         .then( (meiXML) => {
             tk.loadData(meiXML);

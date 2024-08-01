@@ -26,44 +26,46 @@ function createArchivesLinks(author) {
     var folder_name = author;
     folder_name = folder_name.replace(/\s+/g, "-");
 
+    const path = `data/${folder_name}/archives/${folder_name}`; // All files begin with `folder_name`.
+
     //---MEI
     var link_archives_mei = document.createElement('a');
-    link_archives_mei.setAttribute('href','./data/'+folder_name+'/'+folder_name+'_FilesMei.zip');
+    link_archives_mei.setAttribute('href', path + '_FilesMei.zip');
     link_archives_mei.innerHTML = 'MEI';
     document.getElementById('archives').append(link_archives_mei);
     document.getElementById('archives').append(', ');
 
     //---LY
     var link_archives_Ly = document.createElement('a');
-    link_archives_Ly.setAttribute('href','./data/'+folder_name+'/'+folder_name+'_FilesLy.zip');
+    link_archives_Ly.setAttribute('href', path + '_FilesLy.zip');
     link_archives_Ly.innerHTML = 'LY';
     document.getElementById('archives').append(link_archives_Ly);
     document.getElementById('archives').append(', ');
 
     //---MIDI
     var link_archives_Mid = document.createElement('a');
-    link_archives_Mid.setAttribute('href','./data/'+folder_name+'/'+folder_name+'_FilesMid.zip');
+    link_archives_Mid.setAttribute('href', path + '_FilesMid.zip');
     link_archives_Mid.innerHTML = 'MID';
     document.getElementById('archives').append(link_archives_Mid);
     document.getElementById('archives').append(', ');
 
     //---MUSICXML
     var link_archives_MusicXML = document.createElement('a');
-    link_archives_MusicXML.setAttribute('href','./data/'+folder_name+'/'+folder_name+'_FilesMusicXML.zip');
+    link_archives_MusicXML.setAttribute('href', path + '_FilesMusicXML.zip');
     link_archives_MusicXML.innerHTML = 'MUSICXML';
     document.getElementById('archives').append(link_archives_MusicXML);
     document.getElementById('archives').append(', ');
 
     //---PDF
     // For PDF, there might not be any zip. So ensure that there is one with a HEAD request before adding link.
-    const pathPdf='./data/'+folder_name+'/'+folder_name+'_FilesPdf.zip';
+    const pathPdf = path + '_FilesPdf.zip';
 
     var http = new XMLHttpRequest();
     http.open('HEAD', pathPdf, false);
     http.send();
     if (http.status === 200) {
         var link_archives_Pdf = document.createElement('a');
-        link_archives_Pdf.setAttribute('href','./data/'+folder_name+'/'+folder_name+'_FilesPdf.zip');
+        link_archives_Pdf.setAttribute('href', path + '_FilesPdf.zip');
         link_archives_Pdf.innerHTML = 'PDF';
         document.getElementById('archives').append(link_archives_Pdf);
         document.getElementById('archives').append(', ');
@@ -71,7 +73,7 @@ function createArchivesLinks(author) {
 
     //---SVG
     var link_archives_Svg = document.createElement('a');
-    link_archives_Svg.setAttribute('href','./data/'+folder_name+'/'+folder_name+'_FilesSvg.zip');
+    link_archives_Svg.setAttribute('href', path + '_FilesSvg.zip');
     link_archives_Svg.innerHTML = 'SVG';
     document.getElementById('archives').append(link_archives_Svg);
 }
