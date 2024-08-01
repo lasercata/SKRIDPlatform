@@ -489,7 +489,7 @@ async function createPreviews_2(results_container, tk, results, pattern=null) {
             results_container.append(createPreview(url, source, result.number_of_occurrences, result.overall_degree));
 
             let score_div = document.getElementById(source);
-            let score_path = './data/' + collection.replace(/\s+/g, "-") + '/' + source;
+            let score_path = './data/' + collection.replace(/\s+/g, "-") + '/mei/' + source;
             fillPreview(score_div, score_path, tk, result.matches);
         });
     }
