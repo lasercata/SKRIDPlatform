@@ -31,33 +31,10 @@ SKRID Platform is an interface to a graph database designed to explore musical p
 └── README.md
 ```
 
+
 ## Setup
-### Setup database
-Download [neo4j-desktop](https://neo4j.com/download/) (keep the activation code and paste it when launching the application).
-
-In the application, create a new project, and add a database (`add` button, then `local DBMS`).
-Choose a name, and a password (at least 8 characters). You will have to create a file `.database_password` and write this password in it (in order for the application to interact with the database).
-Then select the version `4.2.1`.
-
-When this is done, click on the name, then on the right click on `Plugins`. Install `APOC`.
-
-Then click on `...`, then `Settings`, and replace the configuration with the content of `config/neo4j.conf`.
-
-Click on `Start`, and when started, on `Open`.
-
-Go to the file `assets/data/DATABASENAME/cmdPopulate.cql` (where `DATABASENAME` is the folder name of the current database), and make sure to replace all the path with your current path.
-
-You can finally paste the content of the modified file into the prompt and run it to add the data.
-
-Repeat the same steps with the other databases.
-
-To correct the database (frequencies are not correct, thus compilated fuzzy queries will fail), paste the queries from `config/data_corrections.cypher` in the prompt of neo4j-desktop.
-
-Note: if you want to add a new database, do not forget to rerun the correction queries.
-
-
-### Testing (run in local)
-Download the project and its submodule
+### Setup repository
+Download the project and its submodule :
 ```bash
 git clone https://github.com/vBarreaud/SKRIDPlatform.git
 # or :
@@ -76,7 +53,76 @@ Install node dependencies (it will create the `node_modules` directory) :
 npm install
 ```
 
-Launch the local server :
+### Documentation
+To generate the documentation, run :
+```
+npm run generate-docs
+```
+
+Then open `docs/index.html` with your browser.
+
+### Create database <a name='create-db'></a>
+Download [neo4j-desktop](https://neo4j.com/download/) (keep the activation code and paste it when launching the application).
+
+In the application, create a new project, and add a database (`add` button, then `local DBMS`).
+Choose a name (*SKRID_db* for example), and a password (at least 8 characters). Remember the password, it will be needed later (see [Generate files](#generate-files)).
+Then select the version `4.2.1`.
+
+When this is done, click on the name, then on the right click on `Plugins`. Install `APOC`.
+
+Then click on `...`, then `Settings`, and replace the configuration with the content of `config/neo4j.conf`.
+
+Finally you can launch the database with the `Start` button.
+To test queries, you can use the `Open` button that will create a window with a query prompt.
+
+
+
+Go to the file `assets/data/DATABASENAME/cmdPopulate.cql` (where `DATABASENAME` is the folder name of the current database), and make sure to replace all the path with your current path.
+
+You can finally paste the content of the modified file into the prompt and run it to add the data.
+
+Repeat the same steps with the other databases.
+
+To correct the database (frequencies are not correct, thus compilated fuzzy queries will fail), paste the queries from `config/data_corrections.cypher` in the prompt of neo4j-desktop.
+
+Note: if you want to add a new database, do not forget to rerun the correction queries.
+
+### Generate files and load database <a name='generate-files'></a>
+Now that the database is ready, let's generate the data to fill it.
+
+Dependencies :
+- [`cypher-shell`](https://neo4j.com/deployment-center/?cypher-shell#tools-tab) to populate the database (possible to avoid this by pasting the content of `assets/data/load_all_DB.cql` in the neo4j prompt) ;
+- [`verovio`](https://book.verovio.org/installing-or-building-from-sources/command-line.html) to convert the sources into mei and other file formats ;
+- [`mscore`](https://musescore.org/en/download) to do some conversions (try package `musescore` in your Linux distribution) ;
+- [`musicxml2ly`](https://manpages.ubuntu.com/manpages/trusty/man1/musicxml2ly.1.html) to convert musicXML to lilypond.
+
+After getting `cypher-shell`, make sure to add it to the PATH, or do the following :
+```
+sudo ln -s /bin/cypher-shell /absolute/path/to/bin/cypher-shell
+```
+
+Then you can run :
+```
+./loadAllDB.sh
+```
+
+This will ask for the neo4j password that you created in [Create database](#create-db).
+The password will be stored in the file `.database_password` in order for the application (`index.js`) to communicate with the database.
+
+Then the script will :
+- generate the needed files from the sources (conversion from sources and creation of cypher dumps, see the [data README](assets/data/README.md) for details) ;
+- clear the database ;
+- populate the database.
+
+Note that this will take time - 20 to 30 minutes on my computer.
+
+
+## Run
+Now that the setup is finished, let's run the app !
+
+* If the database was stopped, start it (`Start` button in the neo4j desktop application).
+
+* Then launch the `nodejs` server :
 ```
 node index.js
 ```
@@ -88,22 +134,15 @@ node index.js >> skrid.log
 
 It will print something like `Server listening on port 3000`.
 
-And then open the following url in your browser : `localhost:3000` (change the port accordingly to the previous result).
+To test locally, open the following url in your browser : `localhost:3000` (change the port accordingly to the previous result).
 
-Make sure to have the neo4j database running when testing.
-
-
-## Documentation
-To generate the documentation, run :
-```
-npm run generate-docs
-```
-
-Then open `docs/index.html` with your browser.
 
 ## Notes
 ### TODO
 For known bugs and uncovered parts, see [TODO](TODO.md).
+
+### Adding a database
+To add a database, follow the instructions in the [data README](assets/data/README.md)
 
 ### Notes for local tests
 If `index.js` has been modified, it is needed to restart `node index.js`. Otherwise it is just needed to refresh the web page.

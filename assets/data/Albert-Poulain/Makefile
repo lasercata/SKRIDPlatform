@@ -27,6 +27,7 @@ LY_OBJECTS := $(patsubst $(MUSICXML_DIR)/%.musicxml, $(LY_DIR)/%.ly, $(SOURCES))
 SVG_OBJECTS := $(patsubst $(MUSICXML_DIR)/%.musicxml, $(SVG_DIR)/%.svg, $(SOURCES))
 PDF_OBJECTS := $(patsubst $(MUSICXML_DIR)/%.musicxml, $(PDF_DIR)/%.pdf, $(SOURCES))
 
+#TODO: add ly-obj
 # ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collection)_FilesSvg.zip $(ARCHIVES_DIR)/$(collection)_FilesMei.zip $(ARCHIVES_DIR)/$(collection)_FilesMusicxml.zip $(ARCHIVES_DIR)/$(collection)_FilesMid.zip $(ARCHIVES_DIR)/$(collection)_FilesPdf.zip $(ARCHIVES_DIR)/$(collection)_FilesLy.zip
 ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collection)_FilesSvg.zip $(ARCHIVES_DIR)/$(collection)_FilesMei.zip $(ARCHIVES_DIR)/$(collection)_FilesMusicxml.zip $(ARCHIVES_DIR)/$(collection)_FilesMid.zip $(ARCHIVES_DIR)/$(collection)_FilesPdf.zip
 
@@ -35,7 +36,7 @@ ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collecti
 .PHONY: all
 # all: mei-obj mid-obj svg-obj mscz-obj pdf-obj archives-obj $(CYPHER_DIR)
 all: $(DIRS) metadata mei-obj mid-obj svg-obj mscz-obj pdf-obj archives-obj $(CYPHER_DIR)
-# all: metadata mei-obj mid-obj svg-obj mscz-obj pdf-obj ly-obj archives-obj
+#TODO: add ly-obj
 
 #---Mei
 $(MEI_DIR):
@@ -155,6 +156,7 @@ archives-obj: $(ARCHIVES_DIR) $(ARCHIVES)
 	@echo "Archives created."
 	@echo "================="
 
+#TODO: add ly-obj
 # $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS) $(LY_OBJECTS)
 $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS)
 	@echo "All ..."
