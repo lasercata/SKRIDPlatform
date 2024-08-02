@@ -12,10 +12,6 @@ Affected files:
 List is not exhaustive.
 All the files have in common the pedal symbol.
 
-- Some parts do not work in chrome (in chromium and vivaldi to be precise) (but it works on firefox, firefox-esr) :
-    - collection (`authorButtonHandler` is not defined). May be because the javascript is loaded as `module` and not `text/javascript`, but this is needed in order to use `import` ;
-    - result : it is needed to refresh the page multiple times before having the content displayed.
-
 ## Frontend
 - Result page: svg generated with verovio: comment overlap title (in the svg) ;
 
