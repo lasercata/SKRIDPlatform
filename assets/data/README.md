@@ -1,7 +1,11 @@
 # Generating data
-To generate all data and load it to the database, see the [main README](../../README.md).
+To generate all data and load it to the database, see the [main README](../../README.md#generate-files).
 
 This README explains the data generation process.
+
+The process is separated in two parts : each collection generates all the files by converting from the source, and then the MEI files are converted to cypher dumps.
+
+The conversion from MEI to cypher graph dump is handled by the [`Musypher`](https://github.com/lasercata/Musypher) program.
 
 ## File structure
 ```
@@ -46,7 +50,8 @@ collection_1/
 ## Dependencies
 - [`verovio`](https://book.verovio.org/installing-or-building-from-sources/command-line.html) to convert the sources into mei and other file formats ;
 - [`mscore`](https://musescore.org/en/download) to do some conversions (try package `musescore` in your Linux distribution) ;
-- [`musicxml2ly`](https://manpages.ubuntu.com/manpages/trusty/man1/musicxml2ly.1.html) to convert musicXML to lilypond.
+- [`musicxml2ly`](https://manpages.ubuntu.com/manpages/trusty/man1/musicxml2ly.1.html) to convert musicXML to lilypond ;
+- [`Musypher`](https://github.com/lasercata/Musypher) to create the cypher dump from the MEI. It is not needed to download it, it is done automatically.
 
 ## Usage
 To generate all files :
@@ -56,7 +61,7 @@ make
 ```
 For each collection, this will :
 - generate files in other formats with convertion using the makefile of that collection ;
-- generate the cypher dumps using `Musypher`.
+- generate the cypher dumps using [`Musypher`](https://github.com/lasercata/Musypher).
 
 To clean the generated files, run :
 ```

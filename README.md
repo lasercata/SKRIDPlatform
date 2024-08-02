@@ -36,10 +36,7 @@ SKRID Platform is an interface to a graph database designed to explore musical p
 ### Setup repository
 Download the project and its submodule :
 ```bash
-git clone https://github.com/vBarreaud/SKRIDPlatform.git
-# or :
-# git clone https://github.com/lasercata/SKRIDPlatform.git
-
+git clone https://github.com/lasercata/SKRIDPlatform.git
 cd SKRIDPlatform/
 
 # Need access to the repo https://github.com:aa196883/compilation_requete_fuzzy
@@ -75,18 +72,6 @@ Then click on `...`, then `Settings`, and replace the configuration with the con
 Finally you can launch the database with the `Start` button.
 To test queries, you can use the `Open` button that will create a window with a query prompt.
 
-
-
-Go to the file `assets/data/DATABASENAME/cmdPopulate.cql` (where `DATABASENAME` is the folder name of the current database), and make sure to replace all the path with your current path.
-
-You can finally paste the content of the modified file into the prompt and run it to add the data.
-
-Repeat the same steps with the other databases.
-
-To correct the database (frequencies are not correct, thus compilated fuzzy queries will fail), paste the queries from `config/data_corrections.cypher` in the prompt of neo4j-desktop.
-
-Note: if you want to add a new database, do not forget to rerun the correction queries.
-
 ### Generate files and load database <a name='generate-files'></a>
 Now that the database is ready, let's generate the data to fill it.
 
@@ -94,7 +79,8 @@ Dependencies :
 - [`cypher-shell`](https://neo4j.com/deployment-center/?cypher-shell#tools-tab) to populate the database (possible to avoid this by pasting the content of `assets/data/load_all_DB.cql` in the neo4j prompt) ;
 - [`verovio`](https://book.verovio.org/installing-or-building-from-sources/command-line.html) to convert the sources into mei and other file formats ;
 - [`mscore`](https://musescore.org/en/download) to do some conversions (try package `musescore` in your Linux distribution) ;
-- [`musicxml2ly`](https://manpages.ubuntu.com/manpages/trusty/man1/musicxml2ly.1.html) to convert musicXML to lilypond.
+- [`musicxml2ly`](https://manpages.ubuntu.com/manpages/trusty/man1/musicxml2ly.1.html) to convert musicXML to lilypond ;
+- [`Musypher`](https://github.com/lasercata/Musypher) to create the cypher dump from the MEI. It is not needed to download it, it is done automatically.
 
 After getting `cypher-shell`, make sure to add it to the PATH, or do the following :
 ```

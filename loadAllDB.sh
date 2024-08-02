@@ -30,7 +30,7 @@ cypher-shell -u $user -p $password -d $database --format verbose "match (n) deta
 
 #---Load all
 for d in */; do
-    if [[ "$d" != "Musyphjer/" ]]; then
+    if [[ "$d" != "Musypher/" ]]; then
         echo "*****************************";
         echo "Loading the database '$d' ..."
         echo "*****************************";

@@ -198,8 +198,6 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
 
     notes = notes.slice(0, -2) + ']' // Remove trailing ', ' and add ']'.
 
-    console.log(notes);
-
     //------Create the 'collections' filter for the python script
     let collections = null;
     if(selectedCollections.length != 0) {
@@ -269,6 +267,9 @@ function sendQuery(fuzzyQuery) {
             dataDiv.textContent = '[]';
             patternDiv.textContent = '';
             loadPageN(1, null, true, true);
+
+            console.log(data.error);
+            alert(data.error)
         }
     })
     .catch(err => {
