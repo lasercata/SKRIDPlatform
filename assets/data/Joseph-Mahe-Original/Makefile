@@ -119,7 +119,7 @@ pdf-obj: $(PDF_DIR) $(PDF_OBJECTS)
 	@echo "======================"
 
 $(PDF_DIR)/%.pdf: $(MSCZ_DIR)/%.mscz
-	mscore $^ -o $@ || echo
+	mscore $^ -o $@
 
 #---Ly
 $(LY_DIR):

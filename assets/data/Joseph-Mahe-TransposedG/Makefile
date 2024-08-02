@@ -35,7 +35,6 @@ ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collecti
 #---All
 .PHONY: all
 all: $(DIRS) metadata musicxml-obj mei-obj mid-obj svg-obj pdf-obj archives-obj $(CYPHER_DIR)
-# all: $(DIRS) metadata musicxml-obj mei-obj mid-obj svg-obj pdf-obj ly-obj archives-obj $(CYPHER_DIR)
 #TODO: add ly-obj
 
 #---Mei
@@ -185,7 +184,6 @@ $(CYPHER_DIR):
 	@echo Creating folder "$@"
 	@mkdir -p $@
 	@echo "*" > $@/.gitignore
-
 
 
 #---Metadata
