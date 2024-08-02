@@ -29,7 +29,7 @@ load_all_DB.cql: $(all_cql)
 	@echo Generating file $@.
 	@echo "CALL apoc.cypher.runFiles([" > $@
 	@for k in $^; do \
-			echo "'$$k', " >> $@; \
+			echo "'$$(realpath $$k)', " >> $@; \
 		done;
 	@sed '$$ s/, $$//' $@ > tmp;
 	@rm $@;
@@ -40,6 +40,7 @@ load_all_DB.cql: $(all_cql)
 .PHONY: clean
 clean:
 	@echo Cleaning.
+	@rm -f load_all_DB.cql
 	@for collection in $(DB_folders); do \
 		cd "$$collection" && make clean && cd ..; \
 		done

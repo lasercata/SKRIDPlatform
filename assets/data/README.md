@@ -1,5 +1,4 @@
 # Generating data
-
 TODO: short description
 
 ## Dependencies
@@ -11,6 +10,8 @@ TODO: improve this ...
 
 ## Usage
 TODO
+
+TODO: say it can take time (10 minutes on my computer)
 
 ## Adding a collection
 TODO

@@ -3,9 +3,9 @@ echo Adding metadata to $1!
 # adding the composer "Collecté par Francois-Marie Luzel, 1913" (or erase the previous one if exists) and adding the collection (important for retrieving information in the skrid platform as if gives the name of the folder where to find the inputfile
 if grep -q '<creator type=\"composer\">' $1 ;
 then
-sed -r -i -e 's|<creator type="composer">.*<\/creator>|<creator type="composer">Collecté par Joseph Mahé, 1825<\/creator><creator type="collection">Joseph Mahe Original<\/creator>|g' $1
+sed -r -i -e 's|<creator type="composer">.*<\/creator>|<creator type="composer">Collecté par Joseph Mahé, 1825<\/creator><creator type="collection">Joseph Mahe TransposedG<\/creator>|g' $1
 else 
-sed -r -i -e 's|<\/identification>|<creator type="composer">Collecté par Joseph Mahé, 1825<\/creator><creator type="collection">Joseph Mahe Original<\/creator><\/identification>|g' $1
+sed -r -i -e 's|<\/identification>|<creator type="composer">Collecté par Joseph Mahé, 1825<\/creator><creator type="collection">Joseph Mahe TransposedG<\/creator><\/identification>|g' $1
 fi
 # adding the source "Musiques bretonnes, Maurice Duhamel, Dastum" (or erase the previous one if exists)
 if grep -q '<source>' $1 ;

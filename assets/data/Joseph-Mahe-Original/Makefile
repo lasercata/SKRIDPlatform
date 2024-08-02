@@ -27,6 +27,9 @@ LY_OBJECTS := $(patsubst $(MSCZ_DIR)/%.mscz, $(LY_DIR)/%.ly, $(SOURCES))
 SVG_OBJECTS := $(patsubst $(MSCZ_DIR)/%.mscz, $(SVG_DIR)/%.svg, $(SOURCES))
 PDF_OBJECTS := $(patsubst $(MSCZ_DIR)/%.mscz, $(PDF_DIR)/%.pdf, $(SOURCES))
 
+# ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collection)_FilesSvg.zip $(ARCHIVES_DIR)/$(collection)_FilesMei.zip $(ARCHIVES_DIR)/$(collection)_FilesMusicxml.zip $(ARCHIVES_DIR)/$(collection)_FilesMid.zip $(ARCHIVES_DIR)/$(collection)_FilesPdf.zip $(ARCHIVES_DIR)/$(collection)_FilesLy.zip
+ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collection)_FilesSvg.zip $(ARCHIVES_DIR)/$(collection)_FilesMei.zip $(ARCHIVES_DIR)/$(collection)_FilesMusicxml.zip $(ARCHIVES_DIR)/$(collection)_FilesMid.zip $(ARCHIVES_DIR)/$(collection)_FilesPdf.zip
+
 #------Rules
 #---All
 .PHONY: all
@@ -41,9 +44,9 @@ $(MEI_DIR):
 
 .PHONY: mei-obj
 mei-obj: $(MEI_DIR) $(MEI_OBJECTS)
-	@echo "======================="
-	@echo "Converting to MEI files"
-	@echo "======================="
+	@echo "======================"
+	@echo "Converted to MEI files"
+	@echo "======================"
 
 $(MEI_DIR)/%.mei: $(MUSICXML_DIR)/%.musicxml
 	@verovio $< -t mei -o $@
@@ -56,9 +59,9 @@ $(MID_DIR):
 
 .PHONY: mid-obj
 mid-obj: $(MID_DIR) $(MID_OBJECTS)
-	@echo "========================"
-	@echo "Converting to MIDI files"
-	@echo "========================"
+	@echo "======================="
+	@echo "Converted to MIDI files"
+	@echo "======================="
 
 $(MID_DIR)/%.mid: $(MUSICXML_DIR)/%.musicxml
 	@verovio $^ -t midi -o $@
@@ -71,9 +74,9 @@ $(SVG_DIR):
 
 .PHONY: svg-obj
 svg-obj: $(SVG_DIR) $(SVG_OBJECTS)
-	@echo "======================="
-	@echo "Converting to SVG files"
-	@echo "======================="
+	@echo "======================"
+	@echo "Converted to SVG files"
+	@echo "======================"
 
 $(SVG_DIR)/%.svg: $(MUSICXML_DIR)/%.musicxml
 	@verovio $^ -t svg -o $@
@@ -86,9 +89,9 @@ $(MUSICXML_DIR):
 
 .PHONY: musicxml-obj
 musicxml-obj: $(MUSICXML_DIR) $(MUSICXML_OBJECTS)
-	@echo "============================"
-	@echo "Converting to musicxml files"
-	@echo "============================"
+	@echo "==========================="
+	@echo "Converted to musicxml files"
+	@echo "==========================="
 
 $(MUSICXML_DIR)/%.musicxml: $(MSCZ_DIR)/%.mscz
 	mscore $^ -o $@
@@ -109,10 +112,10 @@ $(PDF_DIR):
 	@echo "*" > $@/.gitignore
 
 .PHONY: pdf-obj
-pdf-obj: $(PDF_DIR) $(PDFOBJECTS)
-	@echo "======================="
-	@echo "Converting to PDF files"
-	@echo "======================="
+pdf-obj: $(PDF_DIR) $(PDF_OBJECTS)
+	@echo "======================"
+	@echo "Converted to PDF files"
+	@echo "======================"
 
 $(PDF_DIR)/%.pdf: $(MSCZ_DIR)/%.mscz
 	mscore $^ -o $@ || echo
@@ -125,9 +128,9 @@ $(LY_DIR):
 
 .PHONY: ly-obj
 ly-obj: $(LY_DIR) $(LY_OBJECTS)
-	@echo "============================"
-	@echo "Converting to Lilypond files"
-	@echo "============================"
+	@echo "==========================="
+	@echo "Converted to Lilypond files"
+	@echo "==========================="
 
 $(LY_DIR)/%.ly: $(MUSICXML_DIR)/%.musicxml
 	musicxml2ly $^ -o $@
@@ -140,9 +143,9 @@ $(ARCHIVES_DIR):
 
 .PHONY: archives-obj
 archives-obj: $(ARCHIVES_DIR) $(ARCHIVES)
-	@echo "====================="
-	@echo "Creating archives ..."
-	@echo "====================="
+	@echo "================="
+	@echo "Archives created."
+	@echo "================="
 
 # $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS) $(LY_OBJECTS)
 $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS)
@@ -205,4 +208,5 @@ clean:
 	@rm -rf $(LY_OBJECTS)
 	@rm -rf $(MID_OBJECTS)
 	@rm -rf $(ARCHIVES_DIR)/*.zip
+	@rm -rf load_DB.cql
 

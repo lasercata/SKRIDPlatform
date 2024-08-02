@@ -27,6 +27,9 @@ LY_OBJECTS := $(patsubst $(MUSICXML_DIR)/%.musicxml, $(LY_DIR)/%.ly, $(SOURCES))
 SVG_OBJECTS := $(patsubst $(MUSICXML_DIR)/%.musicxml, $(SVG_DIR)/%.svg, $(SOURCES))
 PDF_OBJECTS := $(patsubst $(MUSICXML_DIR)/%.musicxml, $(PDF_DIR)/%.pdf, $(SOURCES))
 
+# ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collection)_FilesSvg.zip $(ARCHIVES_DIR)/$(collection)_FilesMei.zip $(ARCHIVES_DIR)/$(collection)_FilesMusicxml.zip $(ARCHIVES_DIR)/$(collection)_FilesMid.zip $(ARCHIVES_DIR)/$(collection)_FilesPdf.zip $(ARCHIVES_DIR)/$(collection)_FilesLy.zip
+ARCHIVES = $(ARCHIVES_DIR)/$(collection)_FilesAll.zip $(ARCHIVES_DIR)/$(collection)_FilesSvg.zip $(ARCHIVES_DIR)/$(collection)_FilesMei.zip $(ARCHIVES_DIR)/$(collection)_FilesMusicxml.zip $(ARCHIVES_DIR)/$(collection)_FilesMid.zip $(ARCHIVES_DIR)/$(collection)_FilesPdf.zip
+
 #------Rules
 #---All
 .PHONY: all
@@ -41,9 +44,9 @@ $(MEI_DIR):
 
 .PHONY: mei-obj
 mei-obj: $(MEI_DIR) $(MEI_OBJECTS)
-	@echo "======================="
-	@echo "Converting to MEI files"
-	@echo "======================="
+	@echo "======================"
+	@echo "Converted to MEI files"
+	@echo "======================"
 
 $(MEI_DIR)/%.mei: $(MUSICXML_DIR)/%.musicxml
 	@verovio $< -t mei -o $@
@@ -56,9 +59,9 @@ $(MID_DIR):
 
 .PHONY: mid-obj
 mid-obj: $(MID_DIR) $(MID_OBJECTS)
-	@echo "========================"
-	@echo "Converting to MIDI files"
-	@echo "========================"
+	@echo "======================="
+	@echo "Converted to MIDI files"
+	@echo "======================="
 
 $(MID_DIR)/%.mid: $(MUSICXML_DIR)/%.musicxml
 	@verovio $^ -t midi -o $@
@@ -71,9 +74,9 @@ $(SVG_DIR):
 
 .PHONY: svg-obj
 svg-obj: $(SVG_DIR) $(SVG_OBJECTS)
-	@echo "======================="
-	@echo "Converting to SVG files"
-	@echo "======================="
+	@echo "======================"
+	@echo "Converted to SVG files"
+	@echo "======================"
 
 $(SVG_DIR)/%.svg: $(MUSICXML_DIR)/%.musicxml
 	@verovio $^ -t svg -o $@
@@ -95,9 +98,9 @@ musicxml-obj: metadata
 #
 # .PHONY: mscz-obj
 # mscz-obj: $(MSCZ_DIR) $(MSCZOBJECTS)
-# 	@echo "========================"
-# 	@echo "Converting to MSCZ files"
-# 	@echo "========================"
+# 	@echo "======================="
+# 	@echo "Converted to MSCZ files"
+# 	@echo "======================="
 #
 # $(MSCZ_DIR)/%.mscz: $(MUSICXML_DIR)/%.musicxml
 # 	mscore $^ -o $@
@@ -109,7 +112,7 @@ musicxml-obj: metadata
 # 	@echo "*" > $@/.gitignore
 #
 # .PHONY: pdf-obj
-# pdf-obj: $(PDF_DIR) $(PDFOBJECTS)
+# pdf-obj: $(PDF_DIR) $(PDF_OBJECTS)
 #
 # $(PDF_DIR)/%.pdf: $(MSCZ_DIR)/%.mscz
 # 	mscore $^ -o $@
@@ -122,9 +125,9 @@ $(LY_DIR):
 
 .PHONY: ly-obj
 ly-obj: $(LY_DIR) $(LY_OBJECTS)
-	@echo "============================"
-	@echo "Converting to Lilypond files"
-	@echo "============================"
+	@echo "==========================="
+	@echo "Converted to Lilypond files"
+	@echo "==========================="
 
 $(LY_DIR)/%.ly: $(MUSICXML_DIR)/%.musicxml
 	musicxml2ly $^ -o $@
@@ -137,14 +140,16 @@ $(ARCHIVES_DIR):
 
 .PHONY: archives-obj
 archives-obj: $(ARCHIVES_DIR) $(ARCHIVES)
-	@echo "====================="
-	@echo "Creating archives ..."
-	@echo "====================="
+	@echo "================="
+	@echo "Archives created."
+	@echo "================="
 
+# As .mscz aleady exists, there is no rule to create them, so they are not in the 'ingredients'
 # $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS) $(LY_OBJECTS)
-$(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS)
+# $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS)
+$(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS)
 	@echo "All ..."
-	@zip -9 -y -r -q $@ $^
+	@zip -9 -y -r -q $@ $(MSCZ_OBJECTS) $^
 
 $(ARCHIVES_DIR)/$(collection)_FilesSvg.zip: $(SVG_OBJECTS)
 	@echo "SVG ..."
@@ -200,4 +205,5 @@ clean:
 	@rm -rf $(LY_OBJECTS)
 	@rm -rf $(MID_OBJECTS)
 	@rm -rf $(ARCHIVES_DIR)/*.zip
+	@rm -rf load_DB.cql
 

@@ -45,9 +45,9 @@ $(MEI_DIR):
 
 .PHONY: mei-obj
 mei-obj: $(MEI_DIR) $(MEI_OBJECTS)
-	@echo "======================="
-	@echo "Converting to MEI files"
-	@echo "======================="
+	@echo "======================"
+	@echo "Converted to MEI files"
+	@echo "======================"
 
 $(MEI_DIR)/%.mei: $(MUSICXML_DIR)/%.musicxml
 	@verovio $^ -t mei -o $@
@@ -67,9 +67,9 @@ $(MID_DIR):
 
 .PHONY: mid-obj
 mid-obj: $(MID_DIR) $(MID_OBJECTS)
-	@echo "========================"
-	@echo "Converting to MIDI files"
-	@echo "========================"
+	@echo "======================="
+	@echo "Converted to MIDI files"
+	@echo "======================="
 
 $(MID_DIR)/%.mid: $(MUSICXML_DIR)/%.musicxml
 	@verovio $^ -t midi -o $@
@@ -82,9 +82,9 @@ $(SVG_DIR):
 
 .PHONY: svg-obj
 svg-obj: $(SVG_DIR) $(SVG_OBJECTS)
-	@echo "======================="
-	@echo "Converting to SVG files"
-	@echo "======================="
+	@echo "======================"
+	@echo "Converted to SVG files"
+	@echo "======================"
 
 $(SVG_DIR)/%.svg: $(MUSICXML_DIR)/%.musicxml
 	@verovio $^ -t svg -o $@
@@ -106,9 +106,9 @@ $(MSCZ_DIR):
 
 .PHONY: mscz-obj
 mscz-obj: $(MSCZ_DIR) $(MSCZOBJECTS)
-	@echo "========================"
-	@echo "Converting to MSCZ files"
-	@echo "========================"
+	@echo "======================="
+	@echo "Converted to MSCZ files"
+	@echo "======================="
 
 $(MSCZ_DIR)/%.mscz: $(MUSICXML_DIR)/%.musicxml
 	mscore $^ -o $@
@@ -121,9 +121,9 @@ $(PDF_DIR):
 
 .PHONY: pdf-obj
 pdf-obj: $(PDF_DIR) $(PDF_OBJECTS)
-	@echo "======================="
-	@echo "Converting to PDF files"
-	@echo "======================="
+	@echo "======================"
+	@echo "Converted to PDF files"
+	@echo "======================"
 
 $(PDF_DIR)/%.pdf: $(MSCZ_DIR)/%.mscz
 	mscore $^ -o $@
@@ -136,9 +136,9 @@ $(LY_DIR):
 
 .PHONY: ly-obj
 ly-obj: $(LY_DIR) $(LY_OBJECTS)
-	@echo "============================"
-	@echo "Converting to Lilypond files"
-	@echo "============================"
+	@echo "==========================="
+	@echo "Converted to Lilypond files"
+	@echo "==========================="
 
 $(LY_DIR)/%.ly: $(MUSICXML_DIR)/%.musicxml
 	musicxml2ly $^ -o $@
@@ -151,9 +151,9 @@ $(ARCHIVES_DIR):
 
 .PHONY: archives-obj
 archives-obj: $(ARCHIVES_DIR) $(ARCHIVES)
-	@echo "====================="
-	@echo "Creating archives ..."
-	@echo "====================="
+	@echo "================="
+	@echo "Archives created."
+	@echo "================="
 
 # $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS) $(LY_OBJECTS)
 $(ARCHIVES_DIR)/$(collection)_FilesAll.zip: $(MSCZ_OBJECTS) $(MUSICXML_OBJECTS) $(SVG_OBJECTS) $(PDF_OBJECTS) $(MID_OBJECTS) $(MEI_OBJECTS)
@@ -216,4 +216,5 @@ clean:
 	@rm -rf $(LY_OBJECTS)
 	@rm -rf $(MID_OBJECTS)
 	@rm -rf $(ARCHIVES_DIR)/*.zip
+	@rm -rf load_DB.cql
 
