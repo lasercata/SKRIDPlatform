@@ -124,6 +124,9 @@ To test locally, open the following url in your browser : `localhost:3000` (chan
 
 
 ## Notes
+### CHANGELOG
+To read what has changed in this project, see the [CHANGELOG](CHANGELOG.md)
+
 ### TODO
 For known bugs and uncovered parts, see [TODO](TODO.md).
 
