@@ -94,7 +94,7 @@ function fetchPageData(author) {
         "query": query,
     };
 
-    return fetch('/query', {
+    return fetch(`${BASE_PATH}/query`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

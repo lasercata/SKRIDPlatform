@@ -201,7 +201,7 @@ function getSourceAndCollection(result) {
  * @param {json[][]|null} [matches=null] - an array of matches. A Match is an array of json elements.
  */
 function makeUrl(collection, source, pattern=null, matches=null) {
-    let url = '/result?author='+ collection +'&score_name=' + source;
+    let url = `${BASE_PATH}`+'/result?author='+ collection +'&score_name=' + source;
 
     if (pattern != '') {
         url += `&pattern=${pattern}`;
@@ -472,7 +472,7 @@ async function createPreviews_2(results_container, tk, results, pattern=null) {
 
         // Get the author (needs a fetch since it is not in the result)
         let author_data = { string: source };
-        await fetch('/findAuthor', { // await is needed here to keep the order of the results
+        await fetch(`${BASE_PATH}/findAuthor`, { // await is needed here to keep the order of the results
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

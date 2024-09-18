@@ -233,7 +233,7 @@ async function dataToCSV(data) {
         let score = data[k];
 
         // Get the collection (needs a fetch since it is not in the result)
-        await fetch('/findAuthor', { // await is needed here to keep the order of the results
+        await fetch(`${BASE_PATH}/findAuthor`, { // await is needed here to keep the order of the results
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

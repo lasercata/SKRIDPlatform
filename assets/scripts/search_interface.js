@@ -218,7 +218,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         collections: collections
     };
 
-    return fetch('/formulateQuery', {
+    return fetch(`${BASE_PATH}/formulateQuery`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -243,7 +243,7 @@ function sendQuery(fuzzyQuery) {
     console.log('Sending query:\n', fuzzyQuery);
 
     // Send the query
-    fetch('/queryFuzzy', {
+    fetch(`${BASE_PATH}/queryFuzzy`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

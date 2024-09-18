@@ -30,7 +30,7 @@ function postAndDisplayQuery(query) {
     };
 
     //---Post the request and display the result
-    fetch('/query', {
+    fetch(`${BASE_PATH}/query`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -100,7 +100,7 @@ function postAndDisplayQuery(query) {
  * postFuzzy(query, 'text').then(data => console.log(data));
  */
 function postFuzzy(fuzzyQuery, format='json') {
-    return fetch('/queryFuzzy', {
+    return fetch(`${BASE_PATH}/queryFuzzy`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -195,7 +195,7 @@ const submitHandler = function() {
     if (is_fuzzy_cb.checked) { //---Fuzzy query (use python script to convert it)
         crisp_field.value = 'Loading...';
 
-        fetch('/compileFuzzy', {
+        fetch(`${BASE_PATH}/compileFuzzy`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

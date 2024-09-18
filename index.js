@@ -18,7 +18,7 @@ const user = 'neo4j'
 
 // Read passowrd for file
 var password;
-const fs = require('node:fs');
+const fs = require('fs');
 try {
     log('info', 'Reading password from file (`.database_password`) ...');
     password = fs.readFileSync('.database_password', 'utf8');
@@ -41,6 +41,16 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use(express.static('data'));
 app.use('/data', express.static('data'));
+
+// préfixe global basé sur l'environnement (production ou développement)
+const BASE_PATH = process.env.BASE_PATH || ''; // '/skrid' en production, '' en local
+
+// Rendre le préfixe disponible dans tous les templates EJS
+app.use((req, res, next) => {
+    res.locals.BASE_PATH = BASE_PATH;
+    next();
+  });
+
 
 //============================= Functions =============================//
 /**
@@ -107,6 +117,13 @@ app.use(express.static('assets/public/')); // Everything in this folder will be 
  *
  * @constant /
  */
+
+// Définir une route pour le fichier config.js qui injecte le BASE_PATH
+app.get('/scripts/config.js', (req, res) => {
+    res.set('Content-Type', 'application/javascript');
+    res.send(`const BASE_PATH = '${BASE_PATH}';`);
+});
+
 app.get("/", function(req,res){
     res.render("home");
 });
@@ -377,7 +394,6 @@ app.post('/compileFuzzy', (req, res) => {
     let allData = '';
     pyParserCompile.stdout.on('data', data => {
         log('info', `/compileFuzzy: received data (${data.length} bytes) from python script.`);
-
         allData += data.toString();
     });
 
@@ -456,7 +472,6 @@ app.post('/formulateQuery', (req, res) => {
     // Create the connection
     log('info', `/formulateQuery: openning connection.`);
     const { spawn } = require('child_process');
-
     let args = [
         'compilation_requete_fuzzy/main_parser.py',
         // '-U', uri, '-u', user, '-p', password, // write mode do not interract with the database
@@ -485,7 +500,6 @@ app.post('/formulateQuery', (req, res) => {
     let allData = '';
     pyParserWrite.stdout.on('data', data => {
         log('info', `/formulateQuery: received data (${data.length} bytes) from python script.`);
-
         allData += data.toString();
     });
 
