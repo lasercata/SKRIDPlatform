@@ -369,6 +369,12 @@ const searchButtonHandler = function() {
     ).then(
         fuzzyQuery => sendQuery(fuzzyQuery)
     );
+
+    // Sélectionne le container qui doit être affiché après la recherche
+    const resultsContainer = document.querySelector(".container_2");
+    resultsContainer.style.display = "flex";
+
+
 }
 
 /**
@@ -718,11 +724,13 @@ function keyListener(event) {
     const qwerty_ch = document.getElementById('qwerty-checkbox');
     let key;
 
-    if (qwerty_ch.checked) {
-        key = qwerty_us_to_azerty[event.key] || event.key;
-    }
-    else
-        key = event.key;
+    // if (qwerty_ch.checked) {
+    //     key = qwerty_us_to_azerty[event.key] || event.key;
+    // }
+    // else
+    //     key = event.key;
+
+    key = event.key;
 
     //------Select the action corresponding to the key
     //---Delete all
@@ -894,16 +902,31 @@ function manageCollections() {
     const select = document.getElementById("collections");
     const list = document.getElementById("selected-collections");
 
+    // Initial display: if no collections are selected, show 'Toutes les collections'
+    if (selectedCollections.length === 0) {
+        list.textContent = "Toutes les collections";
+    }
+
     select.addEventListener("change", function() {
         const selectedOption = this.options[this.selectedIndex];
+
+        // If the user selects a valid collection (not the default '-')
         if (!selectedCollections.includes(selectedOption.value) && (selectedOption.value != '-')) {
             selectedCollections.push(selectedOption.value);
+
+            // Clear the "Toutes les collections" message if present
+            if (list.textContent === "Toutes les collections") {
+                list.textContent = "";
+            }
+
             const listItem = document.createElement("li");
             listItem.textContent = selectedOption.textContent;
             list.appendChild(listItem);
-        } else if(selectedOption.value == '-') {
+
+        // If the user selects the default option ('-')
+        } else if (selectedOption.value == '-') {
             selectedCollections = [];
-            list.textContent = "";
+            list.textContent = "Toutes les collections";  // Reset to 'Toutes les collections' message
         } 
     });
 }
