@@ -3,7 +3,7 @@
  * @module manual_query_script
  */
 
-import { setTk, loadPageN } from './paginated_results.js';
+import { ensureTkInitialized, loadPageN } from './paginated_results.js';
 import { unifyResults, extractMelodyFromQuery } from './preview_scores.js';
 
 var input;
@@ -296,10 +296,5 @@ function init() {
             submitHandler();
     });
 
-    verovio.module.onRuntimeInitialized = () => {
-        let tk = new verovio.toolkit();
-        setTk(tk);
-
-        loadPageN(0); // hide the navigation buttons
-    }
+    loadPageN(0);
 }

@@ -2,6 +2,8 @@
  * @file Manage the creation of previews for the scores.
  * @module preview_scores
  */
+//========= Imports =========//
+import { ensureTkInitialized, loadPageN, tk } from './paginated_results.js';
 
 /** The maximum length for urls. */
 const max_url_length = 16000;
@@ -294,13 +296,12 @@ function createPreview(url, source, nb_occ=null, overall_degree=null) {
  *
  * @param {HTMLElement} score_div        - the html element that will contain the svg preview ;
  * @param {string} score_path            - the (relative) path to the score (`./data/[collection name]/[score name]`) ;
- * @param {verovio.toolkit} tk           - the verovio toolkit ;
  * @param {json[][]|null} [matches=null] - an array of matches. A Match is an array of json elements.
  * @param {number} [parentWidth=180]     - the width of the parent (used to calculate the width of the svg) ;
  * @param {number} [parentHeight=250]    - the height of the parent (used to calculate the height of the svg) ;
  * @param {number} [zoom=20]             - the zoom for the svg ;
  */
-function fillPreview(score_div, score_path, tk, matches=null, parentWidth=180, parentHeight=250, zoom=20) {
+async function fillPreview(score_div, score_path, matches=null, parentWidth=180, parentHeight=250, zoom=20) {
     let pageHeight = parentHeight * 100 / zoom;
     let pageWidth = parentWidth * 100 / zoom;
 
@@ -310,6 +311,7 @@ function fillPreview(score_div, score_path, tk, matches=null, parentWidth=180, p
         scale: zoom,
     };
 
+    await ensureTkInitialized();
     tk.setOptions(options);
 
     fetch(score_path)
@@ -402,20 +404,21 @@ function getGradientColor(degree) {
  * there are multiple function because the query results are different in format.
  *
  * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
- * @param {*} tk - the verovio toolkit ;
  * @param {*} results - the query result containing all the scores ;
  * @param {string|null} [pattern=null] - the search pattern.
  */
-function loadPreviews(results_container, tk, results, pattern=null) {
+async function loadPreviews(results_container, results, pattern=null) {
+    await ensureTkInitialized();
+
     results_container.empty();
 
     if(results.length != 0) {
         if (results[0].hasOwnProperty('s') || (results[0].hasOwnProperty('_fields') && results[0]._fields[0].hasOwnProperty('properties'))) {
             createPreviews_1(results_container, results, pattern);
-            fillPreviews(tk, results);
+            fillPreviews(results);
         }
         else
-            createPreviews_2(results_container, tk, results, pattern);
+            createPreviews_2(results_container, results, pattern);
     }
     else {
         const default_text = $('<h2>').text('No music score found');
@@ -447,11 +450,12 @@ function createPreviews_1(results_container, results, pattern=null) {
  * Used by piano interface page.
  *
  * @param {JQuery<HTMLElement>} results_container - the html element that will contain the previews (e.g `$('#results_container')`) ;
- * @param {*} tk - the verovio toolkit ;
  * @param {*} results - the query result containing all the scores ;
  * @param {string|null} [pattern=null] - the search pattern.
  */
-async function createPreviews_2(results_container, tk, results, pattern=null) {
+async function createPreviews_2(results_container, results, pattern=null) {
+    await ensureTkInitialized();
+
     // Get the collections associated with each result
     for (let k = 0 ; k < results.length ; ++k) {
         const result = results[k];
@@ -490,7 +494,7 @@ async function createPreviews_2(results_container, tk, results, pattern=null) {
 
             let score_div = document.getElementById(source);
             let score_path = './data/' + collection.replace(/\s+/g, "-") + '/mei/' + source;
-            fillPreview(score_div, score_path, tk, result.matches);
+            fillPreview(score_div, score_path, result.matches);
         });
     }
 }
@@ -498,10 +502,9 @@ async function createPreviews_2(results_container, tk, results, pattern=null) {
 /**
  * Fills the score previews with svg previews.
  *
- * @param {verovio.toolkit} tk - the verovio toolkit ;
  * @param {*} results - results from the query to get the collection ;
  */
-function fillPreviews(tk, results) {
+function fillPreviews(results) {
     for (var i = 0; i < results.length; i++) {
         let prop = getSourceAndCollection(results[i]);
 
@@ -509,7 +512,7 @@ function fillPreviews(tk, results) {
 
         let score_div = document.getElementById(prop.source);
         let score_path = './data/' + prop.collection.replace(/\s+/g, "-") + '/mei/' + score_name;
-        fillPreview(score_div, score_path, tk);
+        fillPreview(score_div, score_path);
     }
 }
 

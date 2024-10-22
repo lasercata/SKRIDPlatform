@@ -12,17 +12,25 @@ import { loadPreviews } from "./preview_scores.js";
 var nb_per_page = 10;
 
 /** The verovio toolkit */
-var tk;
+export let tk = null;
 
 document.addEventListener("DOMContentLoaded", init);
 
 /**
- * Set `tk` (global variable in `paginated_results.js`) to `verovioTk`.
- *
- * @param {*} verovioTk - the verovio toolkit.
+ * Initializes the Verovio toolkit if not already initialized.
+ * Returns a Promise that resolves when `tk` is initialized.
  */
-function setTk(verovioTk) {
-    tk = verovioTk;
+export async function ensureTkInitialized() {
+    console.log('in ensureTkInitialized')
+    // If `tk` is already initialized, return a resolved promise
+    if (tk) {
+        console.log("in if");
+    } else {
+        console.log('in else')
+        await verovio.module.onRuntimeInitialized;
+        tk = new verovio.toolkit();
+        console.log("Verovio toolkit initialized");
+    }
 }
 
 /**
@@ -144,8 +152,8 @@ function loadPageN(pageNb, numberPerPage=null, refresh=false, range_change=false
 
         //---Display results
         let results_container = $('#results-container');
-        loadPreviews(results_container, tk, data, pattern);
-        // fillPreviews(tk, data);
+        loadPreviews(results_container, data, pattern);
+        // fillPreviews(data);
 
         //---Disable button if we are on the first or last page
         document.getElementById('prevPage').disabled = (pageNb == 1);
@@ -373,15 +381,7 @@ function init() {
     document.getElementById("prevPage-bot").addEventListener("click", prevDataPageHandler);
 
     document.getElementById('csv-button').addEventListener("click", csvBtHandler);
-
-    verovio.module.onRuntimeInitialized = () => {
-        //---Create verovio toolkit (tk)
-        tk = new verovio.toolkit();
-
-        //---Display first page
-        // loadPageN(1, nb_per_page, true);
-    }
 }
 
 // export { init as init_pagination };
-export { setTk, loadPageN };
+export { loadPageN };

@@ -3,7 +3,7 @@
  * @module collection_script
  */
 
-import { setTk, loadPageN } from './paginated_results.js';
+import { loadPageN } from './paginated_results.js';
 
  /** The number of items per page */
 var nb_per_page = 10;
@@ -137,19 +137,14 @@ const authorButtonHandler = function(author) {
  * Connects buttons and fills the preview with the data that was queried from index.js
  */
 function init() {
-    verovio.module.onRuntimeInitialized = () => {
-        //---Set the current author
-        let authors = JSON.parse(document.getElementById('authors').textContent);
-        current_author = authors[0];
+    //---Set the current author
+    let authors = JSON.parse(document.getElementById('authors').textContent);
+    current_author = authors[0];
 
-        //---Fill the first page
-        authorButtonHandler(authors[0]);
+    //---Fill the first page
+    authorButtonHandler(authors[0]);
 
-        //---Create verovio toolkit (tk)
-        tk = new verovio.toolkit();
-        setTk(tk);
 
-        //---Make `authorButtonHandler` available (as this script is a module in the html)
-        window.authorButtonHandler = authorButtonHandler;
-    }
+    //---Make `authorButtonHandler` available (as this script is a module in the html)
+    window.authorButtonHandler = authorButtonHandler;
 }

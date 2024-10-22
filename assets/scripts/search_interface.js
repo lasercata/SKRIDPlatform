@@ -6,7 +6,7 @@
  */
 
 //========= Imports =========//
-import { setTk, loadPageN } from './paginated_results.js';
+import { loadPageN } from './paginated_results.js';
 import { unifyResults, extractMelodyFromQuery } from './preview_scores.js';
 
 
@@ -1048,7 +1048,7 @@ function initTooltips() {
 /**
  * Initialize all the variables and the Vexflow pentagram
  * */
-function init() {
+async function init() {
     melody = [];
     selectedCollections = [];
 
@@ -1070,18 +1070,11 @@ function init() {
     //---Tooltips
     initTooltips();
 
-    verovio.module.onRuntimeInitialized = () => {
-        manageOptions();
-        manageStaveAndMelody();
-        manageCollections();
+    manageOptions();
+    manageStaveAndMelody();
+    manageCollections();
 
-        matchPicthCbHandler(); // Disable options that should be
-        matchRhythmCbHandler();
-        contourAndTranspositionHandler(null);
-
-        let tk = new verovio.toolkit();
-        setTk(tk);
-
-        loadPageN(0); // hide the navigation buttons
-    }
+    matchPicthCbHandler(); // Disable options that should be
+    matchRhythmCbHandler();
+    contourAndTranspositionHandler(null);
 }
