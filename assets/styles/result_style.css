@@ -122,6 +122,14 @@ body {
         color: #666;
         cursor: not-allowed;
     }
+    .button-container button {
+        min-width: fit-content;
+        white-space: nowrap;
+        margin: 0 10px;
+        padding: 5px 10px;
+        display: inline-block;
+        text-align: center;
+    }
 
     .fa-play,
     .fa-stop {
