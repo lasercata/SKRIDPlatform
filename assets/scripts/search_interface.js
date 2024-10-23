@@ -527,10 +527,10 @@ function showTooltip(event, text) {
 
     tooltip.innerHTML = text;
     tooltip.style.display = 'block';
-    // tooltip.style.left = event.pageX + 10 + 'px';
-    // tooltip.style.top = event.pageY + 10 + 'px';
-    tooltip.style.left = event.pageX - 180 + 'px';
-    tooltip.style.top = event.pageY - 90 + 'px';
+
+    tooltip.style.left = event.pageX  + 10 +  'px';
+    tooltip.style.top = event.pageY  + 10 +  'px';
+    console.log("Tooltip left:", tooltip.style.left, "Tooltip top:", tooltip.style.top);
 }
 
 /**
