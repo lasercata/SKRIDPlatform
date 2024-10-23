@@ -459,7 +459,7 @@ function makeAMatchToggle(nb) {
 
     lb.id = `toggle-match-${nb}-lb`;
     lb.appendChild(cb);
-    lb.append(` Match ${nb + 1}`);
+    lb.append(` Occurence ${nb + 1}`);
 
     return lb;
 }

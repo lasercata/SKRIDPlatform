@@ -275,7 +275,7 @@ function createPreview(url, source, nb_occ=null, overall_degree=null) {
     if (nb_occ != null) {
         const occurrences = document.createElement('p');
         occurrences.className = "score_author";
-        occurrences.textContent = 'Pattern occurrences: ' + nb_occ;
+        occurrences.textContent = 'Occurences : ' + nb_occ;
         a.append(occurrences);
     }
 
@@ -283,7 +283,7 @@ function createPreview(url, source, nb_occ=null, overall_degree=null) {
     if (overall_degree != null) {
         const overall_degree_p = document.createElement('p');
         overall_degree_p.className = "score_author";
-        overall_degree_p.textContent = `Overall degree: ${Math.floor(100 * overall_degree)}%`;
+        overall_degree_p.textContent = `Satisfaction : ${Math.floor(100 * overall_degree)}%`;
         a.append(overall_degree_p);
     }
 

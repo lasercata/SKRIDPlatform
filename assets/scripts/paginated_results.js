@@ -92,7 +92,7 @@ function refreshPageNbInfos(nb, current_page=null, numberPerPage=null) {
         select.value = numberPerPage;
 
     label_bot.innerHTML = spin_box.value.toString() + label.innerHTML;
-    label_nb.innerHTML = `Number of scores : ${nb}`;
+    label_nb.innerHTML = `Nombre de partitions : ${nb}`;
 }
 
 /**
