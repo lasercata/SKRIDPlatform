@@ -158,6 +158,7 @@ const qwerty_us_to_azerty = {
  */
 async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, contour_match=false) {
     //------Create the `notes` for the python script
+    
     let notes = '[';
     for (let k = 0 ; k < melody.length ; ++k) {
         notes += '[';
@@ -197,7 +198,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
     }
 
     notes = notes.slice(0, -2) + ']' // Remove trailing ', ' and add ']'.
-
+    console.log(notes)
     //------Create the 'collections' filter for the python script
     let collections = null;
     if(selectedCollections.length != 0) {
@@ -530,7 +531,6 @@ function showTooltip(event, text) {
 
     tooltip.style.left = event.pageX  + 10 +  'px';
     tooltip.style.top = event.pageY  + 10 +  'px';
-    console.log("Tooltip left:", tooltip.style.left, "Tooltip top:", tooltip.style.top);
 }
 
 /**
@@ -1071,7 +1071,7 @@ function initTooltips() {
 /**
  * Initialize all the variables and the Vexflow pentagram
  * */
-async function init() {
+function init() {
     melody = [];
     selectedCollections = [];
 

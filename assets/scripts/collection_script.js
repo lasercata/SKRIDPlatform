@@ -11,9 +11,6 @@ var nb_per_page = 10;
 /** The current collection */
 var current_author;
 
-/** The verovio toolkit */
-var tk;
-
 document.addEventListener("DOMContentLoaded", init);
 
 /**
