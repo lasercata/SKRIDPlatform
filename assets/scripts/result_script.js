@@ -4,8 +4,18 @@
  */
 
 import { getGradientColor } from "./preview_scores.js";
+import { ensureTkInitialized, loadPageN } from './paginated_results.js';
 
-document.addEventListener("DOMContentLoaded", init);
+// document.addEventListener("DOMContentLoaded", init);
+let tk = null;
+
+document.addEventListener("DOMContentLoaded", (event) => {
+    verovio.module.onRuntimeInitialized = () => {
+      tk = new verovio.toolkit();
+      console.log("Verovio has loaded!");
+      init();
+    }
+});
 
 let datadir;
 let score_name;
@@ -22,8 +32,6 @@ let match_indexes_by_id = {};
 
 // The current page, which will change when playing through the piece
 let currentPage;
-// Verovio toolkit variable
-let tk;
 
 /**
  * Wire up buttons, set parameters, and retrieve song informations in order to display it.
@@ -32,81 +40,82 @@ function init() {
     datadir = "./data/";
     currentPage = 1;
 
-    verovio.module.onRuntimeInitialized = () => {
-        tk = new verovio.toolkit();
-        // const parent = document.querySelector('.score-container');
-        const parent = document.getElementById('notation');
+    // console.log("avant init de verovio");
+    // await ensureTkInitialized();
+    // console.log("après init de verovio");
+    // const parent = document.querySelector('.score-container');
+    const parent = document.getElementById('notation');
 
-        // Set the parameters for the correct visualization of the score
-        // let zoom = 75;
-        let zoom = 50;
-        const parentWidth = parent.offsetWidth;
-        const parentHeight = parent.offsetHeight;
-        let pageHeight = parentHeight * 100 / zoom;
-        let pageWidth = parentWidth * 100 / zoom;
+    // Set the parameters for the correct visualization of the score
+    // let zoom = 75;
+    let zoom = 50;
+    const parentWidth = parent.offsetWidth;
+    const parentHeight = parent.offsetHeight;
+    let pageHeight = parentHeight * 100 / zoom;
+    let pageWidth = parentWidth * 100 / zoom;
 
-        // Use those parameters to set the options
-        let options = {
-            pageHeight: pageHeight,
-            pageWidth: pageWidth,
-            scale: zoom,
-            // adjustPageWidth: true,
-            // adjustPageHeight: true,
-            // scaleToPageSize: true,
-            // shrinkToFit: true,
-            // font: 'Bravura',
-        };
-        tk.setOptions(options);
+    // Use those parameters to set the options
+    let options = {
+        pageHeight: pageHeight,
+        pageWidth: pageWidth,
+        scale: zoom,
+        // adjustPageWidth: true,
+        // adjustPageHeight: true,
+        // scaleToPageSize: true,
+        // shrinkToFit: true,
+        // font: 'Bravura',
+    };
+    tk.setOptions(options);
 
 
-        // Wire up the buttons to actually work.
-        document.getElementById("playMIDI").addEventListener("click", playMIDIHandler);
-        document.getElementById("stopMIDI").addEventListener("click", stopMIDIHandler);
-        document.getElementById("nextPage").addEventListener("click", nextPageHandler);
-        document.getElementById("prevPage").addEventListener("click", prevPageHandler);
-        document.getElementById(`toggle-all-cb`).addEventListener('change', matchAllToggleHandler);
+    // Wire up the buttons to actually work.
+    document.getElementById("playMIDI").addEventListener("click", playMIDIHandler);
+    document.getElementById("stopMIDI").addEventListener("click", stopMIDIHandler);
+    document.getElementById("nextPage").addEventListener("click", nextPageHandler);
+    document.getElementById("prevPage").addEventListener("click", prevPageHandler);
+    document.getElementById(`toggle-all-cb`).addEventListener('change', matchAllToggleHandler);
 
-        // Set the function as message callback
-        MIDIjs.player_callback = midiHightlightingHandler;
+    // Set the function as message callback
+    MIDIjs.player_callback = midiHightlightingHandler;
 
-        makePattern(); // Get the search pattern from the url
-        makeMatches(); // Get the note IDs and degrees from the url
+    makePattern(); // Get the search pattern from the url
+    makeMatches(); // Get the note IDs and degrees from the url
 
-        // Get the author from the url and use it to find the folder in which the .mei file is contained
-        score_name = readFromUrl('score_name');
-        let author = readFromUrl('author').replace(/\s+/g, "-");
-        let folder = author + '/mei/';
+    // Get the author from the url and use it to find the folder in which the .mei file is contained
+    score_name = readFromUrl('score_name');
+    let author = readFromUrl('author').replace(/\s+/g, "-");
+    let folder = author + '/mei/';
 
-        // Search for the .mei file in the folder
-        fetch(datadir + folder + score_name)
-        .then( (response) => response.text() )
-        .then( (meiXML) => {
-            tk.loadData(meiXML);
-            // And generate the SVG for the first page ...
-            let svg = tk.renderToSVG(currentPage);
+    // Search for the .mei file in the folder
+    fetch(datadir + folder + score_name)
+    .then( (response) => response.text() )
+    .then( (meiXML) => {
+        tk.loadData(meiXML);
+        // And generate the SVG for the first page ...
+        let svg = tk.renderToSVG(currentPage);
 
-            // Finally, get the <div> element with the specified ID, 
-            // and set the content (innerHTML) to the SVG that we just generated.
-            document.getElementById("notation").innerHTML = svg;
+        // Finally, get the <div> element with the specified ID, 
+        // and set the content (innerHTML) to the SVG that we just generated.
+        document.getElementById("notation").innerHTML = svg;
 
-            setRightInfos(author, folder);
+        setRightInfos(author, folder);
 
-            // Add gradient legend
-            makeGradientLegend();
+        // Add gradient legend
+        makeGradientLegend();
 
-            // Add the match toggles
-            createMatchesHighlightToggles();
+        // Add the match toggles
+        createMatchesHighlightToggles();
 
-            // Color all matches
-            matchAllToggleHandler();
+        // Color all matches
+        matchAllToggleHandler();
 
-            // Add the hover infos
-            makePatternHoverBoxes();
+        // Add the hover infos
+        makePatternHoverBoxes();
 
-            // Disable buttons according to pagination
-            refreshPagination(currentPage, tk.getPageCount());
-        });
-    }
+        // Disable buttons according to pagination
+        refreshPagination(currentPage, tk.getPageCount());
+    });
+
 }
 
 /**
@@ -116,7 +125,7 @@ function init() {
  * @returns the value of the given parameter from the url
  */
 function readFromUrl(parameter) {
-    const queryString = window.location.search;
+    const queryString = location.search;
     const urlParams = new URLSearchParams(queryString);
     return urlParams.get(parameter);
 }
@@ -228,7 +237,7 @@ function makeGradientLegend() {
  * Note that some attributes might be 'None'.
  */
 function makePattern() {
-    const queryString = window.location.search;
+    const queryString = location.search;
     const urlParams = new URLSearchParams(queryString);
 
     pattern = [];
@@ -297,20 +306,22 @@ function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg
 
     let expected_infos = dur + '\n' + note;
     if (dur != '' || note != '')
-        expected_infos = 'expected note: ' + expected_infos;
+        expected_infos = 'note attendue : ' + expected_infos;
     
     //TODO: add info for the found note ? But this would need to get this information, so it would be needed to pass it through the url again, or read the mei file.
 
     //-Infos from match degree
     // let deg_infos = `agregated degree: ${deg}%, pitch degree: ${pitch_deg}%, duration degree: ${duration_deg}%, sequencing degree: ${sequencing_deg}%`;
-    let deg_infos = `agregated degree: ${deg}%`;
+    let deg_infos = `degré global : ${deg}%`;
 
-    if (expected_note != null && expected_note.class_ != 'None' && expected_note.octave != 'None')
-        deg_infos += `, pitch degree: ${pitch_deg}%`;
-    if (expected_note != null && expected_note.duration != 'None')
-        deg_infos += `, duration degree: ${duration_deg}%`;
+    // if (expected_note != null && expected_note.class_ != 'None' && expected_note.octave != 'None')
+    //     deg_infos += `, degré de hauteur : ${pitch_deg}%`;
+    // if (expected_note != null && expected_note.duration != 'None')
+    //     deg_infos += `, degré de durée : ${duration_deg}%`;
 
-    deg_infos += `, sequencing degree: ${sequencing_deg}%`;
+    deg_infos += `, degré de hauteur : ${pitch_deg}%`;
+    deg_infos += `, degré de durée : ${duration_deg}%`;
+    deg_infos += `, degré de séquençage : ${sequencing_deg}%`;
 
     if (expected_infos != '\n')
         expected_infos += '<br>';
@@ -406,7 +417,7 @@ function makePatternHoverBoxes() {
  * Read the doc of {@linkcode makeUrl} (from {@linkcode preview_scores.js}) for the url format.
  */
 function makeMatches() {
-    const queryString = window.location.search;
+    const queryString = location.search;
     const urlParams = new URLSearchParams(queryString);
 
     matches = [];
