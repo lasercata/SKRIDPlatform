@@ -283,7 +283,12 @@ function createPreview(url, source, nb_occ=null, overall_degree=null) {
     if (overall_degree != null) {
         const overall_degree_p = document.createElement('p');
         overall_degree_p.className = "score_author";
-        overall_degree_p.textContent = `Satisfaction : ${Math.floor(100 * overall_degree)}%`;
+        if (overall_degree < 0.01){
+            overall_degree_p.textContent = `Satisfaction < 1%`;
+        } else {
+            overall_degree_p.textContent = `Satisfaction : ${Math.floor(100 * overall_degree)}%`;
+        }
+        
         a.append(overall_degree_p);
     }
 

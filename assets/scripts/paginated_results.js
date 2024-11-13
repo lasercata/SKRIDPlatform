@@ -21,15 +21,15 @@ document.addEventListener("DOMContentLoaded", init);
  * Returns a Promise that resolves when `tk` is initialized.
  */
 export async function ensureTkInitialized() {
-    console.log('in ensureTkInitialized')
+    // console.log('in ensureTkInitialized')
     // If `tk` is already initialized, return a resolved promise
     if (tk) {
-        console.log("in if");
+        // console.log("in if");
     } else {
-        console.log('in else')
+        // console.log('in else')
         await verovio.module.onRuntimeInitialized;
         tk = new verovio.toolkit();
-        console.log("Verovio toolkit initialized");
+        // console.log("Verovio toolkit initialized");
     }
 }
 

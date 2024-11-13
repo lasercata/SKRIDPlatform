@@ -198,7 +198,6 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
     }
 
     notes = notes.slice(0, -2) + ']' // Remove trailing ', ' and add ']'.
-    console.log(notes)
     //------Create the 'collections' filter for the python script
     let collections = null;
     if(selectedCollections.length != 0) {
@@ -639,7 +638,6 @@ function keyDown(note, key_id=null) {
     if (key_id == null || note == 'r')
         key_id = note;
 
-    console.log(key_id)
     const clickedKey = document.querySelector(`[data-key="${key_id}"]`); // getting clicked key element
     clickedKey.classList.add("active"); 
     // Removing active class after 150 ms from the clicked key element
@@ -687,8 +685,6 @@ function keyUp(note, key_id=null) {
     }
     else // If the duration is longer than the longer note, just add the longer note.
         duration = sortedKeys[sortedKeys.length - 1];
-
-    console.log(`Note : '${note}', duration : ${duration} (${elapsed}s)`);
 
     if (Object.keys(currently_played_notes).length > 1)
         currently_played_notes[note_arr] = {duration: duration};
