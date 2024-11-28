@@ -1,70 +1,81 @@
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Poppins', sans-serif;
-    }
-    html, body {
-        height: 100%;
-    }
-    .body-wrapper {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-    .main-container {
-        flex: 1;
-    }
-    .searchbar-box {
-        background-color: #20AABD;
-        height: 8%;
-        width: 100%;
-        background: linear-gradient(to bottom, #18767E, #20AABD);
-        color: #fff;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-    }
-    .searchbar-title {
-        font-size: 30px;
-    }
-    form {
-        display: inline-block;
-        margin-top: 20px;
-    }
-    form input[type="text"] {
-        padding: 8px;
-        border: none;
-        border-radius: 5px;
-        width: 400px;
-    }
-    form button[type="submit"] {
-        padding: 8px 16px;
-        background-color: #fff;
-        color: #20AABD;
-        border: none;
-        border-radius: 5px;
-        margin-left: 10px;
-        cursor: pointer;
-    }
-    .footer {
-        background: linear-gradient(to bottom, #18767E, #20AABD);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 15%;
-        width: 100%;
-        font-size: 20px;
-        flex-shrink: 0;
-      }
-      
-    .footer .ui.container {
-        text-align: center;
-    }
-    label {
-        user-select: none;
-    }
+@import url('https://fonts.googleapis.com/css?family=Saira');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Saira', sans-serif;
+}
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.content-wrapper {
+    flex: 1; /* S'étend pour occuper tout l'espace entre le header et le footer */
+    display: flex;
+    flex-direction: column; /* Organisation flexible pour le contenu interne */
+    padding: 20px; /* Ajoute des marges internes pour aérer le contenu */
+    box-sizing: border-box; /* Inclut les marges et paddings dans le calcul de la taille */
+    overflow: auto; /* Permet le défilement si le contenu dépasse */
+}
+.main-container {
+    margin: 0 auto;
+    padding: 20px;
+}
+.jumbotron {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.searchbar-box {
+    background-color: #006485;
+    height: 100px;
+    width: 100%;
+    color: #fff;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.searchbar-title {
+    font-size: 30px;
+}
+form {
+    display: inline-block;
+    margin-top: 20px;
+}
+form input[type="text"] {
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    width: 400px;
+}
+form button[type="submit"] {
+    padding: 8px 16px;
+    background-color: #fff;
+    color: #20AABD;
+    border: none;
+    border-radius: 5px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.footer {
+    background-color: #006485; /* Couleur solide pour le footer */
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    flex-shrink: 0; /* Empêche le footer de rétrécir */
+    width: 100%; /* Prend toute la largeur */
+    position: relative; /* Garde le footer dans le flux normal */
+    z-index: 10; /* Assure qu'il reste au-dessus d'autres éléments si nécessaire */
+}
+.footer .ui.container {
+    text-align: center;
+}
+label {
+    user-select: none;
+}

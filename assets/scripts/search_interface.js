@@ -259,6 +259,7 @@ function sendQuery(fuzzyQuery) {
 
         if ('results' in data) {
             // Load the first page
+            console.log(data)
             dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
             patternDiv.textContent = extractMelodyFromQuery(fuzzyQuery);
             loadPageN(1, null, true, true, true);

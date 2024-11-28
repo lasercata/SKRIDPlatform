@@ -1,23 +1,67 @@
+/* Conteneur principal */
 .father_container {
     display: flex;
-    border-radius: 10px;
     overflow: hidden;
-    margin: 30px;
-  }
-.items {
+    margin: 0; 
     flex: 1;
-    background-color: #b9d8df;
+    /* height: calc(100vh - 229px); */
+
 }
+
+/* Section des collections */
 .collections {
-    flex: 0 0 20%;
-    background-color: #62aadd;
-    padding: 15px;
+    flex: 0 0 12%;
+    padding: 0px;
     font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    /* height: auto; */
+    overflow: auto;
 }
+
+/* Titre des collections */
+.collections-title {
+    background-color: #7299ab;
+    padding: 20px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Liste des collections */
+.collections-list {
+    flex: 1;
+    background-color: #f9f9f9;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* Chaque collection individuelle */
+.collection-item {
+    padding: 15px;
+    margin: 5px 0;
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Effet au survol */
+.collection-item:hover {
+    background-color: #e0e0e0;
+}
+
+/* Section des archives */
+.archives {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+}
+
+/* Liens dans les collections (supprimés) */
 .collections a {
     text-decoration: none;
-    color: white;
-}
-.separator {
-    color: white;
+    color: inherit;
 }

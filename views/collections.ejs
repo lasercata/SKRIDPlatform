@@ -33,45 +33,31 @@
 <%- include('./partials/header', { currentPage: 'collections' }); %>
 <body>
   <div class="searchbar-box">
-    <h1 class="searchbar-title">Les collections : visualiser et t&eacute;l&eacute;charger</h1>
+    <h1 class="searchbar-title">Les collections</h1>
   </div>
   <div class="father_container">
-  <div class="collections">
-    S&eacute;lectionner la collection &agrave; afficher :<br/><br/>
-    <p class="separator"> <hr/> </p>
-      <% for(var i = 0; i < authors.length; i++) { %>
-        <a href="#" onClick="authorButtonHandler(this.innerText)"><%= authors[i] %></a><br>
-        <% if (i != authors.length - 1) { %>
-          <p class="separator"> <hr/> </p>
+    <div class="collections">
+      <div class="collections-title"> 
+        Sélectionner une collection :
+      </div>
+      <div class="collections-list">
+        <% for(var i = 0; i < authors.length; i++) { %>
+          <div class="collection-item" onClick="authorButtonHandler('<%= authors[i] %>')">
+            <%= authors[i] %>
+          </div>
         <% } %>
-    <% } %>
-        <p class="separator"> <hr/> </p>
+      </div>
     </div>
+  
     <div class="archives">
-      <!-- <div class="navigation"> -->
-      <!--   <button id="prevPage" class="prevpage-button">Previous page</button> -->
-      <!--   <input type=number min=1 value=1 id="page_nb_input" class="page-nb-input"> -->
-      <!--   <label id="page_max_nb_lb">/ 0</label> -->
-      <!--   <button id="nextPage" class="nextpage-button">Next page</button> -->
-      <!--   <select id="nb_per_page_select"> -->
-      <!--     <option value=10>10</option> -->
-      <!--     <option value=15>15</option> -->
-      <!--     <option value=20>20</option> -->
-      <!--     <option value=100>100</option> -->
-      <!--   </select> -->
-      <!--   <label id="nb_per_page_lb"> per page</label> -->
-      <!-- </div> -->
-
       <br/>
-
-      <p id="archives"> </p>
+      <p id="archives"></p>
       <br/>
       Explorer le contenu des fichiers : <br/>
-        <!-- <div class="results-container" id="results-container"> -->
-        <!-- </div> -->
-        <%- include('./partials/paginated_results.ejs'); %>
+      <%- include('./partials/paginated_results.ejs'); %>
     </div>
   </div>
+  
   <div id="authors" style="display: none;">
     <%= JSON.stringify(authors) %>
   </div>
