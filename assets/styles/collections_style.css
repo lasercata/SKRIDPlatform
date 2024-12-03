@@ -10,12 +10,14 @@
 
 /* Section des collections */
 .collections {
-    flex: 0 0 12%;
+    /* flex: 0 0 12%; */
+    width: 20vh;
+    min-width: 50px;
+    max-width: 500px;
     padding: 0px;
     font-size: 20px;
     display: flex;
     flex-direction: column;
-    /* height: auto; */
     overflow: auto;
 }
 
@@ -23,7 +25,7 @@
 .collections-title {
     background-color: #7299ab;
     padding: 20px;
-    text-align: center;
+    /* text-align: center; */
     font-size: 20px;
     font-weight: bold;
 }

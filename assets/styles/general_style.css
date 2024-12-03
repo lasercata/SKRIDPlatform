@@ -32,7 +32,9 @@ html, body {
 }
 .searchbar-box {
     background-color: #006485;
-    height: 100px;
+    height: 7.5vh;
+    min-height: 50px;
+    max-height: 100px;
     width: 100%;
     color: #fff;
     text-align: center;
@@ -68,8 +70,11 @@ form button[type="submit"] {
     color: white;
     text-align: center;
     padding: 15px 0;
-    flex-shrink: 0; /* Empêche le footer de rétrécir */
-    width: 100%; /* Prend toute la largeur */
+    flex-shrink: 0;
+    height: 7.5vh;
+    min-height: 50px;
+    max-height: 100px;
+    width: 100%;
     position: relative; /* Garde le footer dans le flux normal */
     z-index: 10; /* Assure qu'il reste au-dessus d'autres éléments si nécessaire */
 }
