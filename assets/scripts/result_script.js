@@ -166,11 +166,11 @@ function setRightInfos(author, folder) {
     link_mei.innerHTML = score_name;
     document.getElementById('fichier_mei').appendChild(link_mei);
 
-    var link_ly = document.createElement('a');
-    link_ly.setAttribute('href',datadir+folder+filename+'.ly');
-    link_ly.setAttribute('class', 'file-link');
-    link_ly.innerHTML = filename+'.ly';
-    document.getElementById('fichier_ly').appendChild(link_ly);
+    // var link_ly = document.createElement('a');
+    // link_ly.setAttribute('href',datadir+folder+filename+'.ly');
+    // link_ly.setAttribute('class', 'file-link');
+    // link_ly.innerHTML = filename+'.ly';
+    // document.getElementById('fichier_ly').appendChild(link_ly);
 
     var link_mid = document.createElement('a');
     link_mid.setAttribute('href',datadir+folder+filename+'.mid');
