@@ -9,13 +9,22 @@ import { ensureTkInitialized, loadPageN } from './paginated_results.js';
 // document.addEventListener("DOMContentLoaded", init);
 let tk = null;
 
-document.addEventListener("DOMContentLoaded", (event) => {
-    verovio.module.onRuntimeInitialized = () => {
-      tk = new verovio.toolkit();
-      console.log("Verovio has loaded!");
-      init();
-    }
-});
+async function initializeVerovio() {
+    return new Promise((resolve) => {
+        verovio.module.onRuntimeInitialized = () => {
+            console.log("Verovio has loaded!");
+            tk = new verovio.toolkit();
+            resolve();
+        };
+    });
+}
+
+(async () => {
+    console.log('avant');
+    await initializeVerovio();
+    console.log('après');
+    init();
+})();
 
 let datadir;
 let score_name;
