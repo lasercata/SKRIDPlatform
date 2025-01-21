@@ -191,9 +191,14 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
             notes += 'None], ';
         else {
             let duration_string = melody[k].dots > 0 ? melody[k].duration + 'd' : melody[k].duration; //TODO: will not work for multi-dots
-            let dur_inv = 1 / durationNoteWithDots[duration_string];
+            // let dur_inv = 1 / durationNoteWithDots[duration_string];
 
-            notes += `${dur_inv}], `;
+            // let duration_dur = melody[k].dots > 0 ? `${1 / melody[k].duration}, 1` : `${1 / melody[k].duration}`;
+            let dur = 1 / durationNote[melody[k].duration];
+            if(melody[k].dots > 0){
+                dur += `, 1`
+            }
+            notes += `${dur}], `;
         }
     }
 
@@ -259,7 +264,6 @@ function sendQuery(fuzzyQuery) {
 
         if ('results' in data) {
             // Load the first page
-            console.log(data)
             dataDiv.textContent = JSON.stringify(unifyResults({results: JSON.parse(data.results)}));
             patternDiv.textContent = extractMelodyFromQuery(fuzzyQuery);
             loadPageN(1, null, true, true, true);
