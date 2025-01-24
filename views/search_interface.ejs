@@ -141,16 +141,12 @@
 
       <div class="options-row" style="display: flex; justify-content: space-between;">
         <div class="collections-options">
-          <label for="collections">(Facultatif) Collections dans lesquelles rechercher : </label><br>
+          <label for="collections">Collection dans lesquelles rechercher : </label><br>
           <select id="collections" name="collections">
-            <option value='-'>All</option>
             <% for(var j = 0; j < authors.length; j++) { %>
               <option value='<%= authors[j] %>'><%= authors[j] %></option>
             <% } %>
           </select>
-          <br>
-          <label>Collections sélectionnées :</label>
-          <ol id="selected-collections"></ol>
         </div>
         <div class='general-options'>
           <label class='tooltip-lb' id='pitch-lb'>

@@ -433,7 +433,7 @@ app.post('/compileFuzzy', (req, res) => {
  *         'alpha': float,
  *         'allow_transposition': bool,
  *         'contour_match': bool,
- *         'collections': '"col 1","col 2",...'
+ *         'collection': str
  *     }
  *     ```
  * If some parameters (apart `notes`) are not specified, they will take their default values.
@@ -453,7 +453,7 @@ app.post('/formulateQuery', (req, res) => {
     let alpha = req.body.alpha;
     let allow_transposition = req.body.allow_transposition;
     let contour_match = req.body.contour_match;
-    let collections = req.body.collections;
+    let collection = req.body.collection;
 
     // Set default values if some params are null
     if (pitch_distance == null)
@@ -489,11 +489,10 @@ app.post('/formulateQuery', (req, res) => {
     if (contour_match)
         args.push('-C');
 
-    if (collections != null) {
+    if (collection != null) {
         args.push('-c');
-        args.push(collections);
+        args.push(collection);
     }
-
     let pyParserWrite = spawn('python3', args);
 
     // Get the data

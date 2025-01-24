@@ -30,7 +30,7 @@ let pentagram_height;
 let pianoKeys;
 let volumeSlider;
 let keysCheckbox;
-let selectedCollections;
+let selectedCollection;
 
 let pentagram;
 let pentagram_svg;
@@ -203,13 +203,6 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
     }
 
     notes = notes.slice(0, -2) + ']' // Remove trailing ', ' and add ']'.
-    //------Create the 'collections' filter for the python script
-    let collections = null;
-    if(selectedCollections.length != 0) {
-        collections = '';
-        selectedCollections.forEach(col => {collections += `"${col}",`})
-        collections = collections.slice(0, -1); // Removing trailing ','
-    }
 
     //------Use the python script to get a fuzzy query
     let data = {
@@ -220,7 +213,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         alpha: alpha,
         allow_transposition: allow_transposition,
         contour_match: contour_match,
-        collections: collections
+        collection: selectedCollection
     };
 
     return fetch(`${BASE_PATH}/formulateQuery`, {
@@ -894,41 +887,19 @@ function manageStaveAndMelody() {
 }
 
 /**
- * This function manages the box for selecting the collections in which the query should be executed.
- * Initially, if the user has not selected any collection, it will empty, so that the query will be executed over all the collections.
- * If the user selectes a collection (there is a change event), we add the collection to the 'selectedCollections' array.
- * If the user changes idea, the '-' option will reset everything, emptying the 'selectedCollections' array
+ * This function manages the box for selecting the collection in which the query should be executed.
  */
 function manageCollections() {
     const select = document.getElementById("collections");
-    const list = document.getElementById("selected-collections");
 
-    // Initial display: if no collections are selected, show 'Toutes les collections'
-    if (selectedCollections.length === 0) {
-        list.textContent = "Toutes les collections";
-    }
+    // Initial display: select the first collection by default
+    selectedCollection = select.options[0].value; // Default to the first option
 
     select.addEventListener("change", function() {
         const selectedOption = this.options[this.selectedIndex];
 
-        // If the user selects a valid collection (not the default '-')
-        if (!selectedCollections.includes(selectedOption.value) && (selectedOption.value != '-')) {
-            selectedCollections.push(selectedOption.value);
-
-            // Clear the "Toutes les collections" message if present
-            if (list.textContent === "Toutes les collections") {
-                list.textContent = "";
-            }
-
-            const listItem = document.createElement("li");
-            listItem.textContent = selectedOption.textContent;
-            list.appendChild(listItem);
-
-        // If the user selects the default option ('-')
-        } else if (selectedOption.value == '-') {
-            selectedCollections = [];
-            list.textContent = "Toutes les collections";  // Reset to 'Toutes les collections' message
-        } 
+        // Update the global variable to reflect the newly selected collection
+        selectedCollection = selectedOption.value;
     });
 }
 
@@ -1074,7 +1045,7 @@ function initTooltips() {
  * */
 function init() {
     melody = [];
-    selectedCollections = [];
+    selectedCollection = null;
 
     stave = null;
     context = null;
