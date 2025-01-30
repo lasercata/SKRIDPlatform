@@ -275,7 +275,7 @@ function createPreview(url, source, nb_occ=null, overall_degree=null) {
     if (nb_occ != null) {
         const occurrences = document.createElement('p');
         occurrences.className = "score_author";
-        occurrences.textContent = 'Occurences : ' + nb_occ;
+        occurrences.textContent = 'Occurrences : ' + nb_occ;
         a.append(occurrences);
     }
 
