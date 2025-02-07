@@ -1,7 +1,7 @@
 /* Conteneur principal */
 .father_container {
     display: flex;
-    overflow: hidden;
+    overflow: none;
     margin: 0; 
     flex: 1;
     /* height: calc(100vh - 229px); */
@@ -23,11 +23,12 @@
 
 /* Titre des collections */
 .collections-title {
-    background-color: #7299ab;
+    background-color: #7ab6e0;
     padding: 20px;
     /* text-align: center; */
     font-size: 20px;
     font-weight: bold;
+    color: white;
 }
 
 /* Liste des collections */

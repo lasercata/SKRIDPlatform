@@ -1,85 +1,105 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>The Skrid Platform</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Skrid Platform</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="./styles/semantic.min.css" />
-    <link rel="stylesheet" href="./styles/search_interface_style.css" />
-    <link rel="stylesheet" href="./styles/general_style.css" />
-    <link rel="stylesheet" href="./styles/collections_style.css" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="./styles/semantic.min.css" />
+  <link rel="stylesheet" href="./styles/search_interface_style.css" />
+  <link rel="stylesheet" href="./styles/general_style.css" />
+  <link rel="stylesheet" href="./styles/collections_style.css" />
 
-    <!-- CSS Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <!-- CSS Bootstrap (uniquement Bootstrap 5) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+  <!-- JS Bootstrap 5 (pas besoin de jQuery ou Popper.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
     
-    <!-- JS Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
+    /* Section principale */
+    .hero {
+      background: #006485;
+      color: white;
+      padding: 4rem 0;
+      text-align: center;
+    }
+
+    /* Section des services */
+    .services .card {
+      border: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .services .card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
 </head>
-<%- include('./partials/header', { currentPage: 'home' }); %>
 <body>
-  <div class="searchbar-box">
-      <h1 class="searchbar-title">Le projet Skrid</h1>
-  </div>
-  <div class="content-wrapper">
-    La plateforme Skrid est développée et maintenue par le laboratoire IRISA (site de Lannion). Cette plateforme est un prototype d&eacute;di&eacute; &agrave; la mise en oeuvre de techniques de recherche de contenu musical (d&eacute;velopp&eacute;es par l'IRISA) au sein de partitions musicales de musique traditionnelle bretonne. À ce jour, deux collections sont int&eacute;gr&eacute;es &agrave; la plateforme Skrid. Une troisième collection est en cours de numérisation.<br/>
+<%- include('./partials/header', { currentPage: 'test' }); %>
+  <!-- Section principale -->
+  <header class="hero">
+    <div class="container">
+      <h1>SKRID</h1>
+      <p></p>
+      <a href="#services" class="btn btn-outline btn-lg mt-3" style="background-color: #7ab6e0;">En savoir plus</a>
+    </div>
+  </header>
 
-    <h3 class="container main-container">Avant-propos important</h3>
-    <div class="jumbotron" style="padding:40px;">
-      L'objectif de la plateforme est la mise &agrave; disposition de partitions sous une forme num&eacute;ris&eacute;e permettant la recherche dans le contenu des partitions et non leur &eacute;dition. 
-    Le processus de conversion utilis&eacute; dans la plateforme, permettant de passer de la version originale de la partition &agrave; une version de la partition encodant son contenu musical de façon fine, peut conduire &agrave; la perte de quelques partitions d'une collection, &agrave; l'introduction de quelques erreurs et surtout &agrave; la perte de la mise en page des partitions. Les fournisseurs des donn&eacute;es que la plateforme remercie grandement pour leur aide, ne sont aucunement responsables des erreurs que le traitement des donn&eacute;es pourrait occasionner sur les partitions mises &agrave; disposition par la plateforme.
+  <!-- Section des services -->
+  <section id="services" class="services py-5">
+    <div class="container">
+      <h2 class="text-lest mb-4" style="color: #006485;">Le projet</h2>
+      <hr>
+      <p class="text-center text-muted mb-5">La plateforme Skrid est développée et maintenue par le laboratoire IRISA (site de Lannion). Cette plateforme est un prototype d&eacute;di&eacute; &agrave; la mise en oeuvre de techniques de recherche de contenu musical (d&eacute;velopp&eacute;es par l'IRISA) au sein de partitions musicales de musique traditionnelle bretonne. À ce jour, deux collections sont int&eacute;gr&eacute;es &agrave; la plateforme Skrid. Une troisième collection est en cours de numérisation.</p>
+      <hr>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <i class="bi bi-people-fill fs-1" style="color: #1e90ff;"></i>
+              <h5 class="card-title mt-3 text-center">Recueil Albert Poulain</h5>
+              <p class="card-text text-muted">Ces partitions sont issues de l'ouvrage <a href="https://pur-editions.fr/product/668/carnets-de-route" target="_blank"><i>Albert Poulain, Carnets de route, chansons traditionnelles de Haute Bretagne</i></a> (Éditions Dastum, Presses universitaires de Rennes), publié en 2011.
+
+                Fichiers d'encodage. <br><br> Dastum (Anne-Marie Nicol) a fourni chacune des partitions disponibles au format d'un fichier Finale. <br><br> Le projet Skrid a exporté les partitions sous forme MusicXML (via la fonctionnalité d'export de Finale). Les partitions ont ensuite été exportée aux formats <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>, PDF, MIDI, SVG via MuseScore. Le format <a href="https://music-encoding.org/" target="_blank">MEI</a> a été obtenu par transcription du fichier musicXML via l'outil <a href="https://www.verovio.org" target="_blank">verovio</a>. </p>
+            </div>
+          </div>
         </div>
-  
-        <h3 class="container main-container">Recueil Albert Poulain</h3>
-        <div class="jumbotron" style="padding:40px;">
-          <div> 	Ces partitions sont issues de l'ouvrage <a href="https://pur-editions.fr/product/668/carnets-de-route" target="_blank"><i>Albert Poulain, Carnets de route, chansons traditionnelles de Haute Bretagne</i></a> (&Eacute;ditions Dastum, Presses universitaires de Rennes), publié en 2011.
-            <br/><br/>
-              <b>Fichiers d'encodage.</b>
-      Dastum (Anne-Marie Nicol) a fourni chacune des partitions disponibles au format d'un fichier Finale. Le projet Skrid a export&eacute; les partitions sous forme MusicXML (via la fonctionnalit&eacute; d'export de Finale). Les partitions ont ensuite &eacute;t&eacute; export&eacute;e aux formats <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>, PDF, MIDI, SVG via MuseScore. Le format <a href="https://music-encoding.org/" target="_blank">MEI</a> a &eacute;t&eacute; obtenu par transcription du fichier musicXML via l'outil <a href="https://www.verovio.org" target="_blank">verovio</a>.
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <i class="bi bi-trophy-fill fs-1" style="color: #00c897;"></i>
+              <h5 class="card-title mt-3 text-center">Avant-propos important</h5>
+              <p class="card-text text-muted"> L'objectif de la plateforme est la mise à disposition de partitions sous une forme numérisée permettant la recherche dans le contenu des partitions et non leur édition. <br><br> Le processus de conversion utilisé dans la plateforme, permettant de passer de la version originale de la partition à une version de la partition encodant son contenu musical de façon fine, peut conduire à la perte de quelques partitions d'une collection, à l'introduction de quelques erreurs et surtout à la perte de la mise en page des partitions. <br><br> Les fournisseurs des données que la plateforme remercie grandement pour leur aide, ne sont aucunement responsables des erreurs que le traitement des données pourrait occasionner sur les partitions mises à disposition par la plateforme. </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <i class="bi bi-chat-dots-fill fs-1" style="color: #1e90ff;"></i>
+              <h5 class="card-title mt-3 text-center">Recueil Joseph Mahé : deux collections</h5>
+              <p class="card-text text-muted">Origine des partitions. Ces partitions sont issues du manuscrit <a href="https://gallica.bnf.fr/ark:/12148/bpt6k61026071" target="_blank"><i>Essai sur les Antiquit&eacute;s du d&eacute;partement du Morbihan</i></a>, de Joseph Mahé, publié en 1825, dont une version numérique est mise à disposition dans la Biliothèque <a href="https://gallica.bnf.fr/"
+                target="_blank">Gallica</a> de la BnF. <br><br> Ces œuvres sont également étudiées dans l'ouvrage Joseph Mahé (1760-1831) Premier collecteur de musique populaire de Haute et Basse-Bretagne de Roland Becker (Éditions Dastum, Presses universitaires de Rennes), publié en 2017.
+
+                Fichiers d'encodage. Pour chacune des partitions, la partition a été saisie sous <a href="https://www.musescore.com" target="_blank">MuseScore</a> (.mscz) par Gwenael Piel, et ensuite exportée aux formats <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>, PDF, MIDI, SVG via MuseScore. <br><br> Le format <a href="https://music-encoding.org/" target="_blank">MEI</a> a été obtenu par transcription du fichier musicXML via l'outil <a href="https://www.verovio.org" target="_blank">verovio</a>.
+                
+                Collections associées dans Skrid:
+                
+                    Collection dite "Joseph Mahé Original" contenant les partitions originales
+                    Collection dite "Joseph Mahé Transposed" contenant les partitions transposées dans la tonalité Sol Majeur
+                </p>
+            </div>
+          </div>
         </div>
       </div>
-  
-        
-    <h3 class="container main-container">Recueil Joseph Mah&eacute; : deux collections</h3>
-        <div class="jumbotron" style="padding:40px;">
-          <div> <b>Origine des partitions.</b>
-          Ces partitions sont issues du manuscrit <a href="https://gallica.bnf.fr/ark:/12148/bpt6k61026071" target="_blank"><i>Essai sur les Antiquit&eacute;s du d&eacute;partement du Morbihan</i></a>, de Joseph Mah&eacute;, publi&eacute; en 1825, dont une version num&eacute;rique est
-            mise &agrave; disposition dans la Bilioth&egrave;que <a href="https://gallica.bnf.fr/"
-              target="_blank">Gallica</a> de la BnF. Ces &oelig;uvres sont &eacute;galement &eacute;tudi&eacute;es dans l'ouvrage <i>Joseph Mah&eacute;
-              (1760-1831) Premier collecteur de musique populaire de Haute et Basse-Bretagne</i> de Roland Becker (&Eacute;ditions
-            Dastum, Presses universitaires de Rennes), publi&eacute; en 2017.
-              <br/><br/>
-              
-          <b>Fichiers d'encodage.</b>
-            Pour chacune des partitions, la partition a &eacute;t&eacute; saisie sous <a href="https://www.musescore.com" target="_blank">MuseScore</a> (.mscz) par Gwenael Piel, et ensuite export&eacute;e aux formats <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>, PDF, MIDI, SVG via MuseScore.  
-            Le format <a href="https://music-encoding.org/" target="_blank">MEI</a> a &eacute;t&eacute; obtenu par transcription du fichier musicXML via l'outil <a href="https://www.verovio.org" target="_blank">verovio</a>. 
-            <br/><br/>
-
-            <b>Collections associées dans Skrid:</b>
-            <ul>
-                <li> Collection dite "Joseph Mahé Original" contenant les partitions originales</li>
-                <li> Collection dite "Joseph Mahé Transposed" contenant les partitions transposées dans la tonalité Sol Majeur</li>
-              </ul>
-           </div>
-        </div>
-
-
-        <!-- <h3 class="container main-container">Recueil François-Marie Luzel (en cours de numérisation)</h3>
-        <div class="jumbotron" style="padding:40px;">
-          <div> 	Ces partitions sont issues de l'ouvrage <a href="https://www.dastum.bzh/article/musiques-bretonnes-maurice-duhamel/" target="_blank"><i>Musiques bretonnes</i></a> de Maurice Duhamel, Editions Dastum, 1998 (r&eacute;&eacute;dition du livre de Maurice Duhamel paru en 1913, contenant près de 450 airs qui correspondent aux m&eacute;lodies des chants collect&eacute;s par François-Marie Luzel).
-            <br/><br/>
-              <b>Fichiers d'encodage.</b>
-              Pour une partie des partitions (de l'ouvrage mentionn&eacute; ci-dessus), le projet Skrid a num&eacute;ris&eacute; les partitions via l'outil <a href="https://www.avid.com/products/photoscore-and-notateme-ultimate" target="_blank">Photoscore</a> (aboutissant &agrave; un fichier au format <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>), et les a nettoy&eacute;es (manuellement) via le logiciel <a href="https://www.musescore.com" target="_blank">MuseScore</a> (pour corriger au mieux les erreurs dues au processus de num&eacute;risation). Les formats <a href="https://music-encoding.org/" target="_blank">MEI</a> et SVG ont &eacute;t&eacute; obtenus par transcription du fichier musicXML via l'outil <a href="https://www.verovio.org" target="_blank">verovio</a>.
-              Le format <a href = "https://lilypond.org" target="_blank">lilypond</a> (.ly) a &eacute;t&eacute; obtenu par transcription du fichier musicXML via l'outil <a href = "https://lilypond.org/doc/v2.22/Documentation/usage/invoking-musicxml2ly.fr.html" target="_blank">musicxml2ly</a> de LilyPond. 
-            <br/><br/>
-              Il est &agrave; noter que le processus d'OMRisation (scan de la partition via Photoscore) peut engendrer des pertes au moment de l'encodage, ainsi que quelques erreurs, en particulier d'alignement des textes de port&eacute;e (paroles) avec les &eacute;v&eacute;nements musicaux, ou les traduction des textes (qui se trouvaient sous les partitions d'origine). En raison du grand nombre de partitions trait&eacute;es, toutes les erreurs dues au processus d'OMRisation n'ont pas encore pu être corrig&eacute;es. Certaines (anciennes) notations musicales de la partition d'origine n'ont pas pu être retranscrites dans les formats XML standards. 
-           </div>
-        </div> -->
-  </div>
-        
+    </div>
+  </section>
+  <%- include('./partials/footer'); %>
 </body>
-<%- include('./partials/footer'); %>
 </html>

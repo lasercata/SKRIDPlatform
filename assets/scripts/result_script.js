@@ -72,7 +72,7 @@ function init() {
         // adjustPageHeight: true,
         // scaleToPageSize: true,
         // shrinkToFit: true,
-        // font: 'Bravura',
+        font: 'Bravura',
     };
     tk.setOptions(options);
 
@@ -105,7 +105,9 @@ function init() {
 
         // Finally, get the <div> element with the specified ID, 
         // and set the content (innerHTML) to the SVG that we just generated.
+        document.getElementById("notation").innerHTML = ""; // if the last SVG is load
         document.getElementById("notation").innerHTML = svg;
+
 
         setRightInfos(author, folder);
 

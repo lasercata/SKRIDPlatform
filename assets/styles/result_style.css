@@ -54,8 +54,13 @@ body {
         /* height:640px; */
         height:900px;
     }
+    #notation svg text, #notation svg tspan {
+        line-height: 1.2 !important;  /* Réduit l'interligne */
+        white-space: nowrap;  /* Empêche le texte de se répartir sur plusieurs lignes */
+    }
+    
     tspan {
-        font-size: 230px;
+        font-size: 20vw !important
     }
     g.note.playing {
         fill: rgb(12, 14, 142);

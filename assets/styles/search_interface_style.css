@@ -3,6 +3,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: row;
+  gap: 10px;
 }
 .stave_buttons {
   width: 130px;
@@ -41,7 +42,9 @@
   overflow-x: auto;
   /* width: 500px; */
 }
-#send-button {
+
+/* DESACTIVATE -> BOOTSTRAP USE */
+/*#send-button {
   padding: 10px;
   border-radius: 20px;
   background-color: #62aadd;
@@ -52,6 +55,7 @@
   outline: none;
   cursor: pointer;
 }
+*/
 .options-row label,
 .options-row input[type="radio"],
 .options-row button {
@@ -180,16 +184,32 @@ header input {
 
 .below-keyboard {
     display: flex;
+    gap: 5px;
 }
 
 .rhythm-modif {
     display: flex;
-    margin: 10px;
+    margin: 0px;
+    gap: 5px;
+    align-items: center;
+}
+
+.rhythm-modif-bt {
+   height: 50px;
+   border-radius: 5px;
+   width: 40px;
+   background-color: white;
+   position: relative;
+}
+
+.rhythm-modif-bt img {
+  border-radius: 3px;
 }
 
 .octave-modif-bt-div {
-    display: grid;
+    display: flex;
     margin-right: 10px;
+    gap: 10px;
 }
 
 .octave-modif {
@@ -199,7 +219,9 @@ header input {
 }
 
 .rhythm-modif-bt, .octave-modif-bt {
-    border-radius: 8px;
+    border-radius: 3px;
+    border: none;
+
 }
 
 .white-label {
@@ -322,12 +344,42 @@ header input {
 .tooltip-lb:hover .tooltiptext {
     visibility: visible;
 }
+
+/* tooltip + alt for information button with hover */
+/* Renommer la classe pour éviter les conflits */
+.tooltip-lb-alt {
+  position: relative;
+  display: inline-block;
+}
+.tooltip-lb-alt .tooltiptext {
+  visibility: hidden;
+  width: 150px;
+  background: #18767ed0;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+
+  position: absolute;
+  z-index: 1;
+}
+.tooltip-lb-alt:hover .tooltiptext {
+  visibility: visible;
+}
+
+
 .info-note {
     background: cornsilk;
     border: 1px solid black;
     border-radius: 5px;
     padding: 5px;
     position: absolute;
+}
+
+/* HOVER PRESET BUTTON */
+
+#stricte:hover, #modereeMelo:hover, #modereeRythm:hover {
+    border: 1px solid rgb(15, 15, 143);
 }
 
 @media screen and (max-width: 815px) {

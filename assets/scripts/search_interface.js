@@ -149,14 +149,14 @@ const qwerty_us_to_azerty = {
  * @param {number}  [duration_gap=0]            - the duration gap (fuzzy param) ;
  * @param {number}  [alpha=0]                   - (in [0 ; 1]) will remove every result whose score is below `alpha` (fuzzy param) ;
  * @param {boolean} [allow_transposition=false] - allow transposition (fuzzy param) ;
- * @param {boolean} [contour_match=false]       - match only contour (fuzzy param) ;
+ * @param {boolean} //[contour_match=false]       - match only contour (fuzzy param) ;
  *
  * @returns {promise} the fuzzy query corresponding to the parameters
  *
  * @example
  * createQuery().then(fuzzyQuery => sendQuery(fuzzyQuery));
  */
-async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, contour_match=false) {
+async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, /*contour_match=false*/) {
     //------Create the `notes` for the python script
     
     let notes = '[';
@@ -167,7 +167,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
             let note = melody[k].keys[note_idx];
 
             //---Add note class ('a', 'gs', ...)
-            if (ignore_pitch && !contour_match)
+            if (ignore_pitch /*&& !contour_match*/)
                 notes += '(None, ';
             else if (melody[k].noteType == 'r') // rest
                 notes += "('r', ";
@@ -178,7 +178,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
             }
 
             //---Add octave
-            if ((ignore_octave || melody[k].noteType == 'r') && !contour_match)
+            if ((ignore_octave || melody[k].noteType == 'r') /*&& !contour_match*/)
                 notes += 'None), ';
             else {
                 let octave = note.split('/')[1];
@@ -212,7 +212,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         duration_gap: duration_gap,
         alpha: alpha,
         allow_transposition: allow_transposition,
-        contour_match: contour_match,
+        //contour_match: contour_match,
         collection: selectedCollection
     };
 
@@ -332,7 +332,7 @@ const searchButtonHandler = function() {
     const duration_gap_select = document.getElementById('duration-gap-select');
     const alpha_select = document.getElementById('alpha-select');
     const transposition_cb = document.getElementById('transpose-cb');
-    const contour_cb = document.getElementById('contour-cb');
+    //const contour_cb = document.getElementById('contour-cb');
 
     // Check that melody is not empty
     if (melody.length == 0) {
@@ -340,12 +340,12 @@ const searchButtonHandler = function() {
         return;
     }
 
-    if (!pitch_cb.checked && !rhythm_cb.checked && !contour_cb.checked) {
+    if (!pitch_cb.checked && !rhythm_cb.checked /*&& !contour_cb.checked*/) {
         alert('You have ignored all settings (pitch, rhythm and contour).\nPlease select at least one.\nIf you want to browse the scores, check the collection page.')
         return;
     }
 
-    if ((transposition_cb.checked || contour_cb.checked) && melody.length == 1) {
+    if ((transposition_cb.checked /*|| contour_cb.checked*/) && melody.length == 1) {
         alert('For transposition and contour search, at least two notes are needed (because it is based on interval between notes).');
         return;
     }
@@ -363,7 +363,7 @@ const searchButtonHandler = function() {
         duration_gap_select.value,
         alpha_select.value / 100,
         transposition_cb.checked,
-        contour_cb.checked
+        //contour_cb.checked
     ).then(
         fuzzyQuery => sendQuery(fuzzyQuery)
     );
@@ -374,6 +374,61 @@ const searchButtonHandler = function() {
 
 
 }
+
+/**
+ *  This function add a new button -options avancés- for open/close this option
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    // Sélectionner tous les boutons qui ont un attribut data-button
+    const toggleButtons = document.querySelectorAll("[data-button]");
+
+    toggleButtons.forEach(button => {
+        // Obtenez l'id du collapse associé à ce bouton -> id button -> toggleButton1 ...
+        const targetId = button.getAttribute("data-bs-target").substring(1); // On enlève le "#" de l'id
+        const target = document.getElementById(targetId);
+
+        // Créer une instance du Collapse Bootstrap pour ce collapse
+        const collapseInstance = new bootstrap.Collapse(target, { toggle: false });
+
+        // Gérer l'état "ouvert" du collapse
+        target.addEventListener("shown.bs.collapse", function () {
+            button.textContent = "Fermer"; // Change le texte du bouton après l'ouverture
+            button.setAttribute("aria-expanded", "true"); // Modifie l'aria-expanded
+
+            // Supprime la logique d'ouverture
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-target");
+
+            // Ajouter la logique pour fermer
+            button.addEventListener("click", function () {
+                collapseInstance.hide(); // Ferme la div
+            });
+        });
+
+        // Gérer l'état "fermé" du collapse
+        target.addEventListener("hidden.bs.collapse", function () {
+            button.textContent = "Options avancées"; // Change le texte du bouton après la fermeture
+            button.setAttribute("aria-expanded", "false"); // Modifie l'aria-expanded
+
+            // Rétablir la logique d'ouverture
+            button.setAttribute("data-bs-toggle", "collapse");
+            button.setAttribute("data-bs-target", "#" + targetId);
+
+            // Ajouter un listener pour rouvrir la div
+            button.addEventListener("click", function () {
+                collapseInstance.show(); // Ouvre la div
+            });
+        });
+
+        // Clic initial pour ouvrir ou fermer la div
+        button.addEventListener("click", function () {
+            if (button.getAttribute("aria-expanded") === "false") {
+                collapseInstance.show(); // Ouvre la div
+            }
+        });
+    });
+});
+
 
 /**
  * This function increases/decreases the volume according to the user input
@@ -486,7 +541,7 @@ const matchRhythmCbHandler = () => {
  * Called when "Autoriser les transposition" or "Correspondance du contour seulement" checkbox is clicked.
  * It set the other one as unchecked, and disable other options if needed.
  */
-const contourAndTranspositionHandler = (sender_id) => {
+/*const contourAndTranspositionHandler = (sender_id) => {
     const transpose_cb = document.getElementById('transpose-cb');
     const contour_cb = document.getElementById('contour-cb');
     const pitch_cb = document.getElementById('pitch-cb');
@@ -494,25 +549,25 @@ const contourAndTranspositionHandler = (sender_id) => {
 
     // Uncheck the other checkbox
     // if (event.srcElement.id == 'transpose-cb' && transpose_cb.checked) {
-    if (sender_id == 'transpose-cb' && transpose_cb.checked) {
-        contour_cb.checked = false;
-    }
+    //if (sender_id == 'transpose-cb' && transpose_cb.checked) {
+    //    contour_cb.checked = false;
+    //}
     // if (event.srcElement.id == 'contour-cb' && contour_cb.checked) {
-    if (sender_id == 'contour-cb' && contour_cb.checked) {
-        transpose_cb.checked = false;
-    }
+    //if (sender_id == 'contour-cb' && contour_cb.checked) {
+    //    transpose_cb.checked = false;
+    //}
 
     // If contour is checked, disable pitch param
-    if (contour_cb.checked) {
-        pitch_cb.disabled = true;
-        pitch_dist_cb.disabled = true;
-    }
-    else {
+    //if (contour_cb.checked) {
+    //    pitch_cb.disabled = true;
+    //    pitch_dist_cb.disabled = true;
+    //}
+    /*else {
         pitch_cb.disabled = false;
         matchPicthCbHandler();
         // pitch_dist_cb.disabled = false;
     }
-}
+}*/
 
 /**
  * Used to turn the info box on.
@@ -778,14 +833,14 @@ function keyListener(event) {
  * Also ensure that only one radio button is selected.
  */
 function manageOptions() {
-    const searchButton = document.getElementById("send-button"); // Search button
+    const searchButton = document.querySelectorAll(".send-button"); // Search button // original -> document.getElementById("send-button")
     const clearAllButton = document.getElementById("clear_all");
     const clearLastNoteButton = document.getElementById("clear_last_note");
     const playBt = document.getElementById('play_melody');
     const pitch_cb = document.getElementById('pitch-cb');
     const rhythm_cb = document.getElementById('rhythm-cb');
     const transpose_cb = document.getElementById('transpose-cb');
-    const contour_cb = document.getElementById('contour-cb');
+    //const contour_cb = document.getElementById('contour-cb');
 
     // Add an event listener for the clear-buttons to call the corresponding method
     clearAllButton.addEventListener('click', clear_all_pattern);
@@ -793,14 +848,132 @@ function manageOptions() {
     playBt.addEventListener('click', playMelodyBtHandler);
 
     // Add an event listener for the 'search' button
-    searchButton.addEventListener('click', searchButtonHandler);
+    //searchButton.addEventListener('click', searchButtonHandler); -> is original for 1 button use
+    searchButton.forEach(button => {
+        button.addEventListener('click', searchButtonHandler);
+    });
 
     // Add event listener to 'Hauteur des notes' checkbox
     pitch_cb.addEventListener('click', matchPicthCbHandler);
     rhythm_cb.addEventListener('click', matchRhythmCbHandler );
 
     transpose_cb.addEventListener('click', () => contourAndTranspositionHandler('transpose-cb'));
-    contour_cb.addEventListener('click', () => contourAndTranspositionHandler('contour-cb'));
+   // contour_cb.addEventListener('click', () => contourAndTranspositionHandler('contour-cb'));
+}
+
+/**
+ * Toggle color button preset
+ * 
+ */
+
+// Suivi de l'état du bouton actif
+let activeButton = null;
+
+// Fonction pour gérer le changement de couleur du bouton actif
+function toggleButtonState(buttonId) {
+    const button = document.getElementById(buttonId);
+
+    // Si un bouton est déjà actif, réinitialiser sa couleur
+    if (activeButton && activeButton !== buttonId) {
+        document.getElementById(activeButton).style.backgroundColor = '#7ab6e0'; // Couleur par défaut
+    }
+
+    // Modifier la couleur du bouton actuel
+    button.style.backgroundColor = '#006485'; // Nouvelle couleur de fond
+    activeButton = buttonId; // Mettre à jour l'état du bouton actif
+}
+
+/**
+ * Here is the PRESET BUTTON LOGIC 
+ * 1 -> Stricte / 2 -> Modérée / 3 -> Libre
+ */
+document.getElementById('stricte').addEventListener('click', function () {
+    applyPreset({
+        // OPTIONS VALUE
+        pitchDist: 0,
+        durationFactor: 1,
+        durationGap: 0,
+        alpha: 0,
+        // OPTIONS CHECK
+        pitch: true,
+        rhythm: true,
+        transpose: false
+        //contour: false
+    });
+
+    // OPTION SELECT BACKGROUND
+    toggleButtonState('stricte');
+    // Start search
+    searchButtonHandler();
+});
+
+document.getElementById('modereeMelo').addEventListener('click', function () {
+    applyPreset({
+        // OPTIONS VALUE
+        pitchDist: 5,
+        durationFactor: 1.5,
+        durationGap: 0,
+        alpha: 0,
+        // OPTIONS CHECK
+        pitch: true,
+        rhythm: true,
+        transpose: true,
+        //contour: false
+    });
+    
+    // OPTION SELECT BACKGROUND
+    toggleButtonState('modereeMelo');
+    // Start search
+    searchButtonHandler();
+});
+
+document.getElementById('modereeRythm').addEventListener('click', function () {
+    applyPreset({
+        // OPTIONS VALUE
+        pitchDist: 1,
+        durationFactor: 4,
+        durationGap: 0.0625,
+        alpha: 0,
+        // OPTIONS CHECK
+        pitch: true,
+        rhythm: true,
+        transpose: true,
+        //contour: false
+    });
+
+    // OPTION SELECT BACKGROUND
+    toggleButtonState('modereeRythm');
+    // Start search
+    searchButtonHandler();
+});
+/*
+document.getElementById('libre').addEventListener('click', function () {
+    applyPreset({
+        // OPTIONS VALUE
+        pitchDist: 2,
+        durationFactor: 2,
+        durationGap: 1,
+        alpha: 0,
+        // OPTIONS CHECK
+        pitch: false,
+        rhythm: false,
+        transpose: true,
+        contour: true
+    });
+});
+*/
+
+function applyPreset(preset) {
+    // VALUES
+    document.getElementById('pitch-dist-select').value = preset.pitchDist;
+    document.getElementById('duration-factor-select').value = preset.durationFactor;
+    document.getElementById('duration-gap-select').value = preset.durationGap;
+    document.getElementById('alpha-select').value = preset.alpha;
+    // CHECKBOX 
+    document.getElementById('pitch-cb').checked = preset.pitch;
+    document.getElementById('rhythm-cb').checked = preset.rhythm;
+    document.getElementById('transpose-cb').checked = preset.transpose;
+    //document.getElementById('contour-cb').checked = preset.contour;
 }
 
 /**
@@ -1026,11 +1199,14 @@ function initTooltips() {
         'pitch-lb': "Permet de prendre en compte / ignorer la hauteur des notes.",
         'rhythm-lb': "Permet de prendre en compte / ignorer le rythme (la durée) des notes.",
         'transpose-lb': "Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée.",
-        'contour-lb': "Garde seulement le signe des intervalles entres les notes (haut, bas, égal).",
+        //'contour-lb': "Garde seulement le signe des intervalles entres les notes (haut, bas, égal).",
         'pitch-dist-lb': "Permet d'augmenter la tolérance sur la hauteur de note (en tons), ou sur les intervalles (si transposition est coché).",
         'duration-dist-lb': "Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).",
         'sequencing-dist-lb': "Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...).",
-        'alpha-lb': "Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha."
+        'alpha-lb': "Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.",
+        //'stricte': "Permet une recherche sans tolérances.",
+        //'modereeMelo': "Permet la recherche avec une tolérance sur la hauteur des notes.",
+        //'modereeRythm': "Permet une recherche plus large avec des sauts de figures de notes."
     };
 
     Object.keys(info_texts).forEach(id => {
@@ -1071,5 +1247,94 @@ function init() {
 
     matchPicthCbHandler(); // Disable options that should be
     matchRhythmCbHandler();
-    contourAndTranspositionHandler(null);
+    //contourAndTranspositionHandler(null);
+}
+  
+/**
+ * MESSAGE TOAST BUTTON PRESET --------- PENSER A AJOUTER LA LOGIQUE TRANSPOSITION SINON MESSAGE
+ */
+const toastTrigger1 = document.getElementById('stricte');
+const toastTrigger2 = document.getElementById('modereeMelo');
+const toastTrigger3 = document.getElementById('modereeRythm');
+const toastLiveExample1 = document.getElementById('liveToast1');
+const toastLiveExample2 = document.getElementById('liveToast2');
+const toastLiveExample3 = document.getElementById('liveToast3');
+
+// Show function 1
+if (toastTrigger1) {
+    const toastBootstrap1 = bootstrap.Toast.getOrCreateInstance(toastLiveExample1, { delay: 15000 }); // 5 secondes
+    toastTrigger1.addEventListener('click', () => {
+        toastBootstrap1.show();
+
+        if (melody.length === 0) {
+            toastBootstrap1.hide();  // Si les entrées sont incorrectes, cache le toast
+        } else {
+            toastBootstrap1.show();  // Si tout est ok, affiche le toast
+
+            // Hide function 2
+            if (toastLiveExample2) {
+                const toastBootstrap2 = bootstrap.Toast.getOrCreateInstance(toastLiveExample2);
+                toastBootstrap2.hide();
+            }
+
+            // Hide function 3
+            if (toastLiveExample3) {
+                const toastBootstrap3 = bootstrap.Toast.getOrCreateInstance(toastLiveExample3);
+                toastBootstrap3.hide();
+            }
+        }
+    });
+}
+
+// Show function 2
+if (toastTrigger2) {
+    const toastBootstrap2 = bootstrap.Toast.getOrCreateInstance(toastLiveExample2, { delay: 15000 }); // 5 secondes
+    toastTrigger2.addEventListener('click', () => {
+        toastBootstrap2.show();
+
+        if (melody.length === 0) {
+            toastBootstrap2.hide();  // Si les entrées sont incorrectes, cache le toast
+        } else {
+            toastBootstrap2.show();  // Si tout est ok, affiche le toast
+
+            // Hide function 1
+            if (toastLiveExample1) {
+                const toastBootstrap1 = bootstrap.Toast.getOrCreateInstance(toastLiveExample1);
+                toastBootstrap1.hide();
+            }
+
+            // Hide function 3
+            if (toastLiveExample3) {
+                const toastBootstrap3 = bootstrap.Toast.getOrCreateInstance(toastLiveExample3);
+                toastBootstrap3.hide();
+            }
+        }
+    });
+
+}
+
+// Show function 3
+if (toastTrigger3) {
+    const toastBootstrap3 = bootstrap.Toast.getOrCreateInstance(toastLiveExample3, { delay: 15000 }); // 5 secondes
+    toastTrigger3.addEventListener('click', () => {
+        toastBootstrap3.show();
+
+        if (melody.length === 0) {
+            toastBootstrap3.hide();  // Si les entrées sont incorrectes, cache le toast
+        } else {
+            toastBootstrap3.show();  // Si tout est ok, affiche le toast
+
+            // Hide function 2
+            if (toastLiveExample2) {
+                const toastBootstrap2 = bootstrap.Toast.getOrCreateInstance(toastLiveExample2);
+                toastBootstrap2.hide();
+            }
+
+            // Hide function 1
+            if (toastLiveExample1) {
+                const toastBootstrap1 = bootstrap.Toast.getOrCreateInstance(toastLiveExample1);
+                toastBootstrap1.hide();
+            }
+        }
+    });
 }
