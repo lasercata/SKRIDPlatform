@@ -910,10 +910,10 @@ document.getElementById('stricte').addEventListener('click', function () {
 document.getElementById('modereeMelo').addEventListener('click', function () {
     applyPreset({
         // OPTIONS VALUE
-        pitchDist: 5,
+        pitchDist: 3,
         durationFactor: 1.5,
         durationGap: 0,
-        alpha: 0,
+        alpha: 50,
         // OPTIONS CHECK
         pitch: true,
         rhythm: true,
@@ -933,7 +933,7 @@ document.getElementById('modereeRythm').addEventListener('click', function () {
         pitchDist: 1,
         durationFactor: 4,
         durationGap: 0.0625,
-        alpha: 0,
+        alpha: 50,
         // OPTIONS CHECK
         pitch: true,
         rhythm: true,
@@ -1338,3 +1338,23 @@ if (toastTrigger3) {
         }
     });
 }
+
+/**
+ * Toast Help button
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    var toastEl = document.querySelector('.toast');
+    var toast = new bootstrap.Toast(toastEl);
+    setTimeout(() => toast.show(), 2000); // S'affiche après 2 secondes
+  });
+
+/**
+ * lock del/supp only in fuzzy-options
+ */
+document.querySelectorAll('.fuzzy-options input').forEach(input => {
+input.addEventListener('keydown', (event) => {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+    event.stopPropagation();
+    }
+});
+});

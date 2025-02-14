@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./styles/semantic.min.css" />
     <link rel="stylesheet" href="./styles/search_interface_style.css" />
     <link rel="stylesheet" href="./styles/general_style.css" />
-    <link rel="stylesheet" href="./styles/collections_style.css" />
+    <!--<link rel="stylesheet" href="./styles/collections_styles.css" />-->
     <link rel="stylesheet" href="./styles/paginated_results.css" />
 
     <!-- CSS Bootstrap (uniquement Bootstrap 5) -->
@@ -31,27 +31,34 @@
 <%- include('./partials/header', { currentPage: 'collections' }); %>
 <body>
   <div class="searchbar-box">
-    <h1 class="searchbar-title">Les collections</h1>
+    <h1 class="searchbar-title p-2">Les collections</h1>
   </div>
-  <div class="father_container">
-    <div class="collections shadow bg-body-tertiary">
-      <div class="collections-title"> 
+  <div class="father_container d-flex flex-row gap-1">
+    <!-- MENU LEFT -->
+    <div class="card-lg shadow bg-body-tertiary gap-5 position-fixed rounded-end" style="width: 18rem; top: 30; left: 0; height: 60vh; z-index: 1;">
+      <div class="card-header text-center fs-1 d-flex flex-column"> 
+        <i class="bi bi-people-fill fs-1" style="color: #006485;"></i>
         Collections
-      </div>
-      <div class="collections-list">
+      </div> 
+      <hr>
+      <br>
+      <div class="list-group gap-5" id="list-tab" role="tablist">
         <% for(var i = 0; i < authors.length; i++) { %>
-          <div class="collection-item" onClick="authorButtonHandler('<%= authors[i] %>')">
-            <%= authors[i] %>
-          </div>
+          <a class="btn list-group-item-action w-75 mx-auto d-flex align-items-center" 
+              id="list-home-list-<%= i %>" 
+              onClick="authorButtonHandler('<%= authors[i] %>')">
+              <%= authors[i] %>   
+          </a>
         <% } %>
       </div>
-    </div>
-  
-    <div class="archives">
-      <p id="archives"></p>
-      <%- include('./partials/paginated_results.ejs'); %>
+    </div> 
+    <!-- PARTITIONS VIEW (avec du margin-left pour ne pas être caché sous le menu) -->
+    <div class="archives" style="margin-left: 18rem;">
+        <p id="archives" class="text-secondary m-4"></p>
+        <%- include('./partials/paginated_results.ejs'); %>
     </div>
   </div>
+
   
   <div id="authors" style="display: none;">
     <%= JSON.stringify(authors) %>

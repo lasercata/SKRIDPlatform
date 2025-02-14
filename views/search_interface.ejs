@@ -46,6 +46,16 @@
   </div>
   </div>
   -->
+  <div class="toast custom-toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+    <div class="d-flex">
+      <a href="<%= BASE_PATH %>/help"><div class="toast-body text-center text-white">
+        Aide/astuce
+        <i class="bi bi-lightbulb-fill me-2"></i>
+      </div>
+      </a>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div> 
   <div class="content-wrapper" style="align-items: center;">
     <div class="search-pattern">
       <h1>Rechercher un motif musical</h1>
@@ -149,11 +159,11 @@
         <hr>
         <!-- START TEST PRESET BUTTON -->
         <div class="flex-column" style=" display: flex; gap:20px;">
-        <h4 class="text-center">Sélectionnez la correspondance</h4>
+        <h4 class="text-center">Sélectionnez le type de recherche</h4>
           <div class="flex-row" style=" display: flex; gap:40px;">
             <button id="stricte" type="button" class="btn text-white tooltip-lb" style="background-color: #7ab6e0;">Recherche exacte</button>
-            <button id="modereeMelo" type="button" class="btn text-white" style="background-color: #7ab6e0;">Recherche mélodique <br> approchée</button>
-            <button id="modereeRythm" type="button" class="btn text-white" style="background-color: #7ab6e0;">Recherche rythmique <br> approchée</button>
+            <button id="modereeMelo" type="button" class="btn text-white" style="background-color: #7ab6e0;">Recherche avec tolérance <br> sur la hauteur des notes</button>
+            <button id="modereeRythm" type="button" class="btn text-white" style="background-color: #7ab6e0;">Recherche avec tolérance <br> sur le rythme</button>
             <!--<button id="libre" type="button" class="btn text-white" style="background-color: #7ab6e0;">Recherche exploratoire</button>-->
           </div>
         </div>
