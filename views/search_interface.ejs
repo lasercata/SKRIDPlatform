@@ -56,6 +56,18 @@
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
   </div> 
+  <!-- Toast for going to mic search page -->
+  
+  <div class="toast1 custom-toast1 align-items-center text-bg border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+    <div class="d-flex">
+      <a href="<%= BASE_PATH %>/formulateQueryFromMicrophone"><div class="toast-body text-center text-white">
+        <p>Micro</p>
+        <i class="bi bi-mic-fill"></i>
+      </div>
+      </a>
+    </div>
+  </div>
+
   <div class="content-wrapper" style="align-items: center;">
     <div class="search-pattern">
       <h1>Rechercher un motif musical</h1>
@@ -110,12 +122,13 @@
         </ul>
         <br>
         <!-- Ajout du boutton options pour optimiser le visuel de la page / clavier -->
-        <button id="toggleButton1" class="btn btn-outline-secondary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#bellow-keyboard" aria-expanded="false" aria-controls="bellow-keyboard" data-button="options1">
+        <!--<button id="toggleButton1" class="btn btn-outline-secondary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#bellow-keyboard" aria-expanded="false" aria-controls="bellow-keyboard" data-button="options1">
           Options avancées
-        </button>
-        <div class='below-keyboard collapse collapse-vertical' id="bellow-keyboard">
+        </button>-->
+        <!--<div class='below-keyboard collapse collapse-vertical' id="bellow-keyboard">-->
+        <div class="d-flex gap-4">
           <!-- <button data-key='r' id='silence-bt'><span>Silence (b)</span></button> -->
-          <button data-key='r' id='silence-bt'><span>
+          <button class="m-5" data-key='r' id='silence-bt'><span>
             <img src='public/silences_pics/s1.png' height=40px alt='Silence'>
             /
             <img src='public/silences_pics/s4.png' height=40px>

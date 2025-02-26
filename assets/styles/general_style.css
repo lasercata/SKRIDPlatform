@@ -118,3 +118,33 @@ label {
   .services .card:hover {
     transform: translateY(-5px);
   }
+
+@media screen and (max-width: 615px) {
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+    #collectionMenu{
+        z-index: 0;
+        width: auto !important;
+        position: relative !important;
+    }
+    .nav {
+        width: auto;
+    }
+    #fatherContainer {
+        flex-direction: column !important;
+        position: relative !important;
+    }
+    .archives{
+        margin-left: 0 !important;
+    }
+    #mobileIMG {
+        width: 150px;
+        height: auto;
+        max-width: 100%;
+    
+    }
+}

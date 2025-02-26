@@ -382,11 +382,28 @@ header input {
   max-width: 140px !important;
   position: fixed;
   top: 20%;
-  left: 0;
+  left: 3%;
   text-decoration: none;
 }
 
-.custom-toast a {
+.custom-toast1 {
+  max-width: 140px !important;
+  position: fixed;
+  top: 85%;
+  left: 5%;
+  text-decoration: none !important;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  padding: 5px;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+  background-color: #006485;
+}
+
+.custom-toast a, .custom-toast1 a{
   text-decoration: none;
 }
 
@@ -424,6 +441,7 @@ header input {
     height: 180px;
     width: 60px;
   }
+  
 }
 @media screen and (max-width: 615px) {
   .piano-keys .key:nth-child(13),
@@ -436,4 +454,33 @@ header input {
   .piano-keys .white {
     width: 50px;
   }
+  .wrapper {
+    width: auto !important;
+  }
+  .piano-keys {
+    width: auto;
+    gap: 0px;
+  }
+  .custom-toast {
+    position: fixed;
+    top: 8%;
+    left: 0;
+    z-index: 1000;
+  }
+
+  .custom-toast1 {
+    position: fixed;
+    top: 90%;
+    left: 0;
+    z-index: 100;
+    width: 50px;
+    height: 50px;
+  }
+  .custom-toast1 p {
+    display: none;
+  }
+  .searchbar-box {
+    display: none !important;
+  }
+  
 }

@@ -8,8 +8,24 @@ const express = require('express');
 const neo4j = require('neo4j-driver');
 const bodyParser = require('body-parser');
 
+const multer  = require('multer');
+const { spawn } = require('child_process');
+
 const app = express();
 const port = 3000;
+
+// Configuration de Multer pour stocker temporairement les fichiers audio dans le dossier 'uploads'
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/');  // Dossier de destination pour les fichiers uploadés
+    },
+    filename: function (req, file, cb) {
+      // extension .wav, 
+      cb(null, file.originalname);
+    }
+  });
+const upload = multer({ storage: storage });
+
 
 const uri = 'neo4j://localhost:7687'; // default dor cypher-shell neo4j://localhost:7687
 // cypher-shell -u neo4j -p root -a neo4j://localhost:7687
@@ -184,6 +200,33 @@ app.get('/searchInterface', async function (req, res) {
     }
 
     res.render("search_interface", {
+        authors: authors
+    });
+});
+
+/**
+ * Route for the research page with the microphone interface.
+ *
+ * GET
+ *
+ * @constant /formulateQueryFromMicrophone
+ */
+app.get('/formulateQueryFromMicrophone', async function (req, res) {
+    let authors = [];
+
+    try {
+        // The query to get the authors is necessary to display the list of possible collections
+        const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.collection";
+        let temp2 = await session.run(authorQuery);
+        temp2 = temp2.records;
+        temp2.forEach((record) => {
+            authors.push(record._fields[0]);
+        });
+    } catch(err) {
+        log('error', `/formulateQueryFromMicrophone: ${err}`)
+    }
+
+    res.render("formulateQueryFromMicrophone", {
         authors: authors
     });
 });
@@ -493,6 +536,86 @@ app.post('/formulateQuery', (req, res) => {
         '-g', duration_gap,
         '-a', alpha,
         notes
+    ];
+
+    if (allow_transposition)
+        args.push('-t');
+
+    if (contour_match)
+        args.push('-C');
+
+    if (collection != null) {
+        args.push('-c');
+        args.push(collection);
+    }
+    let pyParserWrite = spawn('python3', args);
+
+    // Get the data
+    let allData = '';
+    pyParserWrite.stdout.on('data', data => {
+        log('info', `/formulateQuery: received data (${data.length} bytes) from python script.`);
+        allData += data.toString();
+    });
+
+    // log stderr
+    let errors = [];
+    pyParserWrite.stderr.on('data', data => {
+        let e = handlePythonStdErr('/formulateQuery', data);
+
+        if (e != null)
+            errors.push(e);
+    });
+
+    // Send the data to the client
+    pyParserWrite.stdout.on('close', () => {
+        log('info', `/formulateQuery: connection closed.`);
+
+        if (errors.length > 0)
+            return res.json({ error: errors.slice(-1)[0] });
+
+        return res.json({ query: allData });
+    });
+});
+
+
+// Endpoint pour traiter l'audio et créer une requête
+/** 
+*
+* @constant /createQueryFromAudio
+*/
+app.post('/createQueryFromAudio', upload.single('audio'), (req, res) => {
+    // Get the params
+    let pitch_distance = req.body.pitch_distance;
+    let duration_factor = req.body.duration_factor;
+    let duration_gap = req.body.duration_gap;
+    let alpha = req.body.alpha;
+    let allow_transposition = req.body.allow_transposition;
+    let contour_match = req.body.contour_match;
+    let collection = req.body.collection;
+
+    // Set default values if some params are null
+    if (pitch_distance == null)
+        pitch_distance = 0;
+    if (duration_factor == null)
+        duration_factor = 1;
+    if (duration_gap == null)
+        duration_gap = 0;
+    if (alpha == null)
+        alpha = 0;
+    if (allow_transposition == null)
+        allow_transposition = false;
+    if (contour_match == null)
+        contour_match = false;
+
+    // Create the connection
+    log('info', `/formulateQuery: openning connection.`);
+    const { spawn } = require('child_process');
+    let args = [
+        'compilation_requete_fuzzy/audio_parser.py',
+        '-p', pitch_distance,
+        '-f', duration_factor,
+        '-g', duration_gap,
+        '-a', alpha,
     ];
 
     if (allow_transposition)
