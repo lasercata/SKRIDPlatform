@@ -60,7 +60,7 @@ app.use(express.static('data'));
 app.use('/data', express.static('data'));
 
 // préfixe global basé sur l'environnement (production ou développement)
-const BASE_PATH = process.env.BASE_PATH || ''; // '/skrid' en production, '' en local
+const BASE_PATH = process.env.BASE_PATH || '/skrid'; // '/skrid' en production, '' en local
 
 // Rendre le préfixe disponible dans tous les templates EJS
 app.use((req, res, next) => {
