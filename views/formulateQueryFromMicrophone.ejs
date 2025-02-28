@@ -25,7 +25,7 @@
   <script src="./scripts/verovio-toolkit-wasm.js" defer></script>
 
   <!-- Javascript of the page -->
-  <!-- <script type="text/javascript" src="./scripts/search_interface.js"></script> -->
+  <!--<script type="module" src="./scripts/search_interface.js"></script>-->
   <script type="module" src="./scripts/micro_interface.js"></script>
   <script type="module" src="./scripts/recorder.js"></script>
 
@@ -270,11 +270,9 @@
     <input type="hidden" name="notes" id="notes-input" value="">
     <button type="submit">Envoyer la requête</button>
   </form>
-    <div class="card">
-        <div class="container_2">
-            <%- include('./partials/paginated_results.ejs'); %>
-        </div>
-    </div>
+      <div class="container_2">
+          <%- include('./partials/paginated_results.ejs'); %>
+      </div>
   </div>
   <div id='tooltip' class='info-note' style='display: none;'></div>
   <%- include('./partials/footer'); %>

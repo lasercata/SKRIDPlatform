@@ -18,7 +18,7 @@ import { startRecording, stopRecording } from './micro_recorder_wav.js';
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('start-rec').addEventListener('click', () => {
     // Démarrer l'enregistrement pour 5 secondes (ajustez la durée si nécessaire)
-    startRecording(5000);
+    startRecording(4000);
   });
   //document.getElementById('stop-rec').addEventListener('click', () => {
   //  stopRecording();

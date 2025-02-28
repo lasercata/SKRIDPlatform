@@ -35,6 +35,7 @@ const user = 'neo4j'
 // Read passowrd for file
 var password;
 const fs = require('fs');
+const { data } = require('jquery');
 try {
     log('info', 'Reading password from file (`.database_password`) ...');
     password = fs.readFileSync('.database_password', 'utf8');
@@ -502,6 +503,7 @@ app.post('/formulateQuery', (req, res) => {
     console.log(req.body);
     // Get the params
     const notes = req.body.notes;
+    console.log(notes);
     let pitch_distance = req.body.pitch_distance;
     let duration_factor = req.body.duration_factor;
     let duration_gap = req.body.duration_gap;
@@ -537,7 +539,7 @@ app.post('/formulateQuery', (req, res) => {
         '-a', alpha,
         notes
     ];
-
+    console.log(args);
     if (allow_transposition)
         args.push('-t');
 
@@ -556,7 +558,7 @@ app.post('/formulateQuery', (req, res) => {
         log('info', `/formulateQuery: received data (${data.length} bytes) from python script.`);
         allData += data.toString();
     });
-
+    console.log(data);
     // log stderr
     let errors = [];
     pyParserWrite.stderr.on('data', data => {
@@ -617,7 +619,7 @@ app.post('/createQueryFromAudio', upload.single('audio'), (req, res) => {
         '-g', duration_gap,
         '-a', alpha,
     ];
-
+    console.log(args);
     if (allow_transposition)
         args.push('-t');
 
