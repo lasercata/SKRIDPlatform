@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 
 //============================= Global variables =============================//
-const { Renderer, Stave, Formatter, StaveNote, Beam, Accidental, MusicXMLParser} = Vex.Flow;
+const { Renderer, Stave, Formatter, StaveNote, Accidental} = VexFlow;
 
 /** This is the array that will contain the music pattern inserted by the user */
 let melody;
@@ -1001,18 +1001,24 @@ function manageStaveAndMelody() {
     silenceBt.addEventListener('mousedown', () => keyDown('r'));
     silenceBt.addEventListener('mouseup', () => keyUp('r'));
 
-    // Create an SVG renderer and attach it to the pentagram
-    renderer = new Renderer(pentagram, Renderer.Backends.SVG);
 
-    // Configure the rendering context
-    renderer.resize(pentagram_width, pentagram_height);
-    context = renderer.getContext();
+    /* global VexFlow */
+    VexFlow.loadFonts('Bravura', 'Academico').then(() => {
+        VexFlow.setFonts('Bravura', 'Academico');
+        // Create an SVG renderer and attach it to the pentagram
+        renderer = new Renderer(pentagram, Renderer.Backends.SVG);
 
-    // Finally create the stave with the treble symbol and draw it
-    stave = new Stave(10, 40, pentagram_width);
-    stave.addClef("treble");
-    stave.setContext(context).draw();
+        // Configure the rendering context
+        renderer.resize(pentagram_width, pentagram_height);
+        context = renderer.getContext();
+        context.setFont('Arial', 10);
 
+        // Finally create the stave with the treble symbol and draw it
+        stave = new Stave(10, 40, pentagram_width);
+        stave.addClef("treble");
+        stave.setContext(context).draw();
+    });
+    
     // The following code manages what to do when the buttons of the piano are pressed
     keysCheckbox.addEventListener("click", showHideKeys);
     volumeSlider.addEventListener("input", handleVolume);
