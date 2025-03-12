@@ -60,7 +60,7 @@ app.use(express.static('data'));
 app.use('/data', express.static('data'));
 
 // préfixe global basé sur l'environnement (production ou développement)
-const BASE_PATH = process.env.BASE_PATH || '/skrid'; // '/skrid' en production, '' en local
+const BASE_PATH = process.env.BASE_PATH || ''; // '/skrid' en production, '' en local
 
 // Rendre le préfixe disponible dans tous les templates EJS
 app.use((req, res, next) => {
@@ -500,15 +500,14 @@ app.post('/compileFuzzy', (req, res) => {
  * @constant /formulateQuery
  */
 app.post('/formulateQuery', (req, res) => {
-    console.log(req.body);
     // Get the params
     const notes = req.body.notes;
-    console.log(notes);
     let pitch_distance = req.body.pitch_distance;
     let duration_factor = req.body.duration_factor;
     let duration_gap = req.body.duration_gap;
     let alpha = req.body.alpha;
     let allow_transposition = req.body.allow_transposition;
+    let allow_homothety = req.body.allow_homothety;
     let contour_match = req.body.contour_match;
     let collection = req.body.collection;
 
@@ -523,6 +522,8 @@ app.post('/formulateQuery', (req, res) => {
         alpha = 0;
     if (allow_transposition == null)
         allow_transposition = false;
+    if (allow_homothety == null)
+        allow_homothety = false;
     if (contour_match == null)
         contour_match = false;
 
@@ -539,9 +540,11 @@ app.post('/formulateQuery', (req, res) => {
         '-a', alpha,
         notes
     ];
-    console.log(args);
     if (allow_transposition)
         args.push('-t');
+
+    if (allow_homothety)
+        args.push('-H');  
 
     if (contour_match)
         args.push('-C');
@@ -550,6 +553,7 @@ app.post('/formulateQuery', (req, res) => {
         args.push('-c');
         args.push(collection);
     }
+    console.log(args);
     let pyParserWrite = spawn('python3', args);
 
     // Get the data
@@ -558,7 +562,6 @@ app.post('/formulateQuery', (req, res) => {
         log('info', `/formulateQuery: received data (${data.length} bytes) from python script.`);
         allData += data.toString();
     });
-    console.log(data);
     // log stderr
     let errors = [];
     pyParserWrite.stderr.on('data', data => {

@@ -156,7 +156,7 @@ const qwerty_us_to_azerty = {
  * @example
  * createQuery().then(fuzzyQuery => sendQuery(fuzzyQuery));
  */
-async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, /*contour_match=false*/) {
+async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, allow_homothety=false, /*contour_match=false*/) {
     //------Create the `notes` for the python script
     
     let notes = '[';
@@ -195,7 +195,6 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
 
             // let duration_dur = melody[k].dots > 0 ? `${1 / melody[k].duration}, 1` : `${1 / melody[k].duration}`;
             let dur = 1 / durationNote[melody[k].duration];
-            console.log(melody[k].modifierContext.getModifiers('dots'), 'ici');
             if(melody[k].dots > 0){
                 dur += `, 1`
             }
@@ -213,6 +212,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         duration_gap: duration_gap,
         alpha: alpha,
         allow_transposition: allow_transposition,
+        allow_homothety: allow_homothety,
         //contour_match: contour_match,
         collection: selectedCollection
     };
@@ -333,6 +333,7 @@ const searchButtonHandler = function() {
     const duration_gap_select = document.getElementById('duration-gap-select');
     const alpha_select = document.getElementById('alpha-select');
     const transposition_cb = document.getElementById('transpose-cb');
+    const homothety_cb = document.getElementById('homothety-cb');
     //const contour_cb = document.getElementById('contour-cb');
 
     // Check that melody is not empty
@@ -364,6 +365,7 @@ const searchButtonHandler = function() {
         duration_gap_select.value,
         alpha_select.value / 100,
         transposition_cb.checked,
+        homothety_cb.checked,
         //contour_cb.checked
     ).then(
         fuzzyQuery => sendQuery(fuzzyQuery)
@@ -858,7 +860,7 @@ function manageOptions() {
     pitch_cb.addEventListener('click', matchPicthCbHandler);
     rhythm_cb.addEventListener('click', matchRhythmCbHandler );
 
-    transpose_cb.addEventListener('click', () => contourAndTranspositionHandler('transpose-cb'));
+    // transpose_cb.addEventListener('click', () => contourAndTranspositionHandler('transpose-cb'));
    // contour_cb.addEventListener('click', () => contourAndTranspositionHandler('contour-cb'));
 }
 
@@ -1207,6 +1209,7 @@ function initTooltips() {
         'pitch-lb': "Permet de prendre en compte / ignorer la hauteur des notes.",
         'rhythm-lb': "Permet de prendre en compte / ignorer le rythme (la durée) des notes.",
         'transpose-lb': "Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée.",
+        'homothety-lb': "Permet d'obtenir les partitions dont le tempo global de la mélodie a changé.",
         //'contour-lb': "Garde seulement le signe des intervalles entres les notes (haut, bas, égal).",
         'pitch-dist-lb': "Permet d'augmenter la tolérance sur la hauteur de note (en tons), ou sur les intervalles (si transposition est coché).",
         'duration-dist-lb': "Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).",
