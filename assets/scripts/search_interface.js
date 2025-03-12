@@ -156,7 +156,7 @@ const qwerty_us_to_azerty = {
  * @example
  * createQuery().then(fuzzyQuery => sendQuery(fuzzyQuery));
  */
-async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, allow_homothety=false, /*contour_match=false*/) {
+async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhythm=false, pitch_dist=0, duration_factor=1, duration_gap=0, alpha=0, allow_transposition=false, allow_homothety=false, incipit_only=false /*contour_match=false*/) {
     //------Create the `notes` for the python script
     
     let notes = '[';
@@ -213,6 +213,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         alpha: alpha,
         allow_transposition: allow_transposition,
         allow_homothety: allow_homothety,
+        incipit_only: incipit_only,
         //contour_match: contour_match,
         collection: selectedCollection
     };
@@ -334,6 +335,7 @@ const searchButtonHandler = function() {
     const alpha_select = document.getElementById('alpha-select');
     const transposition_cb = document.getElementById('transpose-cb');
     const homothety_cb = document.getElementById('homothety-cb');
+    const incipit_cb = document.getElementById('incipit-cb');
     //const contour_cb = document.getElementById('contour-cb');
 
     // Check that melody is not empty
@@ -366,6 +368,7 @@ const searchButtonHandler = function() {
         alpha_select.value / 100,
         transposition_cb.checked,
         homothety_cb.checked,
+        incipit_cb.checked,
         //contour_cb.checked
     ).then(
         fuzzyQuery => sendQuery(fuzzyQuery)
@@ -1210,6 +1213,7 @@ function initTooltips() {
         'rhythm-lb': "Permet de prendre en compte / ignorer le rythme (la durée) des notes.",
         'transpose-lb': "Permet d'obtenir les partitions dont la hauteur des notes de la mélodie est décalée.",
         'homothety-lb': "Permet d'obtenir les partitions dont le tempo global de la mélodie a changé.",
+        'incipit-lb': "Permet de restreindre la recherche aux incipits.",
         //'contour-lb': "Garde seulement le signe des intervalles entres les notes (haut, bas, égal).",
         'pitch-dist-lb': "Permet d'augmenter la tolérance sur la hauteur de note (en tons), ou sur les intervalles (si transposition est coché).",
         'duration-dist-lb': "Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).",

@@ -508,6 +508,7 @@ app.post('/formulateQuery', (req, res) => {
     let alpha = req.body.alpha;
     let allow_transposition = req.body.allow_transposition;
     let allow_homothety = req.body.allow_homothety;
+    let incipit_only = req.body.incipit_only;
     let contour_match = req.body.contour_match;
     let collection = req.body.collection;
 
@@ -545,6 +546,9 @@ app.post('/formulateQuery', (req, res) => {
 
     if (allow_homothety)
         args.push('-H');  
+
+    if (incipit_only)
+    args.push('-io');
 
     if (contour_match)
         args.push('-C');
