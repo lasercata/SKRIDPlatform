@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 
 //============================= Global variables =============================//
-const { Renderer, Stave, Formatter, StaveNote, Accidental} = VexFlow;
+const { Renderer, Stave, Formatter, StaveNote, Accidental, Dot} = VexFlow;
 
 /** This is the array that will contain the music pattern inserted by the user */
 let melody;
@@ -195,6 +195,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
 
             // let duration_dur = melody[k].dots > 0 ? `${1 / melody[k].duration}, 1` : `${1 / melody[k].duration}`;
             let dur = 1 / durationNote[melody[k].duration];
+            console.log(melody[k].modifierContext.getModifiers('dots'), 'ici');
             if(melody[k].dots > 0){
                 dur += `, 1`
             }
@@ -1108,10 +1109,11 @@ function displayNote(note, keys, duration) {
     }
 
     if (note.includes('#'))
-        display_note.addAccidental(0, new Accidental("#"));
+        display_note.addModifier(new Accidental("#"), 0);
 
     if (duration.includes('d'))
-        display_note.addDotToAll();
+        // display_note.addModifier(new Dot(), 0);
+        Dot.buildAndAttach([display_note], {all: true});
 
     melody.push(display_note);
 
