@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const collectionSelect = document.getElementById("collections");
 
   searchButton.addEventListener("click", async () => {
+    const results_container = $('#results-container');
+
     const melodicContour = melodicInput.value.trim();
     const rhythmicContour = rhythmicInput.value.trim();
     const selectedCollection = collectionSelect.value;
@@ -17,31 +19,24 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const data = {
-        notes: `${melodicContour}-${rhythmicContour}`,
-        contour_match: true,
-        collection: selectedCollection
-    };
+    const notes = `${melodicContour}-${rhythmicContour}`;
 
-    try {
-      const response = await fetch(`${BASE_PATH}/formulateQuery`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
+    // Write that a search is performing
+    results_container.empty();
+    results_container.append($('<h3>').text('Chargement...'));
 
-      const resData = await response.json();
+    createQuery(
+      notes, 
+      selectedCollection,
+      false
+    ).then(
+        fuzzyQuery => sendQuery(fuzzyQuery)
+    );
 
-      if ('query' in resData) {
-        sendQuery(resData.query);
-      } else {
-        alert("Erreur : la requête n’a pas pu être formulée.");
-      }
-    } catch (err) {
-      console.error("Erreur lors de la requête :", err);
-    }
+    // Sélectionne le container qui doit être affiché après la recherche
+    const resultsContainer = document.querySelector(".container_2");
+    resultsContainer.style.display = "flex";
+
   });
 });
 
@@ -77,5 +72,31 @@ function sendQuery(fuzzyQuery) {
   })
   .catch(err => {
     console.error("Erreur lors de l’envoi de la requête fuzzy :", err);
+  });
+}
+
+
+async function createQuery(contour, selectedCollection, incipit_only=false) {
+
+  //------Use the python script to get a fuzzy query
+  let data = {
+      notes: contour,
+      incipit_only: incipit_only,
+      contour_match: true,
+      collection: selectedCollection
+  };
+
+  return fetch(`${BASE_PATH}/formulateQuery`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+  })
+  .then(response => {
+      return response.json();
+  })
+  .then(data => {
+      return data.query;
   });
 }

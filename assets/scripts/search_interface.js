@@ -356,7 +356,7 @@ const searchButtonHandler = function() {
 
     // Write that a search is performing
     results_container.empty();
-    results_container.append($('<h3>').text('Loading...'));
+    results_container.append($('<h3>').text('Chargement...'));
 
     createQuery(
         !pitch_cb.checked,
