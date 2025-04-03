@@ -12,17 +12,13 @@ let tk = null;
 async function initializeVerovio() {
     return new Promise((resolve) => {
         verovio.module.onRuntimeInitialized = () => {
-            console.log("Verovio has loaded!");
             tk = new verovio.toolkit();
             resolve();
         };
     });
 }
-
 (async () => {
-    console.log('avant');
     await initializeVerovio();
-    console.log('après');
     init();
 })();
 
@@ -49,10 +45,6 @@ function init() {
     datadir = "./data/";
     currentPage = 1;
 
-    // console.log("avant init de verovio");
-    // await ensureTkInitialized();
-    // console.log("après init de verovio");
-    // const parent = document.querySelector('.score-container');
     const parent = document.getElementById('notation');
 
     // Set the parameters for the correct visualization of the score
@@ -287,7 +279,7 @@ function makePattern() {
  * @param {number} duration_deg - the note duration degree for the current match ;
  * @param {number} sequencing_deg - the note sequencing_deg for the current match.
  */
-function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg, sequencing_deg) {
+function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg, sequencing_deg, membership_functions_degrees) {
     //---Ini
     const expected_note = pattern[match_y];
 
@@ -330,9 +322,26 @@ function makeAPatternHoverBox(id, match_x, match_y, deg, pitch_deg, duration_deg
     // if (expected_note != null && expected_note.duration != 'None')
     //     deg_infos += `, degré de durée : ${duration_deg}%`;
 
-    deg_infos += `, degré de hauteur : ${pitch_deg}%`;
-    deg_infos += `, degré de durée : ${duration_deg}%`;
-    deg_infos += `, degré de séquençage : ${sequencing_deg}%`;
+    if (membership_functions_degrees == null){
+        deg_infos += `<br>degrés de notes :<ul style="padding-left: 20px; margin-top: 2px;">`;
+        deg_infos += `<li><b>degré de hauteur</b> : ${pitch_deg}%</li>`;
+        deg_infos += `<li><b>degré de durée</b> : ${duration_deg}%</li>`;
+        deg_infos += `<li><b>degré de séquençage</b> : ${sequencing_deg}%</li>`;
+
+        deg_infos += `</ul>`;
+    } else {
+        deg_infos += `<br>degrés de contours :<ul style="padding-left: 20px; margin-top: 2px;">`;
+
+        const contourItems = membership_functions_degrees.split('|');
+        for (const item of contourItems) {
+            const [name, value] = item.split('->').map(s => s.trim());
+            if (name && value) {
+                deg_infos += `<li><b>${name}</b> : ${value*100}%</li>`;
+            }
+        }
+        
+        deg_infos += `</ul>`;
+    }
 
     if (expected_infos != '\n')
         expected_infos += '<br>';
@@ -409,14 +418,14 @@ function makePatternHoverBoxes() {
     for (let i = 0 ; i < matches.length ; ++i) {
         for (let j = 0 ; j < matches[i].length ; ++j) {
             ids.push(matches[i][j].id);
-
             makeAPatternHoverBox(
                 matches[i][j].id,
                 i, j,
                 matches[i][j].deg,
                 matches[i][j].pitch_deg,
                 matches[i][j].duration_deg,
-                matches[i][j].sequencing_deg
+                matches[i][j].sequencing_deg,
+                matches[i][j].membership_functions_degrees
             );
         }
     }
@@ -442,7 +451,6 @@ function makeMatches() {
 
         encoded_match.split(';').forEach(encoded_note => { // loop over notes and fill `tmp_matches`
             let tmp_note_json = {}; // will store the attributes of a note before adding it to tmp_match.
-
             let attr = encoded_note.split(',');
 
             try {
@@ -451,7 +459,7 @@ function makeMatches() {
                 tmp_note_json['pitch_deg'] = parseInt(attr[2]);
                 tmp_note_json['duration_deg'] = parseInt(attr[3]);
                 tmp_note_json['sequencing_deg'] = parseInt(attr[4]);
-
+                tmp_note_json['membership_functions_degrees'] = attr[5];
                 tmp_match.push(tmp_note_json);
             }
             catch (err) {

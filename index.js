@@ -206,6 +206,33 @@ app.get('/searchInterface', async function (req, res) {
 });
 
 /**
+ * Route for the contour search page.
+ *
+ * GET
+ *
+ * @constant /contourSearchInterface
+ */
+app.get('/contourSearchInterface', async function (req, res) {
+    let authors = [];
+
+    try {
+        // The query to get the authors is necessary to display the list of possible collections
+        const authorQuery = "MATCH (s:Score) RETURN DISTINCT s.collection";
+        let temp2 = await session.run(authorQuery);
+        temp2 = temp2.records;
+        temp2.forEach((record) => {
+            authors.push(record._fields[0]);
+        });
+    } catch(err) {
+        log('error', `/contourSearchInterface: ${err}`)
+    }
+
+    res.render("contour_search_interface", {
+        authors: authors
+    });
+});
+
+/**
  * Route for the research page with the microphone interface.
  *
  * GET

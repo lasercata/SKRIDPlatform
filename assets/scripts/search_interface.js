@@ -214,7 +214,7 @@ async function createQuery(ignore_pitch=false, ignore_octave=false, ignore_rhyth
         allow_transposition: allow_transposition,
         allow_homothety: allow_homothety,
         incipit_only: incipit_only,
-        //contour_match: contour_match,
+        contour_match: false,
         collection: selectedCollection
     };
 

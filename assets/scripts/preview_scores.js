@@ -208,7 +208,6 @@ function makeUrl(collection, source, pattern=null, matches=null) {
     if (pattern != '') {
         url += `&pattern=${pattern}`;
     }
-
     if (matches != null) {
         url += '&matches=';
 
@@ -223,7 +222,11 @@ function makeUrl(collection, source, pattern=null, matches=null) {
 
                 // Add note to `url_match`
                 url_match += `${matches[i][j].note.id},${deg},${pitch_deg},${duration_deg},${sequencing_deg}`;
-
+                
+                let membership_functions_degrees = matches[i][j].membership_functions_degrees
+                if(membership_functions_degrees) {
+                    url_match += `,${membership_functions_degrees}`;
+                }
                 // Separate notes with ';'
                 if (j < matches[i].length - 1)
                     url_match += ';';
@@ -493,7 +496,6 @@ async function createPreviews_2(results_container, results, pattern=null) {
         })
         .then(data_auth => {
             let collection = data_auth.results[0]._fields[0]
-
             let url = makeUrl(collection, source, pattern, result.matches);
             results_container.append(createPreview(url, source, result.number_of_occurrences, result.overall_degree));
 

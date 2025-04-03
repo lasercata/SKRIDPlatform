@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>The Skrid Platform</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./styles/semantic.min.css" />
+    <link rel="stylesheet" href="./styles/search_interface_style.css" />
+    <link rel="stylesheet" href="./styles/general_style.css" />
+    <link rel="stylesheet" href="./styles/paginated_results.css" />
+    
+    <!-- CSS Bootstrap (uniquement Bootstrap 5) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <!-- JS Bootstrap 5 (pas besoin de jQuery ou Popper.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+
+    <!-- Vexflow for the music notes -->
+    <script src="./scripts/vexflow-core.js"></script>
+
+    <!-- Verovio for the svg representation of the scores previews -->
+    <script src="./scripts/verovio-toolkit-wasm.js" defer></script>
+
+    <!-- Javascript of the page -->
+    <!-- <script type="text/javascript" src="./scripts/search_interface.js"></script> -->
+    <script type="module" src="./scripts/contour_search_interface.js"></script>
+
+    <!-- Jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+
+
+<%- include('./partials/header', { currentPage: 'interface' }); %>
+
+<body>
+  <div class="content-wrapper" style="align-items: center;">
+    <div class="search-pattern">
+        <h1 class="text-center mb-4">Recherche par contour</h1>
+
+        <!-- Contour fields -->
+        <div class="d-flex justify-content-center gap-3 mb-4">
+          <div class="form-group">
+            <label for="melodic-contour">Contour mélodique :</label>
+            <input type="text" class="form-control" id="melodic-contour" placeholder="Ex : D*DdRuU*">
+          </div>
+          <div class="form-group">
+            <label for="rhythmic-contour">Contour rythmique :</label>
+            <input type="text" class="form-control" id="rhythmic-contour" placeholder="Ex : SsMlL">
+          </div>
+        </div>
+
+        <!-- Select collection -->
+        <div class="mb-4 text-center">
+          <label for="collections" class="form-label">Collection dans laquelle rechercher :</label>
+          <select id="collections" name="collections" class="form-select w-auto d-inline-block">
+            <% for (var j = 0; j < authors.length; j++) { %>
+              <option value="<%= authors[j] %>"><%= authors[j] %></option>
+            <% } %>
+          </select>
+        </div>
+
+        <!-- Search button -->
+        <div class="text-center mb-5">
+          <button id="stricte" type="button" class="btn text-white tooltip-lb" style="background-color: #7ab6e0;">Recherche</button>
+        </div>
+    </div>
+      <!-- Results area -->
+      <div class="container_2">
+        <%- include('./partials/paginated_results.ejs'); %>
+      </div>
+
+  </div>
+  <%- include('./partials/footer'); %>
+</body>
+</html>
