@@ -2,6 +2,14 @@
 
 SKRID Platform is an interface to a graph database designed to explore musical patterns in music scores.
 
+## Archived
+This repository is no longer used for the development of the music library.
+
+**The development has moved to: [https://gitlab.inria.fr/skrid](https://gitlab.inria.fr/skrid)**
+
+Original README below:
+
+---
 
 ## Code structure
 ```
